@@ -43,10 +43,30 @@ CHIP ALU {
         ng; // 1 if (out < 0),  0 otherwise
 
     PARTS:
-   // You're advised to work on the ALU chip in two steps:
-   // - First, without handling status outputs (ALU-nostat)
-   // - Then, adding the missing functionality for the "full" chip (ALU). 
-   // You only need to submit the "full" ALU, no need to submit the partial
-   // implementation (ALU-nostat).
-   // Put you code here:
+    // Handling x
+    Mux16(a=x, b=false, sel=zx, out=xAfterZero);                   // zx == 1 => use Mux to get {0,...,0}. Otherwise, keep the same
+
+    Not16(in=xAfterZero, out=notXAfterZero);                     // Calculate the opposite of the result of previous stage
+    Mux16(a=xAfterZero, b=notXAfterZero, sel=nx, out=xAfterAll); // nx == 1 => use Mux to get the opposite. Otherwise, keep the same
+
+    // Same with y
+    Mux16(a=y, b=false, sel=zy, out=yAfterZero);
+
+    Not16(in=yAfterZero, out=notYAfterZero);
+    Mux16(a=yAfterZero, b=notYAfterZero, sel=ny, out=yAfterAll);
+
+    // if f == 1
+    Add16(a=xAfterAll, b=yAfterAll, out=xAddY);
+    And16(a=xAfterAll, b=yAfterAll, out=xAndY);
+    Mux16(a=xAndY, b=xAddY, sel=f, out=xFY);
+
+    // handling 'no'
+    Not16(in=xFY, out=notXFY);
+    Mux16(a=xFY, b=notXFY, sel=no, out=out, out[0..7]=outFirst, out[8..15]=outSecond, out[15]=ng);
+
+    // Taking care of stat (zr)
+    Or8Way(in=outFirst, out=or1);  // If we have a single '1' in 1st half
+    Or8Way(in=outSecond, out=or2); // If we have a single '1' in 2nd half
+    Or(a=or1, b=or2, out=isZr);    // If we have a single '1' in all output
+    Mux(a=true, b=false, sel=isZr, out=zr); // if we don't have any 1's, we set zr to be 1
 }

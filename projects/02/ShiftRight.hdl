@@ -6,7 +6,7 @@
 CHIP ShiftRight{
 	  IN in[16];
     OUT out[16];
-     
+    
     PARTS:
     And(a=in[15], b=true, out=out[15]);
     And(a=in[15], b=true, out=out[14]);

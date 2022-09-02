@@ -12,9 +12,20 @@
  */
 
 CHIP PC {
-    IN in[16],load,inc,reset;
+    IN in[16], load, inc, reset;
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+    Inc16(in=oldVal, out=newVal);
+    
+    Mux16(a=false, b=newVal, sel=inc, out=incRes);
+    Mux16(a=incRes, b=in, sel=load, out=loadRes);
+    Mux16(a=loadRes, b=false, sel=reset, out=resetRes);
+
+    Or(a=load, b=reset, out=ora);
+    Or(a=ora, b=inc, out=changes);
+
+    // If we didn't have any changes, load is 0 and therefore we return oldVal.
+    // Otherwise, we update to resetRes, which has the updated value after inc, load and reset.
+    Register(in=resetRes, load=changes, out=oldVal, out=out);
 }

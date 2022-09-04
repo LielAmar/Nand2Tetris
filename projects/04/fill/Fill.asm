@@ -12,3 +12,10 @@
 // the screen should remain fully clear as long as no key is pressed.
 
 // Put your code here.
+
+// goto [command/line]
+// add R1, R2 (?)
+
+// (LOOP)
+// ...
+//   goto LOOP

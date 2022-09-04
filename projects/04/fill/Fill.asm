@@ -11,11 +11,60 @@
 // "white" in every pixel;
 // the screen should remain fully clear as long as no key is pressed.
 
-// Put your code here.
+(LOOP)
+  // i=8191 (to be used to loop over all pixels needed to be colored)
+  @8191
+  D=A
+  @i
+  M=D
 
-// goto [command/line]
-// add R1, R2 (?)
+  // Check keyboard
+  @KBD
+  D=M
+  
+  // - If any button was pressed, we want to color screen BLACK
+  @COLOR_SCREEN_BLACK
+  D;JGT
 
-// (LOOP)
-// ...
-//   goto LOOP
+  // - Otherwise, we want to color screen WHITE
+  (COLOR_SCREEN_WHITE)
+    @SCREEN
+    D=A
+    @i
+    D=D+M
+    A=D
+    M=0
+
+    // Decrementing i
+    @i
+    M=M-1
+    
+    // If i is >= 0, we want to recall COLOR_SCREEN_WHITE 'cause we still have pixels to color
+    D=M
+    @COLOR_SCREEN_WHITE
+    D;JGE
+    
+    // Otherwise, call LOOP and re-check keyboard input
+    @LOOP
+    0;JMP
+
+  (COLOR_SCREEN_BLACK)
+    @SCREEN
+    D=A
+    @i
+    D=D+M
+    A=D
+    M=-1
+
+    // Decrementing i
+    @i
+    M=M-1
+    
+    // If i is >= 0, we want to recall COLOR_SCREEN_WHITE 'cause we still have pixels to color
+    D=M
+    @COLOR_SCREEN_BLACK
+    D;JGE
+    
+    // Otherwise, call LOOP and re-check keyboard input
+    @LOOP
+    0;JMP

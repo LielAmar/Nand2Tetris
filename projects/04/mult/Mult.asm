@@ -17,7 +17,7 @@ M=0
   @R1
   D=M
   @END
-  D;JEQ
+  D;JEQ // Jump to end if we D=0, meaning we're in last iteration
 
   // Updated R2
   @R0

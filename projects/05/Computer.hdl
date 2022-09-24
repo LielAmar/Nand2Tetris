@@ -15,9 +15,20 @@
  */
 
 CHIP Computer {
-
     IN reset;
 
     PARTS:
-    // Put your code here:
+    // We load the next instruction from ROM32K using 'pc' - a variable that
+    // holds the address of the next instruction.
+    ROM32K(address=pc, out=instruction);
+
+    // We then call the CPU to handle the instruction parsing.
+    // We pass 'M' (Memory['A']), as well as the instruction and whether to reset.
+    // We then get an output, whether we should write it to memory, the address and the next instruction.
+    CPU(inM=inM, instruction=instruction, reset=reset, outM=outM, writeM=writeM, addressM=addressM, pc=pc);
+
+    // We forward the CPU output to memory and write it if 'writeM' == '1'.
+    // The address in which we write is 'addressM', and the output is the updated value of 'M',
+    // which is used for the next CPU call.
+    Memory(in=outM, load=writeM, address=addressM, out=inM);
 }

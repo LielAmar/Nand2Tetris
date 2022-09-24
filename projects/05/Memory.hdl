@@ -27,5 +27,41 @@ CHIP Memory {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+    /*
+      0x0 - 0x3FFF    =  (0)000000000000000 - (0)011111111111111
+      0x4000 - 0x5FFF =  (0)100000000000000 - (0)101111111111111
+      0x6000 - 0x6000 =  (0)110000000000000 - (0)110000000000000
+
+      If we look at the 1st and 2nd bits from the Left, we notice that:
+      0     - 8191  start with 00
+      8192  - 16383 start with 01
+      16384 - 24575 start with 10
+      24576 -       start with 11
+      
+      Therefore, we can use DMux4Way on the 13th and 14th bits to determain
+      where we need to access
+    */
+
+    // If we need to load (meaning load = '1') then, one of these: first, second, third, fourth
+    // will be 1 at the end of DMux4Way. We can use it to know which component to load to.
+    // If we don't need to load anything (load = '0'), all will be 0 meaning we
+    // don't load into any of the components
+    DMux4Way(in=load, sel=address[13..14], a=first, b=second, c=third, d=fourth);
+    
+    // if we're in either 0-8191 or 8192-16383, we want their load parameter to be combined
+    Or(a=first, b=second, out=half);
+
+    // We can discard the leftest bit since it's always 0 and doesn't affect the address.
+    // Then we'll have exactly 14 bits left to be used in RAM16K
+    RAM16K(in=in, load=half, address=address[0..13], out=ramOutput);
+    
+    // We can discard the 2 leftest bits since it's always 01 and doesn't affect the address.
+    // Then we'll have exactly 13 bits left to be used in Screen
+    Screen(in=in, load=third, address=address[0..12], out=screenOutput);
+
+    Keyboard(out=keyboardOutput);
+
+    // Using Mux4Way16 with the sel (address[13..14]) to determain which input (a, b, c or d)
+    // we need to retrieve and put in 'out'. That's the same selection as the one in DMux4Way.
+    Mux4Way16(a=ramOutput, b=ramOutput, c=screenOutput, d=keyboardOutput, sel=address[13..14], out=out);
 }

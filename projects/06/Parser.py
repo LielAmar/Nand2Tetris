@@ -4,87 +4,162 @@ https://www.nand2tetris.org (Shimon Schocken and Noam Nisan, 2017)
 and as allowed by the Creative Common Attribution-NonCommercial-ShareAlike 3.0 
 Unported License (https://creativecommons.org/licenses/by-nc-sa/3.0/).
 """
-import typing
 
+import typing
+from enum import Enum
+
+class CommandType(Enum):
+  A_COMMAND = "A_COMMAND"
+  C_COMMAND = "C_COMMAND"
+  L_COMMAND = "L_COMMAND"
 
 class Parser:
-    """Encapsulates access to the input code. Reads an assembly language 
-    command, parses it, and provides convenient access to the commands 
-    components (fields and symbols). In addition, removes all white space and 
-    comments.
+  """Encapsulates access to the input code. Reads an assembly language 
+  command, parses it, and provides convenient access to the commands 
+  components (fields and symbols). In addition, removes all white space and 
+  comments.
+  """
+
+  def __init__(self, input_file: typing.TextIO) -> None:
+    """Opens the input file and gets ready to parse it.
+
+      Args:
+        input_file (typing.TextIO): input file.
     """
 
-    def __init__(self, input_file: typing.TextIO) -> None:
-        """Opens the input file and gets ready to parse it.
+    self.lines = input_file.read().splitlines()
+    self.current_line_number = -1
+    self.current_command = None
 
-        Args:
-            input_file (typing.TextIO): input file.
-        """
-        # Your code goes here!
-        # A good place to start is:
-        # input_lines = input_file.read().splitlines()
-        pass
+    # Initalizing the first command
+    self.advance()
 
-    def has_more_commands(self) -> bool:
-        """Are there more commands in the input?
+  def has_more_commands(self) -> bool:
+    """Are there more commands in the input?
 
-        Returns:
-            bool: True if there are more commands, False otherwise.
-        """
-        # Your code goes here!
-        pass
+      Returns:
+        bool: True if there are more commands, False otherwise.
+    """
 
-    def advance(self) -> None:
-        """Reads the next command from the input and makes it the current command.
-        Should be called only if has_more_commands() is true.
-        """
-        # Your code goes here!
-        pass
+    for i in range(self.current_line_number, len(self.lines)):
+      if self.is_command(self.lines[i]):
+        return True
 
-    def command_type(self) -> str:
-        """
-        Returns:
-            str: the type of the current command:
-            "A_COMMAND" for @Xxx where Xxx is either a symbol or a decimal number
-            "C_COMMAND" for dest=comp;jump
-            "L_COMMAND" (actually, pseudo-command) for (Xxx) where Xxx is a symbol
-        """
-        # Your code goes here!
-        pass
+    return False
 
-    def symbol(self) -> str:
-        """
-        Returns:
-            str: the symbol or decimal Xxx of the current command @Xxx or
-            (Xxx). Should be called only when command_type() is "A_COMMAND" or 
-            "L_COMMAND".
-        """
-        # Your code goes here!
-        pass
+  def advance(self) -> None:
+    """Reads the next command from the input and makes it the current command.
+      Should be called only if has_more_commands() is true.
+    """
 
-    def dest(self) -> str:
-        """
-        Returns:
-            str: the dest mnemonic in the current C-command. Should be called 
-            only when commandType() is "C_COMMAND".
-        """
-        # Your code goes here!
-        pass
+    if self.has_more_commands():
+      self.current_line_number += 1
 
-    def comp(self) -> str:
-        """
-        Returns:
-            str: the comp mnemonic in the current C-command. Should be called 
-            only when commandType() is "C_COMMAND".
-        """
-        # Your code goes here!
-        pass
+      while not self.is_command(self.lines[self.current_line_number]):
+        self.current_line_number += 1
+    
+      self.current_command = self.lines[self.current_line_number].strip()
 
-    def jump(self) -> str:
-        """
-        Returns:
-            str: the jump mnemonic in the current C-command. Should be called 
-            only when commandType() is "C_COMMAND".
-        """
-        # Your code goes here!
-        pass
+  def command_type(self) -> str:
+    """
+      Returns:
+        str: the type of the current command:
+        "A_COMMAND" for @Xxx where Xxx is either a symbol or a decimal number
+        "C_COMMAND" for dest=comp;jump
+        "L_COMMAND" (actually, pseudo-command) for (Xxx) where Xxx is a symbol
+    """
+
+    if self.current_command[0] == "@":
+      return CommandType.A_COMMAND
+    elif self.current_command[0] == "(":
+      return CommandType.L_COMMAND
+    else:
+      return CommandType.C_COMMAND
+
+  def symbol(self) -> str:
+    """
+      Returns:
+        str: the symbol or decimal Xxx of the current command @Xxx or
+        (Xxx). Should be called only when command_type() is "A_COMMAND" or 
+        "L_COMMAND".
+    """
+
+    command_type = self.command_type()
+
+    if command_type == CommandType.C_COMMAND:
+      return None
+    
+    if command_type == CommandType.A_COMMAND:
+      return self.current_command[1:]
+    
+    return self.current_command[1:-2]
+
+  def dest(self) -> str:
+    """
+      Returns:
+        str: the dest mnemonic in the current C-command. Should be called 
+        only when commandType() is "C_COMMAND".
+    """
+
+    if self.command_type() != CommandType.C_COMMAND:
+      return None
+    
+    return self.current_command.split("=")[0]
+
+  def comp(self) -> str:
+    """
+      Returns:
+        str: the comp mnemonic in the current C-command. Should be called 
+        only when commandType() is "C_COMMAND".
+    """
+
+    if self.command_type() != CommandType.C_COMMAND:
+      return None
+    
+    comp = self.current_command.split("=")
+
+    if len(comp) == 1:
+      return None
+
+    return comp[1].split(";")[0]
+
+  def jump(self) -> str:
+    """
+      Returns:
+        str: the jump mnemonic in the current C-command. Should be called 
+        only when commandType() is "C_COMMAND".
+    """
+
+    if self.command_type() != CommandType.C_COMMAND:
+      return None
+    
+    jump = self.current_command.split(";")
+
+    if len(jump) == 1:
+      return None
+
+    return jump[1]
+    # TODO: might need to add code to remove '//' after the jump
+
+
+  def is_command(self, line: str) -> bool:
+    """Checks if the given line is a valid command.
+      Args:
+        line (str): line to check.
+
+      Returns:
+        bool: True if the line is a command, False otherwise.
+    """
+
+    if not line or line.startswith("//") or line == "\n":
+      return False
+        
+    return True
+
+  def reset(self) -> None:
+    """Resets the parser to the first command.
+    """
+
+    self.current_line_number = -1
+    self.current_command = None
+    self.advance()

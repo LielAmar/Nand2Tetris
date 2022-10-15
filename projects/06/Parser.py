@@ -1,4 +1,5 @@
-"""This file is part of nand2tetris, as taught in The Hebrew University,
+"""
+This file is part of nand2tetris, as taught in The Hebrew University,
 and was written by Aviv Yaish according to the specifications given in  
 https://www.nand2tetris.org (Shimon Schocken and Noam Nisan, 2017)
 and as allowed by the Creative Common Attribution-NonCommercial-ShareAlike 3.0 
@@ -14,14 +15,16 @@ class CommandType(Enum):
   L_COMMAND = "L_COMMAND"
 
 class Parser:
-  """Encapsulates access to the input code. Reads an assembly language 
+  """
+  Encapsulates access to the input code. Reads an assembly language 
   command, parses it, and provides convenient access to the commands 
   components (fields and symbols). In addition, removes all white space and 
   comments.
   """
 
   def __init__(self, input_file: typing.TextIO) -> None:
-    """Opens the input file and gets ready to parse it.
+    """
+    Opens the input file and gets ready to parse it.
 
       Args:
         input_file (typing.TextIO): input file.
@@ -31,25 +34,25 @@ class Parser:
     self.current_line_number = -1
     self.current_command = None
 
-    # Initalizing the first command
-    self.advance()
 
   def has_more_commands(self) -> bool:
-    """Are there more commands in the input?
+    """
+    Are there more commands in the input?
 
       Returns:
         bool: True if there are more commands, False otherwise.
     """
 
-    for i in range(self.current_line_number, len(self.lines)):
+    for i in range(self.current_line_number + 1, len(self.lines)):
       if self.is_command(self.lines[i]):
         return True
 
     return False
 
   def advance(self) -> None:
-    """Reads the next command from the input and makes it the current command.
-      Should be called only if has_more_commands() is true.
+    """
+    Reads the next command from the input and makes it the current command.
+    Should be called only if has_more_commands() is true.
     """
 
     if self.has_more_commands():
@@ -59,6 +62,7 @@ class Parser:
         self.current_line_number += 1
     
       self.current_command = self.lines[self.current_line_number].strip()
+      self.current_command = self.current_command.split("//")[0].strip()
 
   def command_type(self) -> str:
     """
@@ -92,7 +96,7 @@ class Parser:
     if command_type == CommandType.A_COMMAND:
       return self.current_command[1:]
     
-    return self.current_command[1:-2]
+    return self.current_command[1:-1]
 
   def dest(self) -> str:
     """
@@ -104,7 +108,12 @@ class Parser:
     if self.command_type() != CommandType.C_COMMAND:
       return None
     
-    return self.current_command.split("=")[0]
+    dest = self.current_command.split("=")
+
+    if len(dest) == 1:
+      return None
+
+    return dest[0]
 
   def comp(self) -> str:
     """
@@ -119,7 +128,7 @@ class Parser:
     comp = self.current_command.split("=")
 
     if len(comp) == 1:
-      return None
+      return comp[0].split(";")[0]
 
     return comp[1].split(";")[0]
 
@@ -139,11 +148,12 @@ class Parser:
       return None
 
     return jump[1]
-    # TODO: might need to add code to remove '//' after the jump
 
 
   def is_command(self, line: str) -> bool:
-    """Checks if the given line is a valid command.
+    """
+    Checks if the given line is a valid command.
+      
       Args:
         line (str): line to check.
 
@@ -157,9 +167,9 @@ class Parser:
     return True
 
   def reset(self) -> None:
-    """Resets the parser to the first command.
+    """
+    Resets the parser to the first command.
     """
 
     self.current_line_number = -1
     self.current_command = None
-    self.advance()

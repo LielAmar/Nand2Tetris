@@ -1,9 +1,11 @@
-"""This file is part of nand2tetris, as taught in The Hebrew University,
+"""
+This file is part of nand2tetris, as taught in The Hebrew University,
 and was written by Aviv Yaish according to the specifications given in  
 https://www.nand2tetris.org (Shimon Schocken and Noam Nisan, 2017)
 and as allowed by the Creative Common Attribution-NonCommercial-ShareAlike 3.0 
 Unported License (https://creativecommons.org/licenses/by-nc-sa/3.0/).
 """
+
 import os
 import sys
 import typing
@@ -12,13 +14,15 @@ from SymbolTable import SymbolTable
 from Parser import Parser, CommandType
 from Code import Code
 
-def assemble_file(input_file: typing.TextIO, output_file: typing.TextIO) -> None:
-  """Assembles a single file.
+def assemble_file(input_file: typing.TextIO, output_file: typing.TextIO, debug: bool = False) -> None:
+  """
+  Assembles a single file.
 
-  Args:
+    Args:
       input_file (typing.TextIO): the file to assemble.
       output_file (typing.TextIO): writes all output to this file.
   """
+
   """
   You should use the two-pass implementation suggested in the book:
   
@@ -81,49 +85,74 @@ def assemble_file(input_file: typing.TextIO, output_file: typing.TextIO) -> None
   it may be OK.
   """
 
-  symbolTable = SymbolTable()
+  symbol_table = SymbolTable()
   parser = Parser(input_file)
 
-  romAddress = 0
-  ramAddress = 16
+  # ==================== First Pass ====================
+  # - Adds all L-Commands symbols to the symbol table.
+  #   - Keeps track of the ROM address of the next command.
+  # ==================== ========== ====================
+  rom_address = 0
 
   while parser.has_more_commands():
     parser.advance()
 
     if parser.command_type() == CommandType.L_COMMAND:
-      symbolTable.add_entry(parser.symbol(), romAddress)
+      symbol_table.add_entry(parser.symbol(), rom_address)
     else:
-      romAddress += 1
+      rom_address += 1
+
+
+  # ==================== Second Pass ====================
+  # - Adds all A-Commands variables to the symbol table.
+  #   - Keeps track of the RAM address of the next command.
+  # ==================== =========== ====================
+  parser.reset()
+  ram_address = 16
+
+  while parser.has_more_commands():
+    parser.advance()
 
     if parser.command_type() == CommandType.A_COMMAND:
       if parser.symbol().isnumeric():
-        continue
+        pass
 
-      if not symbolTable.contains(parser.symbol()):
-        symbolTable.add_entry(parser.symbol(), ramAddress)
-        ramAddress += 1
-      continue
+      if not symbol_table.contains(parser.symbol()):
+        symbol_table.add_entry(parser.symbol(), ram_address)
+        ram_address += 1
 
+
+  # ==================== Third Pass ====================
+  # - Loops over all A-Commands and C-Commands.
+  #   - Translates each command to binary, and appends it to the output file.
+  # ==================== ========== ====================
   parser.reset()
-  commands = {}
-  command_index = 0
 
   while parser.has_more_commands():
     parser.advance()
 
+    if debug:
+      print("current command: ", parser.current_command)
+      print("comp: ", parser.comp())
+      print("dest: ", parser.dest())
+      print("jump: ", parser.jump())
+
     if parser.command_type() == CommandType.L_COMMAND:
-      continue
+      pass
 
     elif parser.command_type() == CommandType.A_COMMAND:
-      address = symbolTable.get_address(parser.symbol())
-      commands[command_index] = "0" + '{0:15b}'.format(address)
-    
-    else:
-      commands[command_index] = "111" + Code.comp(parser.comp()) + Code.dest(parser.dest()) + Code.jump(parser.jump())
-  
-    command_index += 1
+      symbol = int(parser.symbol() if parser.symbol().isnumeric() \
+        else symbol_table.get_address(parser.symbol()))
 
-  print("commands", commands)
+      binary_symbol = bin(symbol).replace("0b", "")
+      while len(binary_symbol) != 15:
+        binary_symbol = "0" + binary_symbol
+
+      output_file.write("0" + binary_symbol + "\n")
+
+    elif parser.command_type() == CommandType.C_COMMAND:
+      output_file.write("111" + Code.comp(parser.comp()) + \
+        Code.dest(parser.dest()) + Code.jump(parser.jump()) + "\n")
 
 if "__main__" == __name__:
   # Parses the input path and calls assemble_file on each input file.
@@ -131,7 +160,7 @@ if "__main__" == __name__:
   # Both are closed automatically when the code finishes running.
   # If the output file does not exist, it is created automatically in the
   # correct path, using the correct filename.
-  if not len(sys.argv) == 2:
+  if not len(sys.argv) == 2 and not (len(sys.argv) == 3 and sys.argv[2] == "-d"):
     sys.exit("Invalid usage, please use: Assembler <input path>")
 
   argument_path = os.path.abspath(sys.argv[1])
@@ -154,4 +183,4 @@ if "__main__" == __name__:
     
     with open(input_path, 'r') as input_file, \
           open(output_path, 'w') as output_file:
-      assemble_file(input_file, output_file)
+      assemble_file(input_file, output_file, debug = (len(sys.argv) == 3))

@@ -28,5 +28,94 @@ CHIP CpuMul {
         pc[15];          // address of next instruction
     
     PARTS:
-    // Put you code here:
+    // Check the type of instruction (A or C)
+    Or(a=instruction[15], b=false, out=isCInst); // Checking if most left bit is '1'
+    Not(in=isCInst, out=isAInst);                // Checking if most left bit is '0'
+
+    // Checking if we should write to the A register:
+    // Either we have an A instruction, or we have a C instruction & instruction[5] == 1
+    And(a=isCInst, b=instruction[5], out=isCInstWriteA);
+    Or(a=isAInst, b=isCInstWriteA, out=loadA);
+
+    // If we have a C Instruction, we only have a few options:
+    // - isCInstWriteA is '1' and then loadA is '1'.
+    //   This means we want to Override 'A' with aluOutput.
+    // - isCInstWriteA is '0' and then loadA is '0' (because isAInst = '0').
+    //   This means we won't Override 'A' so we don't care about 'newAValue'
+    //
+    // If we have a A Instruction, we only have a single option:
+    // - 'isCInstWriteA' is '0', therefore 'newAValue' = 'instruction'.
+    //   In addition, 'loadA' will be '1', so we will end up Overriding 'A' with 'instruction'
+    //
+    // Regardless, we end up having the correct value in the 'A' register.
+    // We also want addressM to have the value of A by definition.
+    Mux16(a=instruction, b=aluOutput, sel=isCInstWriteA, out=newAValue);
+    ARegister(in=newAValue, load=loadA, out=a, out[0..14]=addressM);
+    
+    // Getting the value of the 'D' register for the 2nd Mux.
+    // If instruction[4] == '1' and we have a 'C' instruction,
+    // we want to update the 'D' register value to be 'aluOutput'
+    And(a=isCInst, b=instruction[4], out=loadD);
+    DRegister(in=aluOutput, load=loadD, out=d);
+
+    // Getting the value of the other input for the ALU.
+    // This is either a (if instruction[12] == '0') or inM (m) otherwise.
+    // If we have an 'A' instruction, all of this doesn't really matter so we don't
+    // have to validate we have a 'C' instruction firstly.
+    Mux16(a=a, b=inM, sel=instruction[12], out=y);
+
+    // Computing the ALU instruction
+    ExtendAlu(x=d, y=y, instruction=instruction[6..14], out=aluOutput, out=outM, zr=isZero, ng=isNegative);
+    
+    // Setting writeM to true if we have a 'C' instruction and instruction[3] == '1'
+    And(a=isCInst, b=instruction[3], out=writeM);
+
+    Not(in=isNegative, out=isNotNegative);
+    Not(in=isZero, out=isNotZero);
+    And(a=isNotNegative, b=isNotZero, out=isPositive);
+
+    /*
+      1 = J1
+      2 = J2
+      3 = J3
+      Z = Zero
+      N = Negative
+      P = Positive
+
+      1 | 2 | 3 | Z | N | P | Output |
+      0 | 0 | 0 | ? | ? | ? |   0    |
+      0 | 0 | 1 | 0 | 0 | 1 |   1    | if(!j1 && !j2 && j3 && positive)
+      0 | 1 | 0 | 1 | 0 | 0 |   1    | if(!j1 && j2 && !j3 && zero)
+      0 | 1 | 1 | 1 | 0 | 1 |   1    | if(!j1 && j2 && j3 && (zero || positive))
+      1 | 0 | 0 | 0 | 1 | 0 |   1    | if(j1 && !j2 && !j3 && negative)
+      1 | 0 | 1 | 0 | 1 | 1 |   1    | if(j1 && !j2 && j3 && (positive || negative))
+      1 | 1 | 0 | 1 | 1 | 0 |   1    | if(j1 && j2 && !j3 && (zero || negative))
+      1 | 1 | 1 | ? | ? | ? |   1    | if(j1 && j2 && j3)
+    */
+
+    // if(j3 && positive).
+    // No need to validate (j1 == 0 && j2 == 0) because
+    // whenever j3 == 1 & isPositive == 1, we jump
+    And(a=instruction[0], b=isPositive, out=jumpOne);
+
+    // if(j2 && zero)
+    // No need to validate (j1 == 0 && j3 == 0) because
+    // whenever j2 == 1 and isZero == 1, we jump
+    And(a=instruction[1], b=isZero, out=jumpTwo);
+
+    // if(j1 && negative)
+    // No need to validate (j2 == 0 && j3 == 0) because
+    // whenever j1 == 1 and isNegative == 1, we jump
+    And(a=instruction[2], b=isNegative, out=jumpThree);
+
+    // These 3 take care of every other combination because at least one of
+    // them must be 1. If any of them is true, we should jump.
+    Or(a=jumpOne, b=jumpTwo, out=jumpOneTwo);
+    Or(a=jumpOneTwo, b=jumpThree, out=shouldJump);
+
+    // If we have a 'C' instruction and shouldJump, we should Load PC
+    // We want to Inc PC only when we don't Load PC and vice verca.
+    And(a=isCInst, b=shouldJump, out=shouldLoadPC);
+    Not(in=shouldLoadPC, out=shouldIncPC);
+    PC(in=a, load=shouldLoadPC, inc=shouldIncPC, reset=reset, out[0..14]=pc);
 }

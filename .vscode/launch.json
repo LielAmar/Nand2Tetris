@@ -11,7 +11,7 @@
       "program": "${file}",
       "console": "integratedTerminal",
       "justMyCode": true,
-      "args": ["projects\\06\\add"]
+      "args": ["projects\\06\\max"]
     }
   ]
 }

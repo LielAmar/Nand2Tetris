@@ -19,5 +19,41 @@ CHIP ExtendAlu {
      OUT out[16], zr, ng;
      
      PARTS:
-     // Put you code here:
+     // Checking if the regular ALU should be used
+     And(a=instruction[8], b=instruction[7], out=useRegular);
+     
+     // The output of the regular ALU
+     ALU(x=x, y=y, zx=instruction[5], nx=instruction[4], zy=instruction[3], 
+          ny=instruction[2], f=instruction[1], no=instruction[0],
+          out=regularOut, zr=regularZR, ng=regularNG);
+
+     // =============================================
+     // We don't need to check instruction[8]=0 and instruction[7]=1
+     // since every other combination of instruction[8] and instruction[7] is
+     // undefined, therefore can have the same result as the extended ALU.
+     // =============================================
+
+     // The output of the extended ALU
+     Mux16(a=y, b=x, sel=instruction[4], out=itemToShift);
+     ShiftLeft(in=itemToShift, out=itemShiftedLeft);
+     ShiftRight(in=itemToShift, out=itemShiftedRight);
+     Mux16(a=itemShiftedRight, b=itemShiftedLeft, sel=instruction[5],
+          out=extendedOut);
+
+     // taking care of 'extendedZR' & 'extendedNG'
+     Not16(in=extendedOut, out=notExtendedOut, out[15]=notExtendedNG);
+     Not16(in=notExtendedOut, out=unused1, out[0..7]=outFirst, out[8..15]=outSecond,
+          out[15]=extendedNG);
+
+     Or8Way(in=outFirst, out=or1);  // If we have a single '1' in 1st half
+     Or8Way(in=outSecond, out=or2); // If we have a single '1' in 2nd half
+     Or(a=or1, b=or2, out=isZr);    // If we have a single '1' in all output
+     Mux(a=true, b=false, sel=isZr, out=extendedZR); // if we don't have any 1's, we set extendedZR to be 1
+
+
+     // Returning the correct output depending on 'useRegular'
+     Mux16(a=extendedOut, b=regularOut, sel=useRegular, out=out);
+     Mux(a=extendedZR, b=regularZR, sel=useRegular, out=zr);
+     Mux(a=extendedNG, b=regularNG, sel=useRegular, out=ng);
+
 }

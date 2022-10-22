@@ -104,6 +104,18 @@ class Code:
       return '1000000'
     elif mnemonic == 'D|M':
       return '1010101'
+    elif mnemonic == 'A<<':
+      return '0100000'
+    elif mnemonic == 'D<<':
+      return '0110000'
+    elif mnemonic == 'M<<':
+      return '1100000'
+    elif mnemonic == 'A>>':
+      return '0000000'
+    elif mnemonic == 'D>>':
+      return '0010000'
+    elif mnemonic == 'M>>':
+      return '1000000'
 
   @staticmethod
   def jump(mnemonic: str) -> str:
@@ -131,3 +143,15 @@ class Code:
       return '110'
     elif mnemonic == 'JMP':
       return '111'
+
+  @staticmethod
+  def intro(mnemonic: str) -> str:
+    """
+    Returns the binary intro of a command.
+    If the command is a standard C command, returns 111.
+    Otherwise, we have an extended command, and we return 101.
+    """
+    if "<<" in mnemonic or ">>" in mnemonic:
+      return "101"
+
+    return "111"

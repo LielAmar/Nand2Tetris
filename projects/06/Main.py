@@ -151,7 +151,7 @@ def assemble_file(input_file: typing.TextIO, output_file: typing.TextIO, debug: 
       output_file.write("0" + binary_symbol + "\n")
 
     elif parser.command_type() == CommandType.C_COMMAND:
-      output_file.write("111" + Code.comp(parser.comp()) + \
+      output_file.write(Code.intro(parser.comp()) + Code.comp(parser.comp()) + \
         Code.dest(parser.dest()) + Code.jump(parser.jump()) + "\n")
 
 if "__main__" == __name__:

@@ -61,7 +61,8 @@ class Parser:
       while not self.is_command(self.lines[self.current_line_number]):
         self.current_line_number += 1
     
-      self.current_command = self.lines[self.current_line_number].strip()
+      # Load current command without comments and white spaces
+      self.current_command = self.lines[self.current_line_number].replace(' ', '')
       self.current_command = self.current_command.split("//")[0].strip()
 
   def command_type(self) -> str:

@@ -9,6 +9,7 @@ Unported License (https://creativecommons.org/licenses/by-nc-sa/3.0/).
 import os
 import sys
 import typing
+
 from Parser import Parser
 from CodeWriter import CodeWriter
 
@@ -130,14 +131,15 @@ if "__main__" == __name__:
   else:
     files_to_translate = [argument_path]
     output_path, extension = os.path.splitext(argument_path)
-    output_path += ".asm"
+  
+  output_path += ".asm"
     
-    with open(output_path, 'w') as output_file:
-      for input_path in files_to_translate:
-        filename, extension = os.path.splitext(input_path)
+  with open(output_path, 'w') as output_file:
+    for input_path in files_to_translate:
+      filename, extension = os.path.splitext(input_path)
         
-        if extension.lower() != ".vm":
-          continue
+      if extension.lower() != ".vm":
+        continue
         
-        with open(input_path, 'r') as input_file:
-          translate_file(input_file, output_file)
+      with open(input_path, 'r') as input_file:
+        translate_file(input_file, output_file)

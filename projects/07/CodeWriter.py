@@ -85,57 +85,14 @@ class CodeWriter:
     # Checking if the last 2 items in the stack are true
     elif command == "and":
       lines.extend(self.get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
-      lines.append("D=D+1")
-
-      lines.append(f"FALSE{self.command_id}")
-      lines.append("D;JNE")
-
-      lines.extend(self.get_common_command(CommonCommand.SAVE_2ND_TO_LAST_ITEM_TO_D))
-      lines.append("D=D+1")
-
-      lines.append(f"FALSE{self.command_id}")
-      lines.append("D;JNE")
-
-
       lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
-      lines.append("M=-1")
-
-      lines.append(f"@END{self.command_id}")
-      lines.append("0;JMP")
-
-      lines.append(f"(FALSE{self.command_id})")
-      lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
-      lines.append("M=0")
-
-      lines.append(f"(END{self.command_id})")
-      lines.extend(self.get_common_command(CommonCommand.REDUCE_SP_BY_1))
+      lines.append("D&M")
 
     # Checking if one of the last 2 items in the stack is true
     elif command == "or":
       lines.extend(self.get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
-      lines.append("D=D+1")
-
-      lines.append(f"@TRUE{self.command_id}")
-      lines.append("D;JEQ")
-
-      lines.extend(self.get_common_command(CommonCommand.SAVE_2ND_TO_LAST_ITEM_TO_D))
-      lines.append("D=D+1")
-
-      lines.append(f"@TRUE{self.command_id}")
-      lines.append("D;JEQ")
-
       lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
-      lines.append("M=0")
-
-      lines.append(f"@END{self.command_id}")
-      lines.append("0;JMP")
-
-      lines.append(f"(TRUE{self.command_id})")
-      lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
-      lines.append("M=-1")
-
-      lines.append(f"(END{self.command_id})")
-      lines.extend(self.get_common_command(CommonCommand.REDUCE_SP_BY_1))
+      lines.append("D|M")
 
     # Shifting the last item in the stack left
     elif command == "shiftleft":
@@ -147,6 +104,7 @@ class CodeWriter:
       lines.extend(self.get_common_command(CommonCommand.GO_TO_LAST_ITEM))
       lines.append("M=M>>")
 
+    # TODO: eq, gt and lt are exactly the same. Might wanna refactor
     # Checking if the last 2 items in the stack are equal
     elif command == "eq":
       lines.extend(self.get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
@@ -182,7 +140,6 @@ class CodeWriter:
 
       lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
       lines.append("M=0")
-
       lines.append(f"@END{self.command_id}")
       lines.append("0;JMP")
 
@@ -207,7 +164,6 @@ class CodeWriter:
 
       lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
       lines.append("M=0")
-
       lines.append(f"@END{self.command_id}")
       lines.append("0;JMP")
 
@@ -237,13 +193,13 @@ class CodeWriter:
 
     if command == CommandType.C_PUSH:
       if segment == "local":
-        lines.extend(self.write_push_local(index))
+        lines.extend(self.write_push_from_pointer(index, "LCL"))
       elif segment == "argument":
-        lines.extend(self.write_push_argument(index))
+        lines.extend(self.write_push_from_pointer(index, "ARG"))
       elif segment == "this":
-        lines.extend(self.write_push_this(index))
+        lines.extend(self.write_push_from_pointer(index, "THIS"))
       elif segment == "that":
-        lines.extend(self.write_push_that(index))
+        lines.extend(self.write_push_from_pointer(index, "THAT"))
 
     # Your code goes here!
     # Note: each reference to static i appearing in the file Xxx.vm should
@@ -383,44 +339,21 @@ class CodeWriter:
       ]
 
 
-  # ===== WRITE UTILS ===== #
-  def write_push_local(self, index: int) -> list[str]:
+  # ===== READ/WRITE UTILS ===== #
+  def write_push_from_pointer(self, index: int, pointer: str) -> list[str]:
     """
     Writes assembly code that affects the push command, where the
-    segment is "local".
+    segment is "{pointer}".
 
       Args:
         index (int): the index in the memory segment.
+        pointer (str): the pointer to the memory segment to use.
     """
 
     lines = []
     lines.append(f"@{index}")
     lines.append("D=A")
-    lines.append("@LCL")
-    lines.append("A=M+D")
-    lines.append("D=M")
-
-    lines.append("@SP")
-    lines.append("A=M")
-    lines.append("M=D")
-
-    lines.append(self.get_common_command(CommonCommand.INCREASE_SP_BY_1))
-
-    return lines
-
-  def write_push_argument(self, index: int) -> list[str]:
-    """
-    Writes assembly code that affects the push command, where the
-    segment is "local".
-
-      Args:
-        index (int): the index in the memory segment.
-    """
-
-    lines = []
-    lines.append(f"@{index}")
-    lines.append("D=A")
-    lines.append("@LCL")
+    lines.append(f"@{pointer}")
     lines.append("A=M+D")
     lines.append("D=M")
 

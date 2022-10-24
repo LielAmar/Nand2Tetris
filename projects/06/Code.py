@@ -27,15 +27,15 @@ class Code:
       return '001'
     elif mnemonic == 'D':
       return '010'
-    elif mnemonic == 'DM':
+    elif mnemonic == 'DM' or mnemonic == 'MD':
       return '011'
     elif mnemonic == 'A':
       return '100'
-    elif mnemonic == 'AM':
+    elif mnemonic == 'AM' or mnemonic == 'MA':
       return '101'
-    elif mnemonic == 'AD':
+    elif mnemonic == 'AD' or mnemonic == 'DA':
       return '110'
-    elif mnemonic == 'ADM':
+    elif mnemonic == 'ADM' or mnemonic == 'AMD' or mnemonic == 'DAM' or mnemonic == 'DMA' or mnemonic == 'MAD' or mnemonic == 'MDA':
       return '111'
 
   @staticmethod
@@ -66,23 +66,23 @@ class Code:
       return '0001111'
     elif mnemonic == '-A':
       return '0110011'
-    elif mnemonic == 'D+1':
+    elif mnemonic == 'D+1' or mnemonic == '1+D':
       return '0011111'
-    elif mnemonic == 'A+1':
+    elif mnemonic == 'A+1' or mnemonic == '1+A':
       return '0110111'
     elif mnemonic == 'D-1':
       return '0001110'
     elif mnemonic == 'A-1':
       return '0110010'
-    elif mnemonic == 'D+A':
+    elif mnemonic == 'D+A' or mnemonic == 'A+D':
       return '0000010'
     elif mnemonic == 'D-A':
       return '0010011'
     elif mnemonic == 'A-D':
       return '0000111'
-    elif mnemonic == 'D&A':
+    elif mnemonic == 'D&A' or mnemonic == 'A&D':
       return '0000000'
-    elif mnemonic == 'D|A':
+    elif mnemonic == 'D|A' or mnemonic == 'A|D':
        return '0010101'
     elif mnemonic == 'M':
       return '1110000'
@@ -90,19 +90,19 @@ class Code:
       return '1110001'
     elif mnemonic == '-M':
        return '1110011'
-    elif mnemonic == 'M+1':
+    elif mnemonic == 'M+1' or mnemonic == '1+M':
       return '1110111'
     elif mnemonic == 'M-1':
       return '1110010'
-    elif mnemonic == 'D+M':
+    elif mnemonic == 'D+M' or mnemonic == 'M+D':
       return '1000010'
     elif mnemonic == 'D-M':
       return '1010011'
     elif mnemonic == 'M-D':
       return '1000111'
-    elif mnemonic == 'D&M':
+    elif mnemonic == 'D&M' or mnemonic == 'M&D':
       return '1000000'
-    elif mnemonic == 'D|M':
+    elif mnemonic == 'D|M' or mnemonic == 'M|D':
       return '1010101'
     elif mnemonic == 'A<<':
       return '0100000'

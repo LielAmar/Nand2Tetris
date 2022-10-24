@@ -8,6 +8,8 @@ Unported License (https://creativecommons.org/licenses/by-nc-sa/3.0/).
 
 import typing
 
+from Constants import *
+
 class CodeWriter:
   """
   Translates VM commands into Hack assembly code.
@@ -20,7 +22,7 @@ class CodeWriter:
         output_stream (typing.TextIO): output stream.
     """
 
-    self.output_steam = output_stream
+    self.output_stream = output_stream
     self.filename = ""
     self.command_id = 0
 
@@ -58,200 +60,163 @@ class CodeWriter:
 
     # Adding the last 2 items in the stack
     if command == "add":
-      lines = [
-        "@SP",   # Going to address 0, to get the pointer of the stack
-        "A=M-1", # Going to the address of the last item in the stack
-        "D=M",   # Saving the last item in the stack
-        "A=A-1", # Going to the item before the last item in the stack
-        "M=M+D", # Setting the 2nd to last item's value to the sum of the last 2 items
-        "@SP",   # Going to address 0, to get the pointer of the stack
-        "M=M-1", # Decreasing the stack pointer by 1
-      ]
+      lines.extend(self.get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
+      lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.append("M=M+D")
+      lines.extend(self.get_common_command(CommonCommand.REDUCE_SP_BY_1))
 
     # Subtracting the last 2 items in the stack
     elif command == "sub":
-      lines = [
-        "@SP",   # Going to address 0, to get the pointer of the stack
-        "A=M-1", # Going to the address of the last item in the stack
-        "D=M",   # Saving the last item in the stack
-        "A=A-1", # Going to the item before the last item in the stack
-        "M=M-D", # Setting the 2nd to last item's value to the sub of the last 2 items
-        "@SP",   # Going to address 0, to get the pointer of the stack
-        "M=M-1", # Decreasing the stack pointer by 1
-      ]
+      lines.extend(self.get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
+      lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.append("M=M-D")
+      lines.extend(self.get_common_command(CommonCommand.REDUCE_SP_BY_1))
     
     # Negating the last item in the stack
     elif command == "neg":
-      lines = [
-        "@SP",   # Going to address 0, to get the pointer of the stack
-        "A=M-1", # Going to the address of the last item in the stack
-        "M=-M",  # Setting the last item's value to the neg of the last item
-      ]
-
-    # Checking if one of the last 2 items in the stack is true
-    elif command == "or":
-      lines = [
-        # Checking if the last item is -1 (true)
-        "@SP",     # Going to address 0, to get the pointer of the stack
-        "A=M-1",   # Going to the address of the last item in the stack
-        "D=M+1",   # Checking if the last item is -1 (true)
-
-          # If it is true, we jump to TRUE
-        f"@TRUE{self.command_id}",   # Going to address TRUE
-        "D;JEQ",   # If the last item was -1 (true), jump to TRUE
-
-        # Checking if the item before the last item is true
-        "@SP",     # Going to address 0, to get the pointer of the stack
-        "A=M-1",   # Going to the address of the last item in the stack
-        "A=A-1",   # Going to the item before the last item in the stack
-        "D=M+1",   # Checking if the 2nd to last item is -1 (true)
-
-          # If it is true, we jump to TRUE
-        f"@TRUE{self.command_id}",   # Going to address TRUE
-        "D;JEQ",   # If the last item was -1 (true), jump to TRUE 
-
-        # If both items are false, we set the result to false and jump to end
-        "@SP",     # Going to address 0, to get the pointer of the stack
-        "A=M-1",   # Going to the address of the last item in the stack
-        "A=A-1",   # Going to the item before the last item in the stack
-        "M=0",     # Setting the 2nd to last item's value to 0
-        f"@END{self.command_id}",   # Going to address END
-        "0;JMP",   # Jump to END
-
-        # If at least one is true, we set the result to true
-        f"(TRUE{self.command_id})",   # Label for TRUE
-        "@SP",     # Going to address 0, to get the pointer of the stack
-        "A=M-1",   # Going to the address of the last item in the stack
-        "A=A-1",   # Going to the item before the last item in the stack
-        "M=-1",    # Setting the 2nd to last item's value to -1
-
-        # Reducing SP by 1 and ending
-        f"(END{self.command_id})",   # Label for END
-        "@SP",     # Going to address 0, to get the pointer of the stack
-        "M=M-1",   # Decreasing the stack pointer by 1
-      ]
+      lines.extend(self.get_common_command(CommonCommand.GO_TO_LAST_ITEM))
+      lines.append("M=-M")
 
     # Chaning the last item in the stack to 'not' item
     elif command == "not":
-      lines = [
-        "@SP",     # Going to address 0, to get the pointer of the stack
-        "A=M-1",   # Going to the address of the last item in the stack
-        "M=!M",    # Setting the last item's value to not last item
-      ]
+      lines.extend(self.get_common_command(CommonCommand.GO_TO_LAST_ITEM))
+      lines.append("M=!M")
+
+    # Checking if the last 2 items in the stack are true
+    elif command == "and":
+      lines.extend(self.get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
+      lines.append("D=D+1")
+
+      lines.append(f"FALSE{self.command_id}")
+      lines.append("D;JNE")
+
+      lines.extend(self.get_common_command(CommonCommand.SAVE_2ND_TO_LAST_ITEM_TO_D))
+      lines.append("D=D+1")
+
+      lines.append(f"FALSE{self.command_id}")
+      lines.append("D;JNE")
+
+
+      lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.append("M=-1")
+
+      lines.append(f"@END{self.command_id}")
+      lines.append("0;JMP")
+
+      lines.append(f"(FALSE{self.command_id})")
+      lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.append("M=0")
+
+      lines.append(f"(END{self.command_id})")
+      lines.extend(self.get_common_command(CommonCommand.REDUCE_SP_BY_1))
+
+    # Checking if one of the last 2 items in the stack is true
+    elif command == "or":
+      lines.extend(self.get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
+      lines.append("D=D+1")
+
+      lines.append(f"@TRUE{self.command_id}")
+      lines.append("D;JEQ")
+
+      lines.extend(self.get_common_command(CommonCommand.SAVE_2ND_TO_LAST_ITEM_TO_D))
+      lines.append("D=D+1")
+
+      lines.append(f"@TRUE{self.command_id}")
+      lines.append("D;JEQ")
+
+      lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.append("M=0")
+
+      lines.append(f"@END{self.command_id}")
+      lines.append("0;JMP")
+
+      lines.append(f"(TRUE{self.command_id})")
+      lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.append("M=-1")
+
+      lines.append(f"(END{self.command_id})")
+      lines.extend(self.get_common_command(CommonCommand.REDUCE_SP_BY_1))
 
     # Shifting the last item in the stack left
     elif command == "shiftleft":
-      lines = [
-        "@SP",     # Going to address 0, to get the pointer of the stack
-        "A=M-1",   # Going to the address of the last item in the stack
-        "M=M<<",    # Setting the last item's value to the left shift of the last item
-      ]
+      lines.extend(self.get_common_command(CommonCommand.GO_TO_LAST_ITEM))
+      lines.append("M=M<<")
 
     # Shifting the last item in the stack right
     elif command == "shiftleft":
-      lines = [
-        "@SP",     # Going to address 0, to get the pointer of the stack
-        "A=M-1",   # Going to the address of the last item in the stack
-        "M=M>>",    # Setting the last item's value to the left shift of the last item
-      ]
+      lines.extend(self.get_common_command(CommonCommand.GO_TO_LAST_ITEM))
+      lines.append("M=M>>")
 
     # Checking if the last 2 items in the stack are equal
     elif command == "eq":
-      lines = [
-        "@SP",   # Going to address 0, to get the pointer of the stack
-        "A=M-1", # Going to the address of the last item in the stack
-        "D=M",   # Saving the last item in the stack
-        "A=A-1", # Going to the item before the last item in the stack
-        "D=M-D", # Setting the 2nd to last item's value to the sub of the last 2 items
-        f"@TRUE{self.command_id}", # Going to address TRUE
-        "D;JEQ", # If the items are identical (D=0), jump to TRUE
-        
-        # Items are not equal
-        "@SP",   # Going to address 0, to get the pointer of the stack
-        "A=M-1", # Going to the address of the last item in the stack
-        "A=A-1", # Going to the item before the last item in the stack
-        "M=0",   # Setting the 2nd to last item's value to 0
-        f"@END{self.command_id}",  # Going to address END
-        "0;JMP", # Jump to END
+      lines.extend(self.get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
+      lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.append("D=M-D")
 
-        # Items are equal
-        f"(TRUE{self.command_id})", # Label for TRUE
-        "@SP",    # Going to address 0, to get the pointer of the stack
-        "A=M-1",  # Going to the address of the last item in the stack
-        "A=A-1",  # Going to the item before the last item in the stack
-        "M=-1",   # Setting the 2nd to last item's value to -1
+      lines.append(f"@TRUE{self.command_id}")
+      lines.append("D;JEQ")
 
-        # Ending code by decreasing the stack pointer by 1
-        f"(END{self.command_id})",  # Label for END
-        "@SP",    # Going to address 0, to get the pointer of the stack
-        "M=M-1",  # Decreasing the stack pointer by 1
-      ]
+      lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.append("M=0")
+      lines.append(f"@END{self.command_id}")
+      lines.append("0;JMP")
+
+      lines.append(f"(TRUE{self.command_id})")
+      lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.append("M=-1")
+
+      lines.append(f"(END{self.command_id})")
+      lines.extend(self.get_common_command(CommonCommand.REDUCE_SP_BY_1))
 
     # Checking if the 2nd to last item is greater than the last item
     elif command == "gt":
-      lines = [
-        "@SP",   # Going to address 0, to get the pointer of the stack
-        "A=M-1", # Going to the address of the last item in the stack
-        "D=M",   # Saving the last item in the stack
-        "A=A-1", # Going to the item before the last item in the stack
-        "D=M-D", # Setting the 2nd to last item's value to the sub of the last 2 items
+      # item0
+      # item1
+      # item0 > item1  <=> item1 - item0 < 0
+      lines.extend(self.get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
+      lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.append("D=M-D")
 
-        f"@TRUE{self.command_id}", # Going to address TRUE
-        "D;JGT", # If the 2nd to last item is smaller than the last item (D<0), jump to TRUE
+      lines.append(f"@TRUE{self.command_id}")
+      lines.append("D;JLT")
 
-        # Item is not greater
-        "@SP",   # Going to address 0, to get the pointer of the stack
-        "A=M-1", # Going to the address of the last item in the stack
-        "A=A-1", # Going to the item before the last item in the stack
-        "M=0",   # Setting the 2nd to last item's value to 0 (false)
-        f"@END{self.command_id}",  # Going to address END
-        "0;JMP", # Jump to END
+      lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.append("M=0")
 
-        # Item is greater
-        f"(TRUE{self.command_id})", # Label for TRUE
-        "@SP",    # Going to address 0, to get the pointer of the stack
-        "A=M-1",  # Going to the address of the last item in the stack
-        "A=A-1",  # Going to the item before the last item in the stack
-        "M=-1",   # Setting the 2nd to last item's value to -1 (true)
+      lines.append(f"@END{self.command_id}")
+      lines.append("0;JMP")
 
-        # Ending code by decreasing the stack pointer by 1
-        f"(END{self.command_id})",  # Label for END
-        "@SP",    # Going to address 0, to get the pointer of the stack
-        "M=M-1",  # Decreasing the stack pointer by 1
-      ]
+      lines.append(f"(TRUE{self.command_id})")
+      lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.append("M=-1")
+
+      lines.append(f"(END{self.command_id})")
+      lines.extend(self.get_common_command(CommonCommand.REDUCE_SP_BY_1))
 
     # Checking if the 2nd to last item is smaller than the last item
     elif command == "lt":
-      lines = [
-        "@SP",   # Going to address 0, to get the pointer of the stack
-        "A=M-1", # Going to the address of the last item in the stack
-        "D=M",   # Saving the last item in the stack
-        "A=A-1", # Going to the item before the last item in the stack
-        "D=M-D", # Setting the 2nd to last item's value to the sub of the last 2 items
+      # item0
+      # item1
+      # item0 < item1  <=> item1 - item0 > 0
+      lines.extend(self.get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
+      lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.append("D=M-D") # item1 - item0
 
-        f"@TRUE{self.command_id}", # Going to address TRUE
-        "D;JLT", # If the 2nd to last item is smaller than the last item (D<0), jump to TRUE
+      lines.append(f"@TRUE{self.command_id}")
+      lines.append("D;JGT")
 
-        # Item is not smaller
-        "@SP",   # Going to address 0, to get the pointer of the stack
-        "A=M-1", # Going to the address of the last item in the stack
-        "A=A-1", # Going to the item before the last item in the stack
-        "M=0",   # Setting the 2nd to last item's value to 0 (false)
-        f"@END{self.command_id}",  # Going to address END
-        "0;JMP", # Jump to END
+      lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.append("M=0")
 
-        # Item is smaller
-        f"(TRUE{self.command_id})", # Label for TRUE
-        "@SP",    # Going to address 0, to get the pointer of the stack
-        "A=M-1",  # Going to the address of the last item in the stack
-        "A=A-1",  # Going to the item before the last item in the stack
-        "M=-1",   # Setting the 2nd to last item's value to -1 (true)
+      lines.append(f"@END{self.command_id}")
+      lines.append("0;JMP")
 
-        # Ending code by decreasing the stack pointer by 1
-        f"(END{self.command_id})",  # Label for END
-        "@SP",    # Going to address 0, to get the pointer of the stack
-        "M=M-1",  # Decreasing the stack pointer by 1
-      ]
+      lines.append(f"(TRUE{self.command_id})")
+      lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.append("M=-1")
+
+      lines.append(f"(END{self.command_id})")
+      lines.extend(self.get_common_command(CommonCommand.REDUCE_SP_BY_1))
 
     # Write all the lines we've created to the output file
     for line in lines:
@@ -267,6 +232,19 @@ class CodeWriter:
         segment (str): the memory segment to operate on.
         index (int): the index in the memory segment.
     """
+
+    lines = []
+
+    if command == CommandType.C_PUSH:
+      if segment == "local":
+        lines.extend(self.write_push_local(index))
+      elif segment == "argument":
+        lines.extend(self.write_push_argument(index))
+      elif segment == "this":
+        lines.extend(self.write_push_this(index))
+      elif segment == "that":
+        lines.extend(self.write_push_that(index))
+
     # Your code goes here!
     # Note: each reference to static i appearing in the file Xxx.vm should
     # be translated to the assembly symbol "Xxx.i". In the subsequent
@@ -357,3 +335,99 @@ class CodeWriter:
     # This is irrelevant for project 7,
     # you will implement this in project 8!
     pass
+
+
+  def get_common_command(self, command: CommandType) -> list[str]:
+    """
+    Returns a list of lines that are common to all commands.
+    """
+
+    if command == CommonCommand.SAVE_LAST_ITEM_TO_D:
+      return [
+        "@SP",   # Going to address 0, to get the pointer of the stack
+        "A=M-1", # Going to the address of the last item in the stack
+        "D=M",   # Saving the last item in the stack
+      ]
+
+    elif command == CommonCommand.SAVE_2ND_TO_LAST_ITEM_TO_D:
+      return [
+        "@SP",   # Going to address 0, to get the pointer of the stack
+        "A=M-1", # Going to the address of the last item in the stack
+        "A=A-1", # Going to the item before the last item in the stack
+        "D=M",   # Saving the 2nd to last item in the stack
+      ]
+
+    elif command == CommonCommand.GO_TO_LAST_ITEM:
+      return [
+        "@SP",   # Going to address 0, to get the pointer of the stack
+        "A=M-1", # Going to the address of the last item in the stack
+      ]
+
+    elif command == CommonCommand.GO_TO_2ND_TO_LAST_ITEM:
+      return [
+        "@SP",   # Going to address 0, to get the pointer of the stack
+        "A=M-1", # Going to the address of the last item in the stack
+        "A=A-1", # Going to the item before the last item in the stack
+      ]
+
+    elif command == CommonCommand.REDUCE_SP_BY_1:
+      return [
+        "@SP",   # Going to address 0, to get the pointer of the stack
+        "M=M-1", # Decreasing the stack pointer by 1
+      ]
+    
+    elif command == CommonCommand.INCREASE_SP_BY_1:
+      return [
+        "@SP",   # Going to address 0, to get the pointer of the stack
+        "M=M+1", # Increasing the stack pointer by 1
+      ]
+
+
+  # ===== WRITE UTILS ===== #
+  def write_push_local(self, index: int) -> list[str]:
+    """
+    Writes assembly code that affects the push command, where the
+    segment is "local".
+
+      Args:
+        index (int): the index in the memory segment.
+    """
+
+    lines = []
+    lines.append(f"@{index}")
+    lines.append("D=A")
+    lines.append("@LCL")
+    lines.append("A=M+D")
+    lines.append("D=M")
+
+    lines.append("@SP")
+    lines.append("A=M")
+    lines.append("M=D")
+
+    lines.append(self.get_common_command(CommonCommand.INCREASE_SP_BY_1))
+
+    return lines
+
+  def write_push_argument(self, index: int) -> list[str]:
+    """
+    Writes assembly code that affects the push command, where the
+    segment is "local".
+
+      Args:
+        index (int): the index in the memory segment.
+    """
+
+    lines = []
+    lines.append(f"@{index}")
+    lines.append("D=A")
+    lines.append("@LCL")
+    lines.append("A=M+D")
+    lines.append("D=M")
+
+    lines.append("@SP")
+    lines.append("A=M")
+    lines.append("M=D")
+
+    lines.append(self.get_common_command(CommonCommand.INCREASE_SP_BY_1))
+
+    return lines

@@ -90,7 +90,7 @@ class Parser:
     if self.command_type() == CommandType.C_ARITHMETIC:
       return self.current_command
     elif self.command_type != CommandType.C_RETURN:
-      return self.current_command.split(" ")[0]
+      return self.current_command.split(" ")[1]
 
   def arg2(self) -> int:
     """
@@ -104,7 +104,7 @@ class Parser:
         or self.command_type() == CommandType.C_POP \
         or self.command_type() == CommandType.C_FUNCTION \
         or self.command_type() == CommandType.C_CALL:
-      return int(self.current_command.split(" ")[1])
+      return int(self.current_command.split(" ")[2])
       
 
   def is_command(self, line: str) -> bool:

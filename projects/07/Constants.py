@@ -13,6 +13,16 @@ class CommandType(Enum):
   C_RETURN = "C_RETURN",
   C_CALL = "C_CALL"
 
+class CommonCommand(Enum):
+  SAVE_LAST_ITEM_TO_D = "save_last_item_to_d",
+  SAVE_2ND_TO_LAST_ITEM_TO_D = "save_2nd_to_last_item_to_d",
+
+  GO_TO_LAST_ITEM = "go_to_last_item",
+  GO_TO_2ND_TO_LAST_ITEM = "go_to_2nd_to_last_item",
+
+  REDUCE_SP_BY_1 = "reduce_sp_by_1",
+  INCREASE_SP_BY_1 = "increase_sp_by_1",
+
 ARITHMETIC_COMMANDS = ["add", "sub", "neg", "eq", "gt", "lt", "and", "or", "not", "shiftleft", "shiftright"]
 PUSH_COMMAND = "push"
 POP_COMMAND = "pop"

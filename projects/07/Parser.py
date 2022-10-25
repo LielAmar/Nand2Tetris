@@ -58,10 +58,10 @@ class Parser:
         self.current_line_number += 1
     
       # Load current command without comments and white spaces
-      self.current_command = self.lines[self.current_line_number].replace(' ', '')
+      self.current_command = self.lines[self.current_line_number]
       self.current_command = self.current_command.split("//")[0].strip()
 
-  def command_type(self) -> str:
+  def command_type(self) -> CommandType:
     """
       Returns:
         str: the type of the current VM command.
@@ -71,11 +71,11 @@ class Parser:
         "C_RETURN", "C_CALL".
     """
 
-    if(self.current_command in ARITHMETIC_COMMANDS):
+    if self.current_command in ARITHMETIC_COMMANDS:
       return CommandType.C_ARITHMETIC
-    elif(self.current_command == PUSH_COMMAND):
+    elif PUSH_COMMAND in self.current_command:
       return CommandType.C_PUSH
-    elif(self.current_command == POP_COMMAND):
+    elif POP_COMMAND in self.current_command:
       return CommandType.C_POP
 
   def arg1(self) -> str:

@@ -1,0 +1,267 @@
+// CommandType.C_PUSH constant 10
+@10
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// CommandType.C_POP local 0
+@LCL
+D=M
+@0
+D=D+A
+@R13
+M=D
+@SP
+A=M-1
+D=M
+@R13
+A=M
+M=D
+@SP
+M=M-1
+// CommandType.C_PUSH constant 21
+@21
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// CommandType.C_PUSH constant 22
+@22
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// CommandType.C_POP argument 2
+@ARG
+D=M
+@2
+D=D+A
+@R13
+M=D
+@SP
+A=M-1
+D=M
+@R13
+A=M
+M=D
+@SP
+M=M-1
+// CommandType.C_POP argument 1
+@ARG
+D=M
+@1
+D=D+A
+@R13
+M=D
+@SP
+A=M-1
+D=M
+@R13
+A=M
+M=D
+@SP
+M=M-1
+// CommandType.C_PUSH constant 36
+@36
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// CommandType.C_POP this 6
+@THIS
+D=M
+@6
+D=D+A
+@R13
+M=D
+@SP
+A=M-1
+D=M
+@R13
+A=M
+M=D
+@SP
+M=M-1
+// CommandType.C_PUSH constant 42
+@42
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// CommandType.C_PUSH constant 45
+@45
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// CommandType.C_POP that 5
+@THAT
+D=M
+@5
+D=D+A
+@R13
+M=D
+@SP
+A=M-1
+D=M
+@R13
+A=M
+M=D
+@SP
+M=M-1
+// CommandType.C_POP that 2
+@THAT
+D=M
+@2
+D=D+A
+@R13
+M=D
+@SP
+A=M-1
+D=M
+@R13
+A=M
+M=D
+@SP
+M=M-1
+// CommandType.C_PUSH constant 510
+@510
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// CommandType.C_POP temp 6
+@SP
+A=M-1
+D=M
+@R11
+M=D
+@SP
+M=M-1
+// CommandType.C_PUSH local 0
+@0
+D=A
+@LCL
+A=M+D
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// CommandType.C_PUSH that 5
+@5
+D=A
+@THAT
+A=M+D
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// add
+@SP
+A=M-1
+D=M
+@SP
+A=M-1
+A=A-1
+M=M+D
+@SP
+M=M-1
+// CommandType.C_PUSH argument 1
+@1
+D=A
+@ARG
+A=M+D
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// sub
+@SP
+A=M-1
+D=M
+@SP
+A=M-1
+A=A-1
+M=M-D
+@SP
+M=M-1
+// CommandType.C_PUSH this 6
+@6
+D=A
+@THIS
+A=M+D
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// CommandType.C_PUSH this 6
+@6
+D=A
+@THIS
+A=M+D
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// add
+@SP
+A=M-1
+D=M
+@SP
+A=M-1
+A=A-1
+M=M+D
+@SP
+M=M-1
+// sub
+@SP
+A=M-1
+D=M
+@SP
+A=M-1
+A=A-1
+M=M-D
+@SP
+M=M-1
+// CommandType.C_PUSH temp 6
+@R11
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// add
+@SP
+A=M-1
+D=M
+@SP
+A=M-1
+A=A-1
+M=M+D
+@SP
+M=M-1

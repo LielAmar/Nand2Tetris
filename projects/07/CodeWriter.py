@@ -59,6 +59,7 @@ class CodeWriter:
     
     self.command_id += 1
     lines = []
+    lines.append(f"// {command}")
 
     # Adding the last 2 items in the stack
     if command == "add":
@@ -88,13 +89,15 @@ class CodeWriter:
     elif command == "and":
       lines.extend(self.get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
       lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
-      lines.append("D&M")
+      lines.append("M=D&M")
+      lines.extend(self.get_common_command(CommonCommand.REDUCE_SP_BY_1))
 
     # Checking if one of the last 2 items in the stack is true
     elif command == "or":
       lines.extend(self.get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
       lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
-      lines.append("D|M")
+      lines.append("M=D|M")
+      lines.extend(self.get_common_command(CommonCommand.REDUCE_SP_BY_1))
 
     # Shifting the last item in the stack left
     elif command == "shiftleft":
@@ -113,37 +116,6 @@ class CodeWriter:
 
     # Checking if the last 2 items in the stack are equal
     elif command == "eq":
-      # ===== Checks if the numbers are equal by sign (to avoid overflow) ===== #
-
-      # Get the last item
-      lines.extend(self.get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
-
-      # If the last item is negative, we want to check if
-      # the 2nd to last item is positive (or zero)
-      lines.append(f"@CHECK_SECOND_ITEM_POSITIVE{self.command_id}")
-      lines.append("D;JLT") # JLE
-
-      # Otherwise, the last item is positive (or zero), we want to check if
-      #  the 2nd to last item is negative
-      lines.extend(self.get_common_command(CommonCommand.SAVE_2ND_TO_LAST_ITEM_TO_D))
-
-      # If the second item is negative, they are not equal so
-      # we can jump to FALSE
-      lines.append(f"@FALSE{self.command_id}")
-      lines.append("D;JLT")
-
-      # We check if the 2nd to last item is positive (or zero)
-      lines.append(f"(CHECK_SECOND_ITEM_POSITIVE{self.command_id})")
-      lines.extend(self.get_common_command(CommonCommand.SAVE_2ND_TO_LAST_ITEM_TO_D))
-
-      # If the second item is positive, they are not equal so
-      # we can jump to FALSE
-      lines.append(f"@FALSE{self.command_id}")
-      lines.append("D;JGE")
-
-
-      # ===== Checks if items are equal by subtracting ===== #
-
       lines.extend(self.get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
       lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
       lines.append("D=M-D")
@@ -151,7 +123,7 @@ class CodeWriter:
       lines.append(f"@TRUE{self.command_id}")
       lines.append("D;JEQ")
 
-      lines.extend(f"(FALSE{self.command_id})")
+      lines.append(f"(FALSE{self.command_id})")
       lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
       lines.append("M=0")
       lines.append(f"@END{self.command_id}")
@@ -166,8 +138,8 @@ class CodeWriter:
 
     # Checking if the 2nd to last item is greater than the last item
     elif command == "gt":
-      # item0
-      # item1
+      # item0 (182)
+      # item1 (181)
       #
       # item0 > item1  <=> item1 - item0 < 0
 
@@ -190,6 +162,10 @@ class CodeWriter:
       lines.append(f"@FALSE{self.command_id}")
       lines.append("D;JLT")
 
+      # If the second item is positive, we want to run the subtraction
+      lines.append(f"@CODE_START{self.command_id}")
+      lines.append("0;JMP")
+
       # We check if the 2nd to last item is positive (or zero)
       lines.append(f"(CHECK_SECOND_ITEM_POSITIVE{self.command_id})")
       lines.extend(self.get_common_command(CommonCommand.SAVE_2ND_TO_LAST_ITEM_TO_D))
@@ -201,10 +177,10 @@ class CodeWriter:
 
 
       # ===== Checks if first item is greater by subtracting ===== #
-
+      lines.append(f"(CODE_START{self.command_id})")
       lines.extend(self.get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
       lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
-      lines.append("D=M-D")
+      lines.append("D=D-M")
 
       lines.append(f"@TRUE{self.command_id}")
       lines.append("D;JLT")
@@ -224,8 +200,8 @@ class CodeWriter:
 
     # Checking if the 2nd to last item is smaller than the last item
     elif command == "lt":
-      # item0
-      # item1
+      # item0 (182)
+      # item1 (181)
       # item0 < item1  <=> item1 - item0 > 0
 
       # ===== Checks if the numbers have different signs (to avoid overflow) ===== #
@@ -247,6 +223,10 @@ class CodeWriter:
       lines.append(f"@TRUE{self.command_id}")
       lines.append("D;JLT")
 
+      # If the second item is positive, we want to run the subtraction
+      lines.append(f"@CODE_START{self.command_id}")
+      lines.append("0;JMP")
+
       # We check if the 2nd to last item is positive (or zero)
       lines.append(f"(CHECK_SECOND_ITEM_POSITIVE{self.command_id})")
       lines.extend(self.get_common_command(CommonCommand.SAVE_2ND_TO_LAST_ITEM_TO_D))
@@ -258,10 +238,10 @@ class CodeWriter:
 
 
       # ===== Checks if first item is greater by subtracting ===== #
-
+      lines.append(f"(CODE_START{self.command_id})")
       lines.extend(self.get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
       lines.extend(self.get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
-      lines.append("D=M-D") # item1 - item0
+      lines.append("D=D-M") # item1 - item0
 
       lines.append(f"@TRUE{self.command_id}")
       lines.append("D;JGT")
@@ -283,7 +263,7 @@ class CodeWriter:
     for line in lines:
       print(line)
       if self.output_stream != None:
-        self.output_stream.write(line)
+        self.output_stream.write(line + "\n")
 
   def write_push_pop(self, command: CommandType, segment: str, index: int) -> None:
     """
@@ -297,6 +277,7 @@ class CodeWriter:
     """
 
     lines = []
+    lines.append(f"// {command} {segment} {index}")
 
     if command == CommandType.C_PUSH:
       if segment == "local":
@@ -313,12 +294,12 @@ class CodeWriter:
         lines.extend(self.write_push_from_segment_direct(f"{self.filename.upper()}.{index}"))
       elif segment == "pointer":
         if index == 0:
-          lines.extend(self.write_push_from_segment(0, "THIS"))
+          lines.extend(self.write_push_from_address("THIS"))
         elif index == 1:
-          lines.extend(self.write_push_from_segment(0, "THAT"))
+          lines.extend(self.write_push_from_address("THAT"))
       elif segment == "temp":
         # TODO: might need to add a check to see if index is in range (5-12)
-        lines.extend(self.write_push_from_segment(index, "R5"))
+        lines.extend(self.write_push_from_address(f"R{5+index}"))
 
     elif command == CommandType.C_POP:
       if segment == "local":
@@ -333,17 +314,17 @@ class CodeWriter:
         lines.extend(self.write_pop_to_segment_direct(f"{self.filename.upper()}.{index}"))
       elif segment == "pointer":
         if index == 0:
-          lines.extend(self.write_pop_to_segment(0, "THIS"))
+          lines.extend(self.write_pop_to_address("THIS"))
         elif index == 1:
-          lines.extend(self.write_pop_to_segment(0, "THAT"))
+          lines.extend(self.write_pop_to_address("THAT"))
       elif segment == "temp":
-        lines.extend(self.write_pop_to_segment(index, "R5"))
+        lines.extend(self.write_pop_to_address(f"R{5+index}"))
         
     # Write all the lines we've created to the output file
     for line in lines:
       print(line)
       if self.output_stream != None:
-        self.output_stream.write(line)
+        self.output_stream.write(line + "\n")
 
   def write_label(self, label: str) -> None:
     """
@@ -544,6 +525,28 @@ class CodeWriter:
 
     return lines
 
+  def write_push_from_address(self, address: str) -> list[str]:
+    """
+    Writes assembly code that affects the push command, where the
+    segment is "{pointer}".
+
+      Args:
+        index (int): the index in the memory segment.
+        pointer (str): the pointer to the memory segment to use.
+    """
+
+    lines = []
+    lines.append(f"@{address}")
+    lines.append("D=M")
+
+    lines.append("@SP")
+    lines.append("A=M")
+    lines.append("M=D")
+
+    lines.extend(self.get_common_command(CommonCommand.INCREASE_SP_BY_1))
+
+    return lines
+
   def write_pop_to_segment(self, index: int, segment: str) -> list[str]:
     """
     Writes assembly code that affects the pop command, where the
@@ -591,6 +594,26 @@ class CodeWriter:
     lines.extend(self.get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
     
     lines.append(f"@{pointer}")
+    lines.append("M=D")
+
+    lines.extend(self.get_common_command(CommonCommand.REDUCE_SP_BY_1))
+
+    return lines
+
+  def write_pop_to_address(self, address: str) -> list[str]:
+    """
+    Writes assembly code that affects the pop command, through an address".
+
+      Args:
+        address (int): the address to use
+    """
+
+    lines = []
+
+    # Popping item from SP and saving it in the address saved in R13
+    lines.extend(self.get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
+    
+    lines.append(f"@{address}")
     lines.append("M=D")
 
     lines.extend(self.get_common_command(CommonCommand.REDUCE_SP_BY_1))

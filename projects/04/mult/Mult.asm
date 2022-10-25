@@ -12,9 +12,14 @@
 @R2
 M=0
 
+@R1
+D=M
+@i
+M=D
+
 (LOOP)
   // Check if we're in last iteration
-  @R1
+  @i
   D=M
   @END
   D;JEQ // Jump to end if we D=0, meaning we're in last iteration
@@ -25,8 +30,8 @@ M=0
   @R2
   M=M+D
 
-  // Decrement R1
-  @R1
+  // Decrement i
+  @i
   M=M-1
 
   // Go to next iteration

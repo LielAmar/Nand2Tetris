@@ -1,4 +1,3 @@
-from curses.ascii import SP
 from enum import Enum
 from re import M
 

@@ -261,7 +261,6 @@ class CodeWriter:
 
     # Write all the lines we've created to the output file
     for line in lines:
-      print(line)
       if self.output_stream != None:
         self.output_stream.write(line + "\n")
 
@@ -322,7 +321,6 @@ class CodeWriter:
         
     # Write all the lines we've created to the output file
     for line in lines:
-      print(line)
       if self.output_stream != None:
         self.output_stream.write(line + "\n")
 

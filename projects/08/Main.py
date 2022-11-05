@@ -13,7 +13,7 @@ from CodeWriter import CodeWriter
 from Constants import *
 
 def translate_file(input_file: typing.TextIO, output_file: typing.TextIO, 
-    bootstrap: bool) -> None:
+    bootstrap: bool, debug: bool) -> None:
   """Translates a single file.
 
   Args:
@@ -25,6 +25,9 @@ def translate_file(input_file: typing.TextIO, output_file: typing.TextIO,
 
   parser = Parser(input_file)
   code_writer = CodeWriter(output_file)
+
+  # Setting the file name & debug flag
+  code_writer.set_debug(debug)
   code_writer.set_file_name(os.path.splitext(os.path.basename(input_file.name))[0])
 
   # Writing the bootstrap code if we've received bootstrap = True
@@ -38,14 +41,24 @@ def translate_file(input_file: typing.TextIO, output_file: typing.TextIO,
 
     if command_type == CommandType.C_ARITHMETIC:
       code_writer.write_arithmetic(parser.arg1())
+
     elif command_type in [CommandType.C_PUSH, CommandType.C_POP]:
       code_writer.write_push_pop(command_type, parser.arg1(), parser.arg2())
-    elif command_type in [CommandType.C_LABEL]:
+
+    elif command_type == CommandType.C_LABEL:
       code_writer.write_label(parser.arg1())
-    elif command_type in [CommandType.C_GOTO]:
+      
+    elif command_type == CommandType.C_GOTO:
       code_writer.write_goto(parser.arg1())
-    elif command_type in [CommandType.C_IF]:
+    elif command_type == CommandType.C_IF:
       code_writer.write_if(parser.arg1())
+
+    elif command_type == CommandType.C_FUNCTION:
+      code_writer.write_function(parser.arg1(), parser.arg2())
+    elif command_type == CommandType.C_CALL:
+      code_writer.write_call(parser.arg1(), parser.arg2())
+    elif command_type == CommandType.C_RETURN:
+      code_writer.write_return()
 
   """
   In this project, we will extend the basic translator developed in project
@@ -60,9 +73,9 @@ def translate_file(input_file: typing.TextIO, output_file: typing.TextIO,
   
   We recommend completing the implementation of the VM translator in two
   stages. 
-  1. First, implement and test the translation of the VM language's
-  branching commands. This stage can be tested using the basic test
-  BasicLoop and the slightly more advanced FibonacciSeries.
+    1. First, implement and test the translation of the VM language's
+    branching commands. This stage can be tested using the basic test
+    BasicLoop and the slightly more advanced FibonacciSeries.
   2. Next, implement and test the translation of the function call and
   return commands. "SimpleFunction" is a basic test for this step, while
   "NestedCall" is slightly more advanced, and also contains in-depth
@@ -139,9 +152,9 @@ if "__main__" == __name__:
   # Both are closed automatically when the code finishes running.
   # If the output file does not exist, it is created automatically in the
   # correct path, using the correct filename.
-  if not len(sys.argv) == 2:
+  if not len(sys.argv) == 2 and not (len(sys.argv) == 3 and sys.argv[2] == "-d"):
     sys.exit("Invalid usage, please use: VMtranslator <input path>")
-    
+
   argument_path = os.path.abspath(sys.argv[1])
   
   if os.path.isdir(argument_path):
@@ -165,6 +178,6 @@ if "__main__" == __name__:
         continue
         
       with open(input_path, 'r') as input_file:
-        translate_file(input_file, output_file, bootstrap)
+        translate_file(input_file, output_file, bootstrap, debug=len(sys.argv) == 3)
       
       bootstrap = False

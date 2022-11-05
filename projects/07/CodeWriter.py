@@ -109,11 +109,6 @@ class CodeWriter:
       lines.extend(self.get_common_command(CommonCommand.GO_TO_LAST_ITEM))
       lines.append("M=M>>")
 
-    # TODO: eq, gt and lt are exactly the same. Might wanna refactor
-    # also, make sure to handle overflow. Meaning if one number is positive and
-    # one number is negative, simply return the negative instead of subtracting
-    # and checking if the result is negative, 'cause this might lead to overflow.
-
     # Checking if the last 2 items in the stack are equal
     elif command == "eq":
       lines.extend(self.get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
@@ -297,7 +292,6 @@ class CodeWriter:
         elif index == 1:
           lines.extend(self.write_push_from_address("THAT"))
       elif segment == "temp":
-        # TODO: might need to add a check to see if index is in range (5-12)
         lines.extend(self.write_push_from_address(f"R{5+index}"))
 
     elif command == CommandType.C_POP:

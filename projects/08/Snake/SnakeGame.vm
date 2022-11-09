@@ -1,0 +1,2678 @@
+function SnakeGame.new 0
+push constant 5
+call Memory.alloc 1
+pop pointer 0
+call SnakeScreen.init 0
+pop temp 0
+call SnakeScreen.width 0
+push constant 2
+call Math.divide 2
+call SnakeScreen.height 0
+push constant 2
+call Math.divide 2
+push constant 3
+call Snake.new 3
+pop this 0
+push constant 3
+pop this 3
+push constant 0
+pop this 4
+call Wall.new 0
+pop this 1
+push pointer 0
+return
+function SnakeGame.dispose 0
+push argument 0
+pop pointer 0
+push this 0
+call Snake.dispose 1
+pop temp 0
+push this 2
+call Apple.dispose 1
+pop temp 0
+push this 1
+call Wall.dispose 1
+pop temp 0
+push pointer 0
+call Memory.deAlloc 1
+pop temp 0
+push constant 0
+return
+function SnakeGame.run 2
+push argument 0
+pop pointer 0
+push constant 0
+pop local 1
+label WHILE_EXP0
+push local 0
+push constant 0
+eq
+not
+if-goto WHILE_END0
+call Keyboard.keyPressed 0
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+call Apple.new 0
+pop this 2
+label WHILE_EXP1
+push this 1
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Wall.atPosition 3
+push this 0
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Snake.atPosition 3
+or
+not
+if-goto WHILE_END1
+push this 2
+call Apple.generate 1
+pop temp 0
+goto WHILE_EXP1
+label WHILE_END1
+label WHILE_EXP2
+push local 1
+not
+not
+if-goto WHILE_END2
+call Keyboard.keyPressed 0
+pop local 0
+push local 0
+push constant 81
+eq
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 0
+not
+pop local 1
+label IF_FALSE0
+push local 0
+push constant 131
+eq
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push this 3
+push constant 1
+eq
+not
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push constant 0
+pop this 3
+label IF_FALSE2
+label IF_FALSE1
+push local 0
+push constant 133
+eq
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push this 3
+push constant 0
+eq
+not
+if-goto IF_TRUE4
+goto IF_FALSE4
+label IF_TRUE4
+push constant 1
+pop this 3
+label IF_FALSE4
+label IF_FALSE3
+push local 0
+push constant 130
+eq
+if-goto IF_TRUE5
+goto IF_FALSE5
+label IF_TRUE5
+push this 3
+push constant 3
+eq
+not
+if-goto IF_TRUE6
+goto IF_FALSE6
+label IF_TRUE6
+push constant 2
+pop this 3
+label IF_FALSE6
+label IF_FALSE5
+push local 0
+push constant 132
+eq
+if-goto IF_TRUE7
+goto IF_FALSE7
+label IF_TRUE7
+push this 3
+push constant 2
+eq
+not
+if-goto IF_TRUE8
+goto IF_FALSE8
+label IF_TRUE8
+push constant 3
+pop this 3
+label IF_FALSE8
+label IF_FALSE7
+push local 0
+push constant 0
+eq
+if-goto IF_TRUE9
+goto IF_FALSE9
+label IF_TRUE9
+call Keyboard.keyPressed 0
+pop local 0
+label IF_FALSE9
+push pointer 0
+call SnakeGame.moveSnake 1
+pop temp 0
+push constant 0
+pop local 0
+push this 2
+call Apple.getX 1
+push this 0
+call Snake.getX 1
+eq
+push this 2
+call Apple.getY 1
+push this 0
+call Snake.getY 1
+eq
+and
+if-goto IF_TRUE10
+goto IF_FALSE10
+label IF_TRUE10
+push this 4
+push constant 9
+add
+pop this 4
+push this 2
+call Apple.generate 1
+pop temp 0
+label WHILE_EXP3
+push this 1
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Wall.atPosition 3
+push this 0
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Snake.atPosition 3
+or
+not
+if-goto WHILE_END3
+push this 2
+call Apple.generate 1
+pop temp 0
+goto WHILE_EXP3
+label WHILE_END3
+push this 0
+call Snake.lengthen 1
+pop temp 0
+label IF_FALSE10
+push this 0
+call Snake.hitItself 1
+if-goto IF_TRUE11
+goto IF_FALSE11
+label IF_TRUE11
+push constant 0
+not
+pop local 1
+label IF_FALSE11
+push this 1
+push this 0
+call Snake.getX 1
+push this 0
+call Snake.getY 1
+call Wall.atPosition 3
+push constant 0
+not
+eq
+if-goto IF_TRUE12
+goto IF_FALSE12
+label IF_TRUE12
+push constant 0
+not
+pop local 1
+label IF_FALSE12
+goto WHILE_EXP2
+label WHILE_END2
+push constant 10
+push constant 20
+call Output.moveCursor 2
+pop temp 0
+push constant 9
+call String.new 1
+push constant 71
+call String.appendChar 2
+push constant 65
+call String.appendChar 2
+push constant 77
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+push constant 79
+call String.appendChar 2
+push constant 86
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 82
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push constant 11
+push constant 20
+call Output.moveCursor 2
+pop temp 0
+push constant 7
+call String.new 1
+push constant 83
+call String.appendChar 2
+push constant 67
+call String.appendChar 2
+push constant 79
+call String.appendChar 2
+push constant 82
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 58
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push this 4
+call Output.printInt 1
+pop temp 0
+push constant 0
+return
+function SnakeGame.moveSnake 0
+push argument 0
+pop pointer 0
+push this 3
+push constant 0
+eq
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push this 0
+call Snake.moveUp 1
+pop temp 0
+label IF_FALSE0
+push this 3
+push constant 1
+eq
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push this 0
+call Snake.moveDown 1
+pop temp 0
+label IF_FALSE1
+push this 3
+push constant 2
+eq
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push this 0
+call Snake.moveLeft 1
+pop temp 0
+label IF_FALSE2
+push this 3
+push constant 3
+eq
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push this 0
+call Snake.moveRight 1
+pop temp 0
+label IF_FALSE3
+push constant 100
+call Sys.wait 1
+pop temp 0
+push constant 0
+return
+function SnakeGame.moveUpNa 2
+push argument 0
+pop pointer 0
+push constant 0
+pop local 1
+label WHILE_EXP0
+push local 0
+push constant 0
+eq
+not
+if-goto WHILE_END0
+call Keyboard.keyPressed 0
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+call Apple.new 0
+pop this 2
+label WHILE_EXP1
+push this 1
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Wall.atPosition 3
+push this 0
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Snake.atPosition 3
+or
+not
+if-goto WHILE_END1
+push this 2
+call Apple.generate 1
+pop temp 0
+goto WHILE_EXP1
+label WHILE_END1
+label WHILE_EXP2
+push local 1
+not
+not
+if-goto WHILE_END2
+call Keyboard.keyPressed 0
+pop local 0
+push local 0
+push constant 81
+eq
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 0
+not
+pop local 1
+label IF_FALSE0
+push local 0
+push constant 131
+eq
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push this 3
+push constant 1
+eq
+not
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push constant 0
+pop this 3
+label IF_FALSE2
+label IF_FALSE1
+push local 0
+push constant 133
+eq
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push this 3
+push constant 0
+eq
+not
+if-goto IF_TRUE4
+goto IF_FALSE4
+label IF_TRUE4
+push constant 1
+pop this 3
+label IF_FALSE4
+label IF_FALSE3
+push local 0
+push constant 130
+eq
+if-goto IF_TRUE5
+goto IF_FALSE5
+label IF_TRUE5
+push this 3
+push constant 3
+eq
+not
+if-goto IF_TRUE6
+goto IF_FALSE6
+label IF_TRUE6
+push constant 2
+pop this 3
+label IF_FALSE6
+label IF_FALSE5
+push local 0
+push constant 132
+eq
+if-goto IF_TRUE7
+goto IF_FALSE7
+label IF_TRUE7
+push this 3
+push constant 2
+eq
+not
+if-goto IF_TRUE8
+goto IF_FALSE8
+label IF_TRUE8
+push constant 3
+pop this 3
+label IF_FALSE8
+label IF_FALSE7
+push local 0
+push constant 0
+eq
+if-goto IF_TRUE9
+goto IF_FALSE9
+label IF_TRUE9
+call Keyboard.keyPressed 0
+pop local 0
+label IF_FALSE9
+push pointer 0
+call SnakeGame.moveSnake 1
+pop temp 0
+push constant 0
+pop local 0
+push this 2
+call Apple.getX 1
+push this 0
+call Snake.getX 1
+eq
+push this 2
+call Apple.getY 1
+push this 0
+call Snake.getY 1
+eq
+and
+if-goto IF_TRUE10
+goto IF_FALSE10
+label IF_TRUE10
+push this 4
+push constant 9
+add
+pop this 4
+push this 2
+call Apple.generate 1
+pop temp 0
+label WHILE_EXP3
+push this 1
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Wall.atPosition 3
+push this 0
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Snake.atPosition 3
+or
+not
+if-goto WHILE_END3
+push this 2
+call Apple.generate 1
+pop temp 0
+goto WHILE_EXP3
+label WHILE_END3
+push this 0
+call Snake.lengthen 1
+pop temp 0
+label IF_FALSE10
+push this 0
+call Snake.hitItself 1
+if-goto IF_TRUE11
+goto IF_FALSE11
+label IF_TRUE11
+push constant 0
+not
+pop local 1
+label IF_FALSE11
+push this 1
+push this 0
+call Snake.getX 1
+push this 0
+call Snake.getY 1
+call Wall.atPosition 3
+push constant 0
+not
+eq
+if-goto IF_TRUE12
+goto IF_FALSE12
+label IF_TRUE12
+push constant 0
+not
+pop local 1
+label IF_FALSE12
+goto WHILE_EXP2
+label WHILE_END2
+push constant 10
+push constant 20
+call Output.moveCursor 2
+pop temp 0
+push constant 9
+call String.new 1
+push constant 71
+call String.appendChar 2
+push constant 65
+call String.appendChar 2
+push constant 77
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+push constant 79
+call String.appendChar 2
+push constant 86
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 82
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push constant 11
+push constant 20
+call Output.moveCursor 2
+pop temp 0
+push constant 7
+call String.new 1
+push constant 83
+call String.appendChar 2
+push constant 67
+call String.appendChar 2
+push constant 79
+call String.appendChar 2
+push constant 82
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 58
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push this 4
+call Output.printInt 1
+pop temp 0
+push constant 0
+pop local 1
+label WHILE_EXP4
+push local 0
+push constant 0
+eq
+not
+if-goto WHILE_END4
+call Keyboard.keyPressed 0
+pop local 0
+goto WHILE_EXP4
+label WHILE_END4
+call Apple.new 0
+pop this 2
+label WHILE_EXP5
+push this 1
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Wall.atPosition 3
+push this 0
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Snake.atPosition 3
+or
+not
+if-goto WHILE_END5
+push this 2
+call Apple.generate 1
+pop temp 0
+goto WHILE_EXP5
+label WHILE_END5
+label WHILE_EXP6
+push local 1
+not
+not
+if-goto WHILE_END6
+call Keyboard.keyPressed 0
+pop local 0
+push local 0
+push constant 81
+eq
+if-goto IF_TRUE13
+goto IF_FALSE13
+label IF_TRUE13
+push constant 0
+not
+pop local 1
+label IF_FALSE13
+push local 0
+push constant 131
+eq
+if-goto IF_TRUE14
+goto IF_FALSE14
+label IF_TRUE14
+push this 3
+push constant 1
+eq
+not
+if-goto IF_TRUE15
+goto IF_FALSE15
+label IF_TRUE15
+push constant 0
+pop this 3
+label IF_FALSE15
+label IF_FALSE14
+push local 0
+push constant 133
+eq
+if-goto IF_TRUE16
+goto IF_FALSE16
+label IF_TRUE16
+push this 3
+push constant 0
+eq
+not
+if-goto IF_TRUE17
+goto IF_FALSE17
+label IF_TRUE17
+push constant 1
+pop this 3
+label IF_FALSE17
+label IF_FALSE16
+push local 0
+push constant 130
+eq
+if-goto IF_TRUE18
+goto IF_FALSE18
+label IF_TRUE18
+push this 3
+push constant 3
+eq
+not
+if-goto IF_TRUE19
+goto IF_FALSE19
+label IF_TRUE19
+push constant 2
+pop this 3
+label IF_FALSE19
+label IF_FALSE18
+push local 0
+push constant 132
+eq
+if-goto IF_TRUE20
+goto IF_FALSE20
+label IF_TRUE20
+push this 3
+push constant 2
+eq
+not
+if-goto IF_TRUE21
+goto IF_FALSE21
+label IF_TRUE21
+push constant 3
+pop this 3
+label IF_FALSE21
+label IF_FALSE20
+push local 0
+push constant 0
+eq
+if-goto IF_TRUE22
+goto IF_FALSE22
+label IF_TRUE22
+call Keyboard.keyPressed 0
+pop local 0
+label IF_FALSE22
+push pointer 0
+call SnakeGame.moveSnake 1
+pop temp 0
+push constant 0
+pop local 0
+push this 2
+call Apple.getX 1
+push this 0
+call Snake.getX 1
+eq
+push this 2
+call Apple.getY 1
+push this 0
+call Snake.getY 1
+eq
+and
+if-goto IF_TRUE23
+goto IF_FALSE23
+label IF_TRUE23
+push this 4
+push constant 9
+add
+pop this 4
+push this 2
+call Apple.generate 1
+pop temp 0
+label WHILE_EXP7
+push this 1
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Wall.atPosition 3
+push this 0
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Snake.atPosition 3
+or
+not
+if-goto WHILE_END7
+push this 2
+call Apple.generate 1
+pop temp 0
+goto WHILE_EXP7
+label WHILE_END7
+push this 0
+call Snake.lengthen 1
+pop temp 0
+label IF_FALSE23
+push this 0
+call Snake.hitItself 1
+if-goto IF_TRUE24
+goto IF_FALSE24
+label IF_TRUE24
+push constant 0
+not
+pop local 1
+label IF_FALSE24
+push this 1
+push this 0
+call Snake.getX 1
+push this 0
+call Snake.getY 1
+call Wall.atPosition 3
+push constant 0
+not
+eq
+if-goto IF_TRUE25
+goto IF_FALSE25
+label IF_TRUE25
+push constant 0
+not
+pop local 1
+label IF_FALSE25
+goto WHILE_EXP6
+label WHILE_END6
+push constant 10
+push constant 20
+call Output.moveCursor 2
+pop temp 0
+push constant 9
+call String.new 1
+push constant 71
+call String.appendChar 2
+push constant 65
+call String.appendChar 2
+push constant 77
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+push constant 79
+call String.appendChar 2
+push constant 86
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 82
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push constant 11
+push constant 20
+call Output.moveCursor 2
+pop temp 0
+push constant 7
+call String.new 1
+push constant 83
+call String.appendChar 2
+push constant 67
+call String.appendChar 2
+push constant 79
+call String.appendChar 2
+push constant 82
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 58
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push this 4
+call Output.printInt 1
+pop temp 0
+push constant 0
+pop local 1
+label WHILE_EXP8
+push local 0
+push constant 0
+eq
+not
+if-goto WHILE_END8
+call Keyboard.keyPressed 0
+pop local 0
+goto WHILE_EXP8
+label WHILE_END8
+call Apple.new 0
+pop this 2
+label WHILE_EXP9
+push this 1
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Wall.atPosition 3
+push this 0
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Snake.atPosition 3
+or
+not
+if-goto WHILE_END9
+push this 2
+call Apple.generate 1
+pop temp 0
+goto WHILE_EXP9
+label WHILE_END9
+label WHILE_EXP10
+push local 1
+not
+not
+if-goto WHILE_END10
+call Keyboard.keyPressed 0
+pop local 0
+push local 0
+push constant 81
+eq
+if-goto IF_TRUE26
+goto IF_FALSE26
+label IF_TRUE26
+push constant 0
+not
+pop local 1
+label IF_FALSE26
+push local 0
+push constant 131
+eq
+if-goto IF_TRUE27
+goto IF_FALSE27
+label IF_TRUE27
+push this 3
+push constant 1
+eq
+not
+if-goto IF_TRUE28
+goto IF_FALSE28
+label IF_TRUE28
+push constant 0
+pop this 3
+label IF_FALSE28
+label IF_FALSE27
+push local 0
+push constant 133
+eq
+if-goto IF_TRUE29
+goto IF_FALSE29
+label IF_TRUE29
+push this 3
+push constant 0
+eq
+not
+if-goto IF_TRUE30
+goto IF_FALSE30
+label IF_TRUE30
+push constant 1
+pop this 3
+label IF_FALSE30
+label IF_FALSE29
+push local 0
+push constant 130
+eq
+if-goto IF_TRUE31
+goto IF_FALSE31
+label IF_TRUE31
+push this 3
+push constant 3
+eq
+not
+if-goto IF_TRUE32
+goto IF_FALSE32
+label IF_TRUE32
+push constant 2
+pop this 3
+label IF_FALSE32
+label IF_FALSE31
+push local 0
+push constant 132
+eq
+if-goto IF_TRUE33
+goto IF_FALSE33
+label IF_TRUE33
+push this 3
+push constant 2
+eq
+not
+if-goto IF_TRUE34
+goto IF_FALSE34
+label IF_TRUE34
+push constant 3
+pop this 3
+label IF_FALSE34
+label IF_FALSE33
+push local 0
+push constant 0
+eq
+if-goto IF_TRUE35
+goto IF_FALSE35
+label IF_TRUE35
+call Keyboard.keyPressed 0
+pop local 0
+label IF_FALSE35
+push pointer 0
+call SnakeGame.moveSnake 1
+pop temp 0
+push constant 0
+pop local 0
+push this 2
+call Apple.getX 1
+push this 0
+call Snake.getX 1
+eq
+push this 2
+call Apple.getY 1
+push this 0
+call Snake.getY 1
+eq
+and
+if-goto IF_TRUE36
+goto IF_FALSE36
+label IF_TRUE36
+push this 4
+push constant 9
+add
+pop this 4
+push this 2
+call Apple.generate 1
+pop temp 0
+label WHILE_EXP11
+push this 1
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Wall.atPosition 3
+push this 0
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Snake.atPosition 3
+or
+not
+if-goto WHILE_END11
+push this 2
+call Apple.generate 1
+pop temp 0
+goto WHILE_EXP11
+label WHILE_END11
+push this 0
+call Snake.lengthen 1
+pop temp 0
+label IF_FALSE36
+push this 0
+call Snake.hitItself 1
+if-goto IF_TRUE37
+goto IF_FALSE37
+label IF_TRUE37
+push constant 0
+not
+pop local 1
+label IF_FALSE37
+push this 1
+push this 0
+call Snake.getX 1
+push this 0
+call Snake.getY 1
+call Wall.atPosition 3
+push constant 0
+not
+eq
+if-goto IF_TRUE38
+goto IF_FALSE38
+label IF_TRUE38
+push constant 0
+not
+pop local 1
+label IF_FALSE38
+goto WHILE_EXP10
+label WHILE_END10
+push constant 10
+push constant 20
+call Output.moveCursor 2
+pop temp 0
+push constant 9
+call String.new 1
+push constant 71
+call String.appendChar 2
+push constant 65
+call String.appendChar 2
+push constant 77
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+push constant 79
+call String.appendChar 2
+push constant 86
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 82
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push constant 11
+push constant 20
+call Output.moveCursor 2
+pop temp 0
+push constant 7
+call String.new 1
+push constant 83
+call String.appendChar 2
+push constant 67
+call String.appendChar 2
+push constant 79
+call String.appendChar 2
+push constant 82
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 58
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push this 4
+call Output.printInt 1
+pop temp 0
+push constant 0
+pop local 1
+label WHILE_EXP12
+push local 0
+push constant 0
+eq
+not
+if-goto WHILE_END12
+call Keyboard.keyPressed 0
+pop local 0
+goto WHILE_EXP12
+label WHILE_END12
+call Apple.new 0
+pop this 2
+label WHILE_EXP13
+push this 1
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Wall.atPosition 3
+push this 0
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Snake.atPosition 3
+or
+not
+if-goto WHILE_END13
+push this 2
+call Apple.generate 1
+pop temp 0
+goto WHILE_EXP13
+label WHILE_END13
+label WHILE_EXP14
+push local 1
+not
+not
+if-goto WHILE_END14
+call Keyboard.keyPressed 0
+pop local 0
+push local 0
+push constant 81
+eq
+if-goto IF_TRUE39
+goto IF_FALSE39
+label IF_TRUE39
+push constant 0
+not
+pop local 1
+label IF_FALSE39
+push local 0
+push constant 131
+eq
+if-goto IF_TRUE40
+goto IF_FALSE40
+label IF_TRUE40
+push this 3
+push constant 1
+eq
+not
+if-goto IF_TRUE41
+goto IF_FALSE41
+label IF_TRUE41
+push constant 0
+pop this 3
+label IF_FALSE41
+label IF_FALSE40
+push local 0
+push constant 133
+eq
+if-goto IF_TRUE42
+goto IF_FALSE42
+label IF_TRUE42
+push this 3
+push constant 0
+eq
+not
+if-goto IF_TRUE43
+goto IF_FALSE43
+label IF_TRUE43
+push constant 1
+pop this 3
+label IF_FALSE43
+label IF_FALSE42
+push local 0
+push constant 130
+eq
+if-goto IF_TRUE44
+goto IF_FALSE44
+label IF_TRUE44
+push this 3
+push constant 3
+eq
+not
+if-goto IF_TRUE45
+goto IF_FALSE45
+label IF_TRUE45
+push constant 2
+pop this 3
+label IF_FALSE45
+label IF_FALSE44
+push local 0
+push constant 132
+eq
+if-goto IF_TRUE46
+goto IF_FALSE46
+label IF_TRUE46
+push this 3
+push constant 2
+eq
+not
+if-goto IF_TRUE47
+goto IF_FALSE47
+label IF_TRUE47
+push constant 3
+pop this 3
+label IF_FALSE47
+label IF_FALSE46
+push local 0
+push constant 0
+eq
+if-goto IF_TRUE48
+goto IF_FALSE48
+label IF_TRUE48
+call Keyboard.keyPressed 0
+pop local 0
+label IF_FALSE48
+push pointer 0
+call SnakeGame.moveSnake 1
+pop temp 0
+push constant 0
+pop local 0
+push this 2
+call Apple.getX 1
+push this 0
+call Snake.getX 1
+eq
+push this 2
+call Apple.getY 1
+push this 0
+call Snake.getY 1
+eq
+and
+if-goto IF_TRUE49
+goto IF_FALSE49
+label IF_TRUE49
+push this 4
+push constant 9
+add
+pop this 4
+push this 2
+call Apple.generate 1
+pop temp 0
+label WHILE_EXP15
+push this 1
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Wall.atPosition 3
+push this 0
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Snake.atPosition 3
+or
+not
+if-goto WHILE_END15
+push this 2
+call Apple.generate 1
+pop temp 0
+goto WHILE_EXP15
+label WHILE_END15
+push this 0
+call Snake.lengthen 1
+pop temp 0
+label IF_FALSE49
+push this 0
+call Snake.hitItself 1
+if-goto IF_TRUE50
+goto IF_FALSE50
+label IF_TRUE50
+push constant 0
+not
+pop local 1
+label IF_FALSE50
+push this 1
+push this 0
+call Snake.getX 1
+push this 0
+call Snake.getY 1
+call Wall.atPosition 3
+push constant 0
+not
+eq
+if-goto IF_TRUE51
+goto IF_FALSE51
+label IF_TRUE51
+push constant 0
+not
+pop local 1
+label IF_FALSE51
+goto WHILE_EXP14
+label WHILE_END14
+push constant 10
+push constant 20
+call Output.moveCursor 2
+pop temp 0
+push constant 9
+call String.new 1
+push constant 71
+call String.appendChar 2
+push constant 65
+call String.appendChar 2
+push constant 77
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+push constant 79
+call String.appendChar 2
+push constant 86
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 82
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push constant 11
+push constant 20
+call Output.moveCursor 2
+pop temp 0
+push constant 7
+call String.new 1
+push constant 83
+call String.appendChar 2
+push constant 67
+call String.appendChar 2
+push constant 79
+call String.appendChar 2
+push constant 82
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 58
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push this 4
+call Output.printInt 1
+pop temp 0
+push constant 0
+pop local 1
+label WHILE_EXP16
+push local 0
+push constant 0
+eq
+not
+if-goto WHILE_END16
+call Keyboard.keyPressed 0
+pop local 0
+goto WHILE_EXP16
+label WHILE_END16
+call Apple.new 0
+pop this 2
+label WHILE_EXP17
+push this 1
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Wall.atPosition 3
+push this 0
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Snake.atPosition 3
+or
+not
+if-goto WHILE_END17
+push this 2
+call Apple.generate 1
+pop temp 0
+goto WHILE_EXP17
+label WHILE_END17
+label WHILE_EXP18
+push local 1
+not
+not
+if-goto WHILE_END18
+call Keyboard.keyPressed 0
+pop local 0
+push local 0
+push constant 81
+eq
+if-goto IF_TRUE52
+goto IF_FALSE52
+label IF_TRUE52
+push constant 0
+not
+pop local 1
+label IF_FALSE52
+push local 0
+push constant 131
+eq
+if-goto IF_TRUE53
+goto IF_FALSE53
+label IF_TRUE53
+push this 3
+push constant 1
+eq
+not
+if-goto IF_TRUE54
+goto IF_FALSE54
+label IF_TRUE54
+push constant 0
+pop this 3
+label IF_FALSE54
+label IF_FALSE53
+push local 0
+push constant 133
+eq
+if-goto IF_TRUE55
+goto IF_FALSE55
+label IF_TRUE55
+push this 3
+push constant 0
+eq
+not
+if-goto IF_TRUE56
+goto IF_FALSE56
+label IF_TRUE56
+push constant 1
+pop this 3
+label IF_FALSE56
+label IF_FALSE55
+push local 0
+push constant 130
+eq
+if-goto IF_TRUE57
+goto IF_FALSE57
+label IF_TRUE57
+push this 3
+push constant 3
+eq
+not
+if-goto IF_TRUE58
+goto IF_FALSE58
+label IF_TRUE58
+push constant 2
+pop this 3
+label IF_FALSE58
+label IF_FALSE57
+push local 0
+push constant 132
+eq
+if-goto IF_TRUE59
+goto IF_FALSE59
+label IF_TRUE59
+push this 3
+push constant 2
+eq
+not
+if-goto IF_TRUE60
+goto IF_FALSE60
+label IF_TRUE60
+push constant 3
+pop this 3
+label IF_FALSE60
+label IF_FALSE59
+push local 0
+push constant 0
+eq
+if-goto IF_TRUE61
+goto IF_FALSE61
+label IF_TRUE61
+call Keyboard.keyPressed 0
+pop local 0
+label IF_FALSE61
+push pointer 0
+call SnakeGame.moveSnake 1
+pop temp 0
+push constant 0
+pop local 0
+push this 2
+call Apple.getX 1
+push this 0
+call Snake.getX 1
+eq
+push this 2
+call Apple.getY 1
+push this 0
+call Snake.getY 1
+eq
+and
+if-goto IF_TRUE62
+goto IF_FALSE62
+label IF_TRUE62
+push this 4
+push constant 9
+add
+pop this 4
+push this 2
+call Apple.generate 1
+pop temp 0
+label WHILE_EXP19
+push this 1
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Wall.atPosition 3
+push this 0
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Snake.atPosition 3
+or
+not
+if-goto WHILE_END19
+push this 2
+call Apple.generate 1
+pop temp 0
+goto WHILE_EXP19
+label WHILE_END19
+push this 0
+call Snake.lengthen 1
+pop temp 0
+label IF_FALSE62
+push this 0
+call Snake.hitItself 1
+if-goto IF_TRUE63
+goto IF_FALSE63
+label IF_TRUE63
+push constant 0
+not
+pop local 1
+label IF_FALSE63
+push this 1
+push this 0
+call Snake.getX 1
+push this 0
+call Snake.getY 1
+call Wall.atPosition 3
+push constant 0
+not
+eq
+if-goto IF_TRUE64
+goto IF_FALSE64
+label IF_TRUE64
+push constant 0
+not
+pop local 1
+label IF_FALSE64
+goto WHILE_EXP18
+label WHILE_END18
+push constant 10
+push constant 20
+call Output.moveCursor 2
+pop temp 0
+push constant 9
+call String.new 1
+push constant 71
+call String.appendChar 2
+push constant 65
+call String.appendChar 2
+push constant 77
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+push constant 79
+call String.appendChar 2
+push constant 86
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 82
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push constant 11
+push constant 20
+call Output.moveCursor 2
+pop temp 0
+push constant 7
+call String.new 1
+push constant 83
+call String.appendChar 2
+push constant 67
+call String.appendChar 2
+push constant 79
+call String.appendChar 2
+push constant 82
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 58
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push this 4
+call Output.printInt 1
+pop temp 0
+push constant 0
+pop local 1
+label WHILE_EXP20
+push local 0
+push constant 0
+eq
+not
+if-goto WHILE_END20
+call Keyboard.keyPressed 0
+pop local 0
+goto WHILE_EXP20
+label WHILE_END20
+call Apple.new 0
+pop this 2
+label WHILE_EXP21
+push this 1
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Wall.atPosition 3
+push this 0
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Snake.atPosition 3
+or
+not
+if-goto WHILE_END21
+push this 2
+call Apple.generate 1
+pop temp 0
+goto WHILE_EXP21
+label WHILE_END21
+label WHILE_EXP22
+push local 1
+not
+not
+if-goto WHILE_END22
+call Keyboard.keyPressed 0
+pop local 0
+push local 0
+push constant 81
+eq
+if-goto IF_TRUE65
+goto IF_FALSE65
+label IF_TRUE65
+push constant 0
+not
+pop local 1
+label IF_FALSE65
+push local 0
+push constant 131
+eq
+if-goto IF_TRUE66
+goto IF_FALSE66
+label IF_TRUE66
+push this 3
+push constant 1
+eq
+not
+if-goto IF_TRUE67
+goto IF_FALSE67
+label IF_TRUE67
+push constant 0
+pop this 3
+label IF_FALSE67
+label IF_FALSE66
+push local 0
+push constant 133
+eq
+if-goto IF_TRUE68
+goto IF_FALSE68
+label IF_TRUE68
+push this 3
+push constant 0
+eq
+not
+if-goto IF_TRUE69
+goto IF_FALSE69
+label IF_TRUE69
+push constant 1
+pop this 3
+label IF_FALSE69
+label IF_FALSE68
+push local 0
+push constant 130
+eq
+if-goto IF_TRUE70
+goto IF_FALSE70
+label IF_TRUE70
+push this 3
+push constant 3
+eq
+not
+if-goto IF_TRUE71
+goto IF_FALSE71
+label IF_TRUE71
+push constant 2
+pop this 3
+label IF_FALSE71
+label IF_FALSE70
+push local 0
+push constant 132
+eq
+if-goto IF_TRUE72
+goto IF_FALSE72
+label IF_TRUE72
+push this 3
+push constant 2
+eq
+not
+if-goto IF_TRUE73
+goto IF_FALSE73
+label IF_TRUE73
+push constant 3
+pop this 3
+label IF_FALSE73
+label IF_FALSE72
+push local 0
+push constant 0
+eq
+if-goto IF_TRUE74
+goto IF_FALSE74
+label IF_TRUE74
+call Keyboard.keyPressed 0
+pop local 0
+label IF_FALSE74
+push pointer 0
+call SnakeGame.moveSnake 1
+pop temp 0
+push constant 0
+pop local 0
+push this 2
+call Apple.getX 1
+push this 0
+call Snake.getX 1
+eq
+push this 2
+call Apple.getY 1
+push this 0
+call Snake.getY 1
+eq
+and
+if-goto IF_TRUE75
+goto IF_FALSE75
+label IF_TRUE75
+push this 4
+push constant 9
+add
+pop this 4
+push this 2
+call Apple.generate 1
+pop temp 0
+label WHILE_EXP23
+push this 1
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Wall.atPosition 3
+push this 0
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Snake.atPosition 3
+or
+not
+if-goto WHILE_END23
+push this 2
+call Apple.generate 1
+pop temp 0
+goto WHILE_EXP23
+label WHILE_END23
+push this 0
+call Snake.lengthen 1
+pop temp 0
+label IF_FALSE75
+push this 0
+call Snake.hitItself 1
+if-goto IF_TRUE76
+goto IF_FALSE76
+label IF_TRUE76
+push constant 0
+not
+pop local 1
+label IF_FALSE76
+push this 1
+push this 0
+call Snake.getX 1
+push this 0
+call Snake.getY 1
+call Wall.atPosition 3
+push constant 0
+not
+eq
+if-goto IF_TRUE77
+goto IF_FALSE77
+label IF_TRUE77
+push constant 0
+not
+pop local 1
+label IF_FALSE77
+goto WHILE_EXP22
+label WHILE_END22
+push constant 10
+push constant 20
+call Output.moveCursor 2
+pop temp 0
+push constant 9
+call String.new 1
+push constant 71
+call String.appendChar 2
+push constant 65
+call String.appendChar 2
+push constant 77
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+push constant 79
+call String.appendChar 2
+push constant 86
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 82
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push constant 11
+push constant 20
+call Output.moveCursor 2
+pop temp 0
+push constant 7
+call String.new 1
+push constant 83
+call String.appendChar 2
+push constant 67
+call String.appendChar 2
+push constant 79
+call String.appendChar 2
+push constant 82
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 58
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push this 4
+call Output.printInt 1
+pop temp 0
+push constant 0
+pop local 1
+label WHILE_EXP24
+push local 0
+push constant 0
+eq
+not
+if-goto WHILE_END24
+call Keyboard.keyPressed 0
+pop local 0
+goto WHILE_EXP24
+label WHILE_END24
+call Apple.new 0
+pop this 2
+label WHILE_EXP25
+push this 1
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Wall.atPosition 3
+push this 0
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Snake.atPosition 3
+or
+not
+if-goto WHILE_END25
+push this 2
+call Apple.generate 1
+pop temp 0
+goto WHILE_EXP25
+label WHILE_END25
+label WHILE_EXP26
+push local 1
+not
+not
+if-goto WHILE_END26
+call Keyboard.keyPressed 0
+pop local 0
+push local 0
+push constant 81
+eq
+if-goto IF_TRUE78
+goto IF_FALSE78
+label IF_TRUE78
+push constant 0
+not
+pop local 1
+label IF_FALSE78
+push local 0
+push constant 131
+eq
+if-goto IF_TRUE79
+goto IF_FALSE79
+label IF_TRUE79
+push this 3
+push constant 1
+eq
+not
+if-goto IF_TRUE80
+goto IF_FALSE80
+label IF_TRUE80
+push constant 0
+pop this 3
+label IF_FALSE80
+label IF_FALSE79
+push local 0
+push constant 133
+eq
+if-goto IF_TRUE81
+goto IF_FALSE81
+label IF_TRUE81
+push this 3
+push constant 0
+eq
+not
+if-goto IF_TRUE82
+goto IF_FALSE82
+label IF_TRUE82
+push constant 1
+pop this 3
+label IF_FALSE82
+label IF_FALSE81
+push local 0
+push constant 130
+eq
+if-goto IF_TRUE83
+goto IF_FALSE83
+label IF_TRUE83
+push this 3
+push constant 3
+eq
+not
+if-goto IF_TRUE84
+goto IF_FALSE84
+label IF_TRUE84
+push constant 2
+pop this 3
+label IF_FALSE84
+label IF_FALSE83
+push local 0
+push constant 132
+eq
+if-goto IF_TRUE85
+goto IF_FALSE85
+label IF_TRUE85
+push this 3
+push constant 2
+eq
+not
+if-goto IF_TRUE86
+goto IF_FALSE86
+label IF_TRUE86
+push constant 3
+pop this 3
+label IF_FALSE86
+label IF_FALSE85
+push local 0
+push constant 0
+eq
+if-goto IF_TRUE87
+goto IF_FALSE87
+label IF_TRUE87
+call Keyboard.keyPressed 0
+pop local 0
+label IF_FALSE87
+push pointer 0
+call SnakeGame.moveSnake 1
+pop temp 0
+push constant 0
+pop local 0
+push this 2
+call Apple.getX 1
+push this 0
+call Snake.getX 1
+eq
+push this 2
+call Apple.getY 1
+push this 0
+call Snake.getY 1
+eq
+and
+if-goto IF_TRUE88
+goto IF_FALSE88
+label IF_TRUE88
+push this 4
+push constant 9
+add
+pop this 4
+push this 2
+call Apple.generate 1
+pop temp 0
+label WHILE_EXP27
+push this 1
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Wall.atPosition 3
+push this 0
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Snake.atPosition 3
+or
+not
+if-goto WHILE_END27
+push this 2
+call Apple.generate 1
+pop temp 0
+goto WHILE_EXP27
+label WHILE_END27
+push this 0
+call Snake.lengthen 1
+pop temp 0
+label IF_FALSE88
+push this 0
+call Snake.hitItself 1
+if-goto IF_TRUE89
+goto IF_FALSE89
+label IF_TRUE89
+push constant 0
+not
+pop local 1
+label IF_FALSE89
+push this 1
+push this 0
+call Snake.getX 1
+push this 0
+call Snake.getY 1
+call Wall.atPosition 3
+push constant 0
+not
+eq
+if-goto IF_TRUE90
+goto IF_FALSE90
+label IF_TRUE90
+push constant 0
+not
+pop local 1
+label IF_FALSE90
+goto WHILE_EXP26
+label WHILE_END26
+push constant 10
+push constant 20
+call Output.moveCursor 2
+pop temp 0
+push constant 9
+call String.new 1
+push constant 71
+call String.appendChar 2
+push constant 65
+call String.appendChar 2
+push constant 77
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+push constant 79
+call String.appendChar 2
+push constant 86
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 82
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push constant 11
+push constant 20
+call Output.moveCursor 2
+pop temp 0
+push constant 7
+call String.new 1
+push constant 83
+call String.appendChar 2
+push constant 67
+call String.appendChar 2
+push constant 79
+call String.appendChar 2
+push constant 82
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 58
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push this 4
+call Output.printInt 1
+pop temp 0
+push constant 0
+pop local 1
+label WHILE_EXP28
+push local 0
+push constant 0
+eq
+not
+if-goto WHILE_END28
+call Keyboard.keyPressed 0
+pop local 0
+goto WHILE_EXP28
+label WHILE_END28
+call Apple.new 0
+pop this 2
+label WHILE_EXP29
+push this 1
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Wall.atPosition 3
+push this 0
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Snake.atPosition 3
+or
+not
+if-goto WHILE_END29
+push this 2
+call Apple.generate 1
+pop temp 0
+goto WHILE_EXP29
+label WHILE_END29
+label WHILE_EXP30
+push local 1
+not
+not
+if-goto WHILE_END30
+call Keyboard.keyPressed 0
+pop local 0
+push local 0
+push constant 81
+eq
+if-goto IF_TRUE91
+goto IF_FALSE91
+label IF_TRUE91
+push constant 0
+not
+pop local 1
+label IF_FALSE91
+push local 0
+push constant 131
+eq
+if-goto IF_TRUE92
+goto IF_FALSE92
+label IF_TRUE92
+push this 3
+push constant 1
+eq
+not
+if-goto IF_TRUE93
+goto IF_FALSE93
+label IF_TRUE93
+push constant 0
+pop this 3
+label IF_FALSE93
+label IF_FALSE92
+push local 0
+push constant 133
+eq
+if-goto IF_TRUE94
+goto IF_FALSE94
+label IF_TRUE94
+push this 3
+push constant 0
+eq
+not
+if-goto IF_TRUE95
+goto IF_FALSE95
+label IF_TRUE95
+push constant 1
+pop this 3
+label IF_FALSE95
+label IF_FALSE94
+push local 0
+push constant 130
+eq
+if-goto IF_TRUE96
+goto IF_FALSE96
+label IF_TRUE96
+push this 3
+push constant 3
+eq
+not
+if-goto IF_TRUE97
+goto IF_FALSE97
+label IF_TRUE97
+push constant 2
+pop this 3
+label IF_FALSE97
+label IF_FALSE96
+push local 0
+push constant 132
+eq
+if-goto IF_TRUE98
+goto IF_FALSE98
+label IF_TRUE98
+push this 3
+push constant 2
+eq
+not
+if-goto IF_TRUE99
+goto IF_FALSE99
+label IF_TRUE99
+push constant 3
+pop this 3
+label IF_FALSE99
+label IF_FALSE98
+push local 0
+push constant 0
+eq
+if-goto IF_TRUE100
+goto IF_FALSE100
+label IF_TRUE100
+call Keyboard.keyPressed 0
+pop local 0
+label IF_FALSE100
+push pointer 0
+call SnakeGame.moveSnake 1
+pop temp 0
+push constant 0
+pop local 0
+push this 2
+call Apple.getX 1
+push this 0
+call Snake.getX 1
+eq
+push this 2
+call Apple.getY 1
+push this 0
+call Snake.getY 1
+eq
+and
+if-goto IF_TRUE101
+goto IF_FALSE101
+label IF_TRUE101
+push this 4
+push constant 9
+add
+pop this 4
+push this 2
+call Apple.generate 1
+pop temp 0
+label WHILE_EXP31
+push this 1
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Wall.atPosition 3
+push this 0
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Snake.atPosition 3
+or
+not
+if-goto WHILE_END31
+push this 2
+call Apple.generate 1
+pop temp 0
+goto WHILE_EXP31
+label WHILE_END31
+push this 0
+call Snake.lengthen 1
+pop temp 0
+label IF_FALSE101
+push this 0
+call Snake.hitItself 1
+if-goto IF_TRUE102
+goto IF_FALSE102
+label IF_TRUE102
+push constant 0
+not
+pop local 1
+label IF_FALSE102
+push this 1
+push this 0
+call Snake.getX 1
+push this 0
+call Snake.getY 1
+call Wall.atPosition 3
+push constant 0
+not
+eq
+if-goto IF_TRUE103
+goto IF_FALSE103
+label IF_TRUE103
+push constant 0
+not
+pop local 1
+label IF_FALSE103
+goto WHILE_EXP30
+label WHILE_END30
+push constant 10
+push constant 20
+call Output.moveCursor 2
+pop temp 0
+push constant 9
+call String.new 1
+push constant 71
+call String.appendChar 2
+push constant 65
+call String.appendChar 2
+push constant 77
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+push constant 79
+call String.appendChar 2
+push constant 86
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 82
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push constant 11
+push constant 20
+call Output.moveCursor 2
+pop temp 0
+push constant 7
+call String.new 1
+push constant 83
+call String.appendChar 2
+push constant 67
+call String.appendChar 2
+push constant 79
+call String.appendChar 2
+push constant 82
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 58
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push this 4
+call Output.printInt 1
+pop temp 0
+push constant 0
+pop local 1
+label WHILE_EXP32
+push local 0
+push constant 0
+eq
+not
+if-goto WHILE_END32
+call Keyboard.keyPressed 0
+pop local 0
+goto WHILE_EXP32
+label WHILE_END32
+call Apple.new 0
+pop this 2
+label WHILE_EXP33
+push this 1
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Wall.atPosition 3
+push this 0
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Snake.atPosition 3
+or
+not
+if-goto WHILE_END33
+push this 2
+call Apple.generate 1
+pop temp 0
+goto WHILE_EXP33
+label WHILE_END33
+label WHILE_EXP34
+push local 1
+not
+not
+if-goto WHILE_END34
+call Keyboard.keyPressed 0
+pop local 0
+push local 0
+push constant 81
+eq
+if-goto IF_TRUE104
+goto IF_FALSE104
+label IF_TRUE104
+push constant 0
+not
+pop local 1
+label IF_FALSE104
+push local 0
+push constant 131
+eq
+if-goto IF_TRUE105
+goto IF_FALSE105
+label IF_TRUE105
+push this 3
+push constant 1
+eq
+not
+if-goto IF_TRUE106
+goto IF_FALSE106
+label IF_TRUE106
+push constant 0
+pop this 3
+label IF_FALSE106
+label IF_FALSE105
+push local 0
+push constant 133
+eq
+if-goto IF_TRUE107
+goto IF_FALSE107
+label IF_TRUE107
+push this 3
+push constant 0
+eq
+not
+if-goto IF_TRUE108
+goto IF_FALSE108
+label IF_TRUE108
+push constant 1
+pop this 3
+label IF_FALSE108
+label IF_FALSE107
+push local 0
+push constant 130
+eq
+if-goto IF_TRUE109
+goto IF_FALSE109
+label IF_TRUE109
+push this 3
+push constant 3
+eq
+not
+if-goto IF_TRUE110
+goto IF_FALSE110
+label IF_TRUE110
+push constant 2
+pop this 3
+label IF_FALSE110
+label IF_FALSE109
+push local 0
+push constant 132
+eq
+if-goto IF_TRUE111
+goto IF_FALSE111
+label IF_TRUE111
+push this 3
+push constant 2
+eq
+not
+if-goto IF_TRUE112
+goto IF_FALSE112
+label IF_TRUE112
+push constant 3
+pop this 3
+label IF_FALSE112
+label IF_FALSE111
+push local 0
+push constant 0
+eq
+if-goto IF_TRUE113
+goto IF_FALSE113
+label IF_TRUE113
+call Keyboard.keyPressed 0
+pop local 0
+label IF_FALSE113
+push pointer 0
+call SnakeGame.moveSnake 1
+pop temp 0
+push constant 0
+pop local 0
+push this 2
+call Apple.getX 1
+push this 0
+call Snake.getX 1
+eq
+push this 2
+call Apple.getY 1
+push this 0
+call Snake.getY 1
+eq
+and
+if-goto IF_TRUE114
+goto IF_FALSE114
+label IF_TRUE114
+push this 4
+push constant 9
+add
+pop this 4
+push this 2
+call Apple.generate 1
+pop temp 0
+label WHILE_EXP35
+push this 1
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Wall.atPosition 3
+push this 0
+push this 2
+call Apple.getX 1
+push this 2
+call Apple.getY 1
+call Snake.atPosition 3
+or
+not
+if-goto WHILE_END35
+push this 2
+call Apple.generate 1
+pop temp 0
+goto WHILE_EXP35
+label WHILE_END35
+push this 0
+call Snake.lengthen 1
+pop temp 0
+label IF_FALSE114
+push this 0
+call Snake.hitItself 1
+if-goto IF_TRUE115
+goto IF_FALSE115
+label IF_TRUE115
+push constant 0
+not
+pop local 1
+label IF_FALSE115
+push this 1
+push this 0
+call Snake.getX 1
+push this 0
+call Snake.getY 1
+call Wall.atPosition 3
+push constant 0
+not
+eq
+if-goto IF_TRUE116
+goto IF_FALSE116
+label IF_TRUE116
+push constant 0
+not
+pop local 1
+label IF_FALSE116
+goto WHILE_EXP34
+label WHILE_END34
+push constant 10
+push constant 20
+call Output.moveCursor 2
+pop temp 0
+push constant 9
+call String.new 1
+push constant 71
+call String.appendChar 2
+push constant 65
+call String.appendChar 2
+push constant 77
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+push constant 79
+call String.appendChar 2
+push constant 86
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 82
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push constant 11
+push constant 20
+call Output.moveCursor 2
+pop temp 0
+push constant 7
+call String.new 1
+push constant 83
+call String.appendChar 2
+push constant 67
+call String.appendChar 2
+push constant 79
+call String.appendChar 2
+push constant 82
+call String.appendChar 2
+push constant 69
+call String.appendChar 2
+push constant 58
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push this 4
+call Output.printInt 1
+pop temp 0
+push constant 0
+return

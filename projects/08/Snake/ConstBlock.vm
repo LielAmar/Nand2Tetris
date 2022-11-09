@@ -1,0 +1,59 @@
+function ConstBlock.new 0
+push constant 1
+call Memory.alloc 1
+pop pointer 0
+push pointer 0
+return
+function ConstBlock.dispose 0
+push argument 0
+pop pointer 0
+push pointer 0
+call Memory.deAlloc 1
+pop temp 0
+push constant 0
+return
+function ConstBlock.LEFT 0
+push argument 0
+pop pointer 0
+push constant 1
+return
+function ConstBlock.RIGHT 0
+push argument 0
+pop pointer 0
+push constant 2
+return
+function ConstBlock.UP 0
+push argument 0
+pop pointer 0
+push constant 3
+return
+function ConstBlock.DOWN 0
+push argument 0
+pop pointer 0
+push constant 4
+return
+function ConstBlock.OK 0
+push argument 0
+pop pointer 0
+push constant 1
+return
+function ConstBlock.YAMI 0
+push argument 0
+pop pointer 0
+push constant 2
+return
+function ConstBlock.OUCH 0
+push argument 0
+pop pointer 0
+push constant 3
+return
+function ConstBlock.NOTHING 0
+push argument 0
+pop pointer 0
+push constant 1
+return
+function ConstBlock.APPLE 0
+push argument 0
+pop pointer 0
+push constant 2
+return

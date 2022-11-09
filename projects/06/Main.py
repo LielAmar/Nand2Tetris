@@ -115,7 +115,7 @@ def assemble_file(input_file: typing.TextIO, output_file: typing.TextIO, debug: 
 
     if parser.command_type() == CommandType.A_COMMAND:
       if parser.symbol().isnumeric():
-        pass
+        continue
 
       if not symbol_table.contains(parser.symbol()):
         symbol_table.add_entry(parser.symbol(), ram_address)

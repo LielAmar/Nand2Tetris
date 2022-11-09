@@ -1,0 +1,49 @@
+// This file is part of the materials accompanying the book
+// "The Elements of Computing Systems" by Nisan and Schocken, 
+// MIT Press 2004. Book site: http://www.idc.ac.il/tecs
+// File name: projects/07/StackArithmetic/StackTest/StackTest.vm.
+// Version: beta 1.4.
+
+// Executes a sequence of arithmetic and logical operations
+// on the stack. 
+function Main.T3 0
+call Main.t1 0
+call Main.t2 0
+call Main.t3 0
+call Main.t4 0
+label WHILE
+goto WHILE              // Loop infinitely
+return
+
+function Main.t1 0
+push constant 32767
+neg
+push constant 1
+sub
+push constant 32767
+lt
+return
+function Main.t2 0
+push constant 32767
+push constant 32767
+neg
+push constant 1
+sub
+gt
+return
+function Main.t3 0
+push constant 20000
+neg
+push constant 1
+sub
+push constant 30000
+gt
+return
+function Main.t4 0
+push constant 20000
+push constant 30000
+neg
+push constant 1
+sub
+gt
+return

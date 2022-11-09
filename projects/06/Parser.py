@@ -162,6 +162,8 @@ class Parser:
         bool: True if the line is a command, False otherwise.
     """
 
+    line = line.replace(' ', '')
+
     if not line or line.startswith("//") or line == "\n":
       return False
         

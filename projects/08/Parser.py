@@ -72,24 +72,24 @@ class Parser:
     """
 
     if self.current_command in ARITHMETIC_COMMANDS:
-      return CommandType.C_ARITHMETIC
+      return "C_ARITHMETIC"
     elif PUSH_COMMAND in self.current_command:
-      return CommandType.C_PUSH
+      return "C_PUSH"
     elif POP_COMMAND in self.current_command:
-      return CommandType.C_POP
+      return "C_POP"
     elif LABEL_COMMAND in self.current_command:
-      return CommandType.C_LABEL
+      return "C_LABEL"
     # Checking if-goto before goto
     elif IF_COMMAND in self.current_command:
-      return CommandType.C_IF
+      return "C_IF"
     elif GOTO_COMMAND in self.current_command:
-      return CommandType.C_GOTO
+      return "C_GOTO"
     elif FUNCTION_COMMAND in self.current_command:
-      return CommandType.C_FUNCTION
+      return "C_FUNCTION"
     elif RETURN_COMMAND in self.current_command:
-      return CommandType.C_RETURN
+      return "C_RETURN"
     elif CALL_COMMAND in self.current_command:
-      return CommandType.C_CALL
+      return "C_CALL"
 
   def arg1(self) -> str:
     """
@@ -100,9 +100,9 @@ class Parser:
     
     """
 
-    if self.command_type() == CommandType.C_ARITHMETIC:
+    if self.command_type() == "C_ARITHMETIC":
       return self.current_command
-    elif self.command_type != CommandType.C_RETURN:
+    elif self.command_type != "C_RETURN":
       return self.current_command.split(" ")[1]
 
   def arg2(self) -> int:
@@ -113,11 +113,11 @@ class Parser:
         "C_FUNCTION" or "C_CALL".
     """
 
-    if self.command_type() == CommandType.C_PUSH \
-        or self.command_type() == CommandType.C_POP \
-        or self.command_type() == CommandType.C_FUNCTION \
-        or self.command_type() == CommandType.C_CALL:
-      return int(self.current_command.split(" ")[2])
+    # if self.command_type() == CommandType.C_PUSH \
+        # or self.command_type() == CommandType.C_POP \
+        # or self.command_type() == CommandType.C_FUNCTION \
+        # or self.command_type() == CommandType.C_CALL:
+    return int(self.current_command.split()[2])
       
 
   def is_command(self, line: str) -> bool:

@@ -24,7 +24,6 @@ def translate_file(input_file: typing.TextIO, output_file: typing.TextIO,
   """
 
   parser = Parser(input_file)
-
   code_writer = CodeWriter(output_file)
 
   # Setting the file name & debug flag

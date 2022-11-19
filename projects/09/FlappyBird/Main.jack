@@ -1,0 +1,16 @@
+class Main {
+  function void main() {
+    var int score;
+    
+    var FlappyBirdGameManager gameManager;
+    let gameManager = FlappyBirdGameManager.new();
+    let score = gameManager.run();
+    do gameManager.dispose();
+
+    do Output.printString("You have lost! Your score: ");
+    do Output.printInt(score);
+    do Output.println();
+
+    return;
+  }
+}

@@ -1,0 +1,112 @@
+/** The Bird Object for FlappyBird game. */
+class Pillar {
+
+  // Constants
+  field int velocity;
+  field int width;
+
+  field int x;
+  field int height;
+
+  /** Constructs a new bird with a given location. */
+  constructor Pillar new(int initHeight) {
+    // Initializing constants
+    let velocity = -20;
+    let width = 40;
+
+    let x = 511; // Starting x pos
+    let height = initHeight;
+
+    do render();
+    return this;
+  }
+
+  /** Disposes the bird. */
+  method void dispose() {
+    do Memory.deAlloc(this);
+    return;
+  }
+
+  /** Renders the bird on the screen. */
+  method void render() {
+    do Screen.setColor(true);
+
+    do Screen.drawRectangle(Math.max(x, 0), 0,
+        Math.min(Math.max(0, x + width), 511), 0 + height);
+
+    do Screen.drawRectangle(Math.max(x, 0), 255 - height,
+        Math.min(Math.max(0, x + width), 511), 255);
+    return;
+   }
+
+  /** Erases the bird from the screen. */
+  method void erase() {
+    do Screen.setColor(false);
+
+    do Screen.drawRectangle(Math.max(x, 0), 0,
+        Math.min(Math.max(0, x + width), 511), 0 + height);
+
+    do Screen.drawRectangle(Math.max(x, 0), 255 - height,
+        Math.min(Math.max(0, x + width), 511), 255);
+    return;
+  }
+
+  /** Ticks the bird to update it's speed. */
+  method void tick() {
+    do erase();
+    let x = x + velocity;
+    do render();
+    
+    return;
+  }
+
+  method boolean isOut() {
+    if((x + width) < 0) {
+      return true;
+    }
+
+    return false;
+  }
+
+  method int getX() {
+    return x;
+  }
+
+  method int getWidth() {
+    return width;
+  }
+
+  method boolean hasColided(int objX, int objY, int objWidth, int objHeight) {
+    var int pillarStartingX, pillarEndingX, bottomPillarStartY;
+    var int objStartingX, objEndingX, objStartingY, objEndingY;
+
+    let pillarStartingX = x;
+    let pillarEndingX = x + width;
+
+    let objStartingX = objX;
+    let objEndingX = objX + objWidth;
+    let objStartingY = objY;
+    let objEndingY = objY + objHeight;
+
+    // If object x is within the pillar x
+    if(((objStartingX > pillarStartingX) & (objStartingX < pillarEndingX)) | 
+        ((objEndingX > pillarStartingX) & (objEndingX < pillarEndingX))) {
+      
+      // Checking top pillar
+      if(((objStartingY > -1) & (objStartingY < height)) |
+          ((objEndingY > -1) & (objEndingY < height))) {
+        return true;
+      }
+
+      let bottomPillarStartY = 512 - height;
+
+      // Checking bottom pillar
+      if(((objStartingY > bottomPillarStartY) & (objStartingY < 512)) |
+          ((objEndingY > bottomPillarStartY) & (objEndingY < 512))) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+}

@@ -1,0 +1,162 @@
+/** The Bird Object for FlappyBird game. */
+class Bird {
+
+  // Constants
+  field int minY;
+  field int maxY;
+  field int maxVelocity;
+  field int jumpVelocity;
+
+  field int x, y;
+  field int width, height;
+  field int velocity;
+
+  /** Constructs a new bird with a given location. */
+  constructor Bird new(int initX, int initY) {
+    // Initializing constants
+    let minY = 0 + 25;
+    let maxY = 256 - 25;
+    let maxVelocity = 10;
+    let jumpVelocity = -8;
+
+    let x = initX;
+    let y = initY;
+    let width = 18;
+    let height = 13;
+    let velocity = 0;
+
+    do render();
+    return this;
+  }
+
+  /** Disposes the bird. */
+  method void dispose() {
+    do Memory.deAlloc(this);
+    return;
+  }
+
+  /** Renders the bird on the screen. */
+  method void render() {
+    // TODO: draw the bird pixel by pixel
+    do Screen.setColor(true);
+
+    do Screen.drawRectangle(x + 6, y, (x + 6) + 5, y);
+    do Screen.drawRectangle(x + 4, y + 1, (x + 4) + 1, y + 1);
+    do Screen.drawRectangle(x + 3, y + 2, x + 3, y + 2);
+    do Screen.drawRectangle(x + 1, y + 3, (x + 1) + 3, y + 3);
+    do Screen.drawRectangle(x, y + 4, x, (y + 4) + 2);
+    do Screen.drawRectangle(x + 1, y + 7, x + 1, y + 7);
+    do Screen.drawRectangle(x + 2, y + 8, (x + 2) + 2, y + 8);
+    do Screen.drawRectangle(x + 4, y + 9, (x + 4), y + 9);
+    do Screen.drawRectangle(x + 5, y + 10, (x + 5) + 1, y + 10);
+    do Screen.drawRectangle(x + 7, y + 11, (x + 7) + 3, y + 11);
+    do Screen.drawRectangle(x + 11, y + 10, (x + 11) + 4, y + 10);
+    do Screen.drawRectangle(x + 15, y + 9, x + 15, y + 9);
+    do Screen.drawRectangle(x + 10, y + 9, x + 10, y + 9);
+    do Screen.drawRectangle(x + 9, y + 8, x + 9, y + 8);
+    do Screen.drawRectangle(x + 10, y + 7, x + 10, y + 7);
+    do Screen.drawRectangle(x + 11, y + 8, (x + 11) + 4, y + 8);
+    do Screen.drawRectangle(x + 16, y + 7, x + 16, y + 7);
+    do Screen.drawRectangle(x + 11, y + 6, (x + 11) + 4, y + 6);
+    do Screen.drawRectangle(x + 14, y + 3, x + 14, (y + 3) + 2);
+    do Screen.drawRectangle(x + 13, y + 2, x + 13, y + 2);
+    do Screen.drawRectangle(x + 12, y + 1, x + 12, y + 1);
+    do Screen.drawRectangle(x + 12, y + 3, x + 12, (y + 3) + 1);
+
+    do Screen.drawRectangle(x + 9, y + 2, x + 9, (y + 2) + 2);
+    do Screen.drawRectangle(x + 10, y + 5, x + 10, y + 5);
+    do Screen.drawRectangle(x + 5, y + 4, x + 5, y + 4);
+    do Screen.drawRectangle(x + 6, y + 5, x + 6, (y + 5) + 1);
+    do Screen.drawRectangle(x + 5, y + 7, x + 6, y + 7);
+
+    return;
+   }
+
+  /** Erases the bird from the screen. */
+  method void erase() {
+    // TODO: erase the bird pixel by pixel
+    do Screen.setColor(false);
+
+    do Screen.drawRectangle(x + 6, y, (x + 6) + 5, y);
+    do Screen.drawRectangle(x + 4, y + 1, (x + 4) + 1, y + 1);
+    do Screen.drawRectangle(x + 3, y + 2, x + 3, y + 2);
+    do Screen.drawRectangle(x + 1, y + 3, (x + 1) + 3, y + 3);
+    do Screen.drawRectangle(x, y + 4, x, (y + 4) + 2);
+    do Screen.drawRectangle(x + 1, y + 7, x + 1, y + 7);
+    do Screen.drawRectangle(x + 2, y + 8, (x + 2) + 2, y + 8);
+    do Screen.drawRectangle(x + 4, y + 9, (x + 4), y + 9);
+    do Screen.drawRectangle(x + 5, y + 10, (x + 5) + 1, y + 10);
+    do Screen.drawRectangle(x + 7, y + 11, (x + 7) + 3, y + 11);
+    do Screen.drawRectangle(x + 11, y + 10, (x + 11) + 4, y + 10);
+    do Screen.drawRectangle(x + 15, y + 9, x + 15, y + 9);
+    do Screen.drawRectangle(x + 10, y + 9, x + 10, y + 9);
+    do Screen.drawRectangle(x + 9, y + 8, x + 9, y + 8);
+    do Screen.drawRectangle(x + 10, y + 7, x + 10, y + 7);
+    do Screen.drawRectangle(x + 11, y + 8, (x + 11) + 4, y + 8);
+    do Screen.drawRectangle(x + 16, y + 7, x + 16, y + 7);
+    do Screen.drawRectangle(x + 11, y + 6, (x + 11) + 4, y + 6);
+    do Screen.drawRectangle(x + 14, y + 3, x + 14, (y + 3) + 2);
+    do Screen.drawRectangle(x + 13, y + 2, x + 13, y + 2);
+    do Screen.drawRectangle(x + 12, y + 1, x + 12, y + 1);
+    do Screen.drawRectangle(x + 12, y + 3, x + 12, (y + 3) + 1);
+
+    do Screen.drawRectangle(x + 9, y + 2, x + 9, (y + 2) + 2);
+    do Screen.drawRectangle(x + 10, y + 5, x + 10, y + 5);
+    do Screen.drawRectangle(x + 5, y + 4, x + 5, y + 4);
+    do Screen.drawRectangle(x + 6, y + 5, x + 6, (y + 5) + 1);
+    do Screen.drawRectangle(x + 5, y + 7, x + 6, y + 7);
+
+    return;
+  }
+
+  /** Ticks the bird to update it's speed. */
+  method void tick() {
+    if(velocity < maxVelocity) {
+      let velocity = velocity + 1;
+    }
+
+    do erase();
+    let y = y + velocity;
+    do render();
+    
+    return;
+  }
+
+  /** Makes the bird jump */
+  method void jump() {
+    // Only be able to jump if we're falling and didn't hit the ceiling
+    if(velocity > -1 & y > 1) { 
+      let velocity = jumpVelocity;
+        
+      do erase(); // Erases the bird
+      // do tick(); // Updates the bird's position
+      // do render(); // Renders the bird
+    }
+    
+    return;
+  }
+
+  method boolean isDead() {
+    if((y < minY) | (y > maxY)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  method int getX() {
+    return x;
+  }
+  
+  method int getY() {
+    return y;
+  }
+  
+  method int getWidth() {
+    return width;
+  }
+  
+  method int getHeight() {
+    return height;
+  }
+}

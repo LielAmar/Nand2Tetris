@@ -1,0 +1,149 @@
+class FlappyBirdGameManager {
+  // Screen is 512x256
+
+  // Constants
+  field Array pillarHeights;
+
+  field Bird bird;
+  field boolean jumped;
+  field boolean released;
+  
+  field int currentPillarType;
+  field Pillar currentPillar;
+  field boolean addedCurrentPilarScore;
+
+  field int score;
+
+  /** Constructs a new Flappy Bird Game. */
+  constructor FlappyBirdGameManager new() {
+    // Initializing the bird
+    var int birdX;
+    var int birdY;
+    let birdX = 150;
+    let birdY = (256 - 15) / 2; // (Screen height - Bird height) / 2
+    let bird = Bird.new(birdX, birdY);
+
+    // Initializing current 2 pillars
+    do initPillarHeights();
+    let currentPillarType = 0;
+    let currentPillar = Pillar.new(pillarHeights[currentPillarType]);
+    let currentPillarType = currentPillarType + 1;
+    let addedCurrentPilarScore = false;
+
+    // Initializing score
+    let score = 0;
+
+    return this;
+  }
+
+  method void initPillarHeights() {
+    let pillarHeights = Array.new(10);
+
+    let pillarHeights[0] = 20;
+    let pillarHeights[1] = 50;
+    let pillarHeights[2] = 30;
+    let pillarHeights[3] = 40;
+    let pillarHeights[4] = 80;
+    let pillarHeights[5] = 75;
+    let pillarHeights[6] = 25;
+    let pillarHeights[7] = 55;
+    let pillarHeights[8] = 70;
+    let pillarHeights[9] = 60;
+
+    return;
+  }
+
+  /** Disposes this game. */
+  method void dispose() {
+    do bird.dispose();
+    do Memory.deAlloc(this);
+    return;
+  }
+
+  /** Ticks the bird. */
+  method void tickBird() {
+    // Only we have pressed jumped & released, we want to jump
+    if (jumped & released) {
+      let jumped = false;
+      do bird.jump();
+    }
+
+    do bird.tick();
+    return;
+  }
+
+  /** Ticks the pillar. */
+  method void tickPillar() {
+    // Only we have pressed jumped & released, we want to jump
+    do currentPillar.tick();
+
+    // If the pillar is out of screen, we want to create a new one
+    if(currentPillar.isOut()) {
+      do currentPillar.erase();
+      do currentPillar.dispose();
+
+      let currentPillar = Pillar.new(pillarHeights[currentPillarType]);
+      let currentPillarType = currentPillarType + 1;
+      let addedCurrentPilarScore = false;
+
+      if(currentPillarType > 9) {
+        let currentPillarType = 0;
+      }
+    }
+
+    return;
+  }
+
+  method void tickScore() {
+    do Output.printString("Current Score: ");
+    do Output.printInt(score);
+    do Output.println();
+    do Output.moveCursor(0, 0);
+
+    if((currentPillar.getX() + currentPillar.getWidth()) < bird.getX()) {
+      if(~addedCurrentPilarScore) {
+        let addedCurrentPilarScore = true;
+        let score = score + 1;
+      }
+    }
+    // Check if should add to score
+
+    return;
+  }
+
+  /** 
+    Runs the game logic.
+    It handles the user's inputs and makes the bird jump if needed.
+    When the bird is dead, it exists and returning the score.
+  */
+  method int run() {
+    var char currentKey;
+    var boolean exit;
+    var boolean isBirdDead;
+    var boolean isHitPillar;
+    let exit = false;
+    
+    while (~exit & ~isBirdDead & ~isHitPillar) {
+      let currentKey = Keyboard.keyPressed();
+
+      if (currentKey = 0) { let released = true; }
+      if (currentKey = 81 /* q */) { let exit = true; }
+      if (currentKey = 32 /* space */) { let jumped = true; let released = false; }
+
+      do tickBird();
+      do tickPillar();
+      do tickScore();
+
+      let isHitPillar = currentPillar.hasColided(bird.getX(), bird.getY(),
+          bird.getWidth(), bird.getHeight());
+      let isBirdDead = bird.isDead();
+
+      do Sys.wait(50); // delays the next frame
+    }
+
+    do currentPillar.erase();
+    do bird.erase();
+    do Output.moveCursor(0, 0);
+    return score;
+  }
+}

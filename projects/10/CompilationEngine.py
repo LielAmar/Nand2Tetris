@@ -5,14 +5,15 @@ and as allowed by the Creative Common Attribution-NonCommercial-ShareAlike 3.0
 Unported License (https://creativecommons.org/licenses/by-nc-sa/3.0/).
 """
 import typing
-
+import JackTokenizer
 
 class CompilationEngine:
-    """Gets input from a JackTokenizer and emits its parsed structure into an
+    """
+    Gets input from a JackTokenizer and emits its parsed structure into an
     output stream.
     """
 
-    def __init__(self, input_stream: "JackTokenizer", output_stream) -> None:
+    def __init__(self, input_stream: JackTokenizer, output_stream) -> None:
         """
         Creates a new compilation engine with the given input and output. The
         next routine called must be compileClass()

@@ -15,6 +15,17 @@ KEYWORDS = { "class", "constructor", "function", "method", "field", "static",
 SYMBOLS = { '{', '}', '(', ')', '[', ']', '.', ',', ';', '+', '-', '*', '/',
   '&', '<', '>', '=', '~' }
 
+
+class Token:
+
+  def __init__(self, token: str, token_type: str) -> None:
+    self.token = token
+    self.token_type = token_type
+
+  def __str__(self):
+    return f"{self.token}"
+
+
 class JackTokenizer:
   """
   Removes all comments from the input stream and breaks it
@@ -131,64 +142,99 @@ class JackTokenizer:
     index = 0
     result = ""
 
+    inString = False
+
     while index < len(input):
-      # TODO: is something like 'function(" hello //// I'm here")' legal?
+      if input[index] == '"':
+        inString = not inString
 
-      # If we have a comment, skip it.
-      if input[index] == "/":
-        if input[index + 1] == "/":
-          index = input.find("\n", index) + 1
-          result += " " # Adding a space to distinguish between tokens
-          continue
+      if not inString:
+        # If we have a comment, skip it.
+        if input[index] == "/":
+          if input[index + 1] == "/":
+            index = input.find("\n", index) + 1
+            result += " " # Adding a space to distinguish between tokens
+            continue
 
-        elif input[index + 1] == "*":
-          index = input.find("*/", index) + 2
-          result += " " # Adding a space to distinguish between tokens
-          continue
-        
+          elif input[index + 1] == "*":
+            index = input.find("*/", index) + 2
+            result += " " # Adding a space to distinguish between tokens
+            continue
+          
       result += input[index]
       index += 1
       
     return result
 
+
+  def __create_token(self, token: str) -> Token:
+    if token[0] == '"' and token[-1] == '"':
+      return Token(token[1:-1], "STRING_CONST")
+    elif token in SYMBOLS:
+      return Token(token, "SYMBOL")
+    elif token in KEYWORDS:
+      return Token(token, "KEYWORD")
+    elif token.isdigit():
+      return Token(token, "INT_CONST")
+    else:
+      return Token(token, "IDENTIFIER")
+
+
   def __tokenize(self, input: str) -> list[str]:
     tokens = []
 
-    print("pre split: ", repr(input))
-    # Split the input into tokens (splitting by lines [\n] and spaces)
-    # lines = re.split("[ \n]", input)
-    lines = re.split("[\n]", input)
+    # Split the input into lines
+    lines = input.split("\n")
     
-    # Removing all empty strings (spaces)
-    lines = list(filter(lambda x: x.replace(" ", "") != "", lines))
+    # Removing all empty lines
+    lines = list(filter(lambda x: x and len(x.replace(" ", "")) > 0 and len(x) > 0, lines))
     
-    print("post split: ", lines)
+    current_token = ""
+    inString = False
 
     # Looping over the lines and adding all tokens
-    for i in range(len(lines)):
-      line = lines[i]
+    for line in lines:      
 
-      suspected_tokens = line.split(" ")
+      # Looping over all characters in the line
+      for char in line:
 
-      for sus_token in suspected_tokens:
-        # If the token is a exactly a keyword
-        if sus_token in KEYWORDS:
-          tokens.append(Token(sus_token, "keyword"))
-          continue
+        # If we hit a symbol, we want to add it to the list of tokens.
+        # If the token we've build so far is not empty, we'll add it to the 
+        # list of tokens as well
+        if char in SYMBOLS and not inString:
+          if current_token != "":
+            tokens.append(self.__create_token(current_token))
 
-        # If our item is a symbol
-        if sus_token in SYMBOLS:
-          tokens.append(Token(sus_token, "symbol"))
-          continue
+            current_token = ""
+            inString = False
+          
+          tokens.append(self.__create_token(char))
+          
+        # If we hit a space, and we don't have an empty token, we want to
+        # add the token to the list of tokens.
+        elif char == " " and not inString:
+          if current_token != "":
+            tokens.append(self.__create_token(current_token))
 
-        # If our item is an integer constant
-        if sus_token.isdigit():
-          tokens.append(Token(sus_token, "integerConstant"))
-          continue
+            current_token = ""
+            inString = False
 
-        # Now we want to check if we have a few tokens combined,
-        # For example: if(  -> [if, (]
-    
+        # If we hit a string, we want to add the token to the list of tokens.
+        elif char == '"':
+          if not inString:
+            current_token += char
+            inString = True
+
+          else: # we're in string
+            current_token += char
+            tokens.append(self.__create_token(current_token))
+
+            current_token = ""
+            inString = False
+
+        else:
+          current_token += char
+        
     print([str(token) for token in tokens])
 
     return tokens
@@ -268,13 +314,3 @@ class JackTokenizer:
     """
     # Your code goes here!
     pass
-
-
-class Token:
-
-  def __init__(self, token: str, token_type: str) -> None:
-    self.token = token
-    self.token_type = token_type
-
-  def __str__(self):
-    return f"{self.token}"

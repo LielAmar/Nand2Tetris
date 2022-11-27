@@ -6,14 +6,8 @@ Unported License (https://creativecommons.org/licenses/by-nc-sa/3.0/).
 """
 
 import typing
-import re
 
-KEYWORDS = { "class", "constructor", "function", "method", "field", "static",
-  "var", "int", "char", "boolean", "void", "true", "false", "null", "this",
-  "let", "do", "if", "else", "while", "return" }
-
-SYMBOLS = { '{', '}', '(', ')', '[', ']', '.', ',', ';', '+', '-', '*', '/',
-  '&', '<', '>', '=', '~' }
+from Constants import *
 
 
 class Token:
@@ -23,7 +17,8 @@ class Token:
     self.token_type = token_type
 
   def __str__(self):
-    return f"{self.token}"
+    # return f"{self.token} ({len(self.token)})"
+    return f"{self.token} of type {self.token_type}"
 
 
 class JackTokenizer:
@@ -108,18 +103,7 @@ class JackTokenizer:
   """
 
 
-  # def __init__(self, input_stream: typing.TextIO) -> None:
-  #   """
-  #   Opens the input stream and gets ready to tokenize it.
-
-  #   Args:
-  #     input_stream (typing.TextIO): input stream.
-  #   """
-
-  #   self.lines = self.__clear_white_spaces(input_stream.read())
-
-
-  def __init__(self, input) -> None:
+  def __init__(self, input_stream: typing.TextIO) -> None:
     """
     Opens the input stream and gets ready to tokenize it.
 
@@ -127,9 +111,10 @@ class JackTokenizer:
       input_stream (typing.TextIO): input stream.
     """
 
-    stipped_input = self.__remove_comments(input)
-
+    stipped_input = self.__remove_comments(input_stream.read())
     self.tokens = self.__tokenize(stipped_input)
+
+    self.current_token_id = 0
 
   def __remove_comments(self, input: str) -> str:
     """
@@ -168,9 +153,23 @@ class JackTokenizer:
 
 
   def __create_token(self, token: str) -> Token:
+    """
+    Gets a string and returns a Token object with the right type
+    
+    Args:
+      token: string to be converted to a Token object
+    """
+
     if token[0] == '"' and token[-1] == '"':
       return Token(token[1:-1], "STRING_CONST")
     elif token in SYMBOLS:
+      if token == "<":
+        token = "&lt;"
+      elif token == ">":
+        token = "&gt;"
+      elif token == "&":
+        token = "&amp;"
+      
       return Token(token, "SYMBOL")
     elif token in KEYWORDS:
       return Token(token, "KEYWORD")
@@ -179,12 +178,18 @@ class JackTokenizer:
     else:
       return Token(token, "IDENTIFIER")
 
-
   def __tokenize(self, input: str) -> list[str]:
+    """
+    Tokenizes the input string and returns a list of tokens
+
+    Args:
+      input: input string to parse
+    """
+
     tokens = []
 
     # Split the input into lines
-    lines = input.split("\n")
+    lines = input.replace("\t", " ").split("\n")
     
     # Removing all empty lines
     lines = list(filter(lambda x: x and len(x.replace(" ", "")) > 0 and len(x) > 0, lines))
@@ -235,28 +240,25 @@ class JackTokenizer:
         else:
           current_token += char
         
-    print([str(token) for token in tokens])
-
     return tokens
 
 
-  
   def has_more_tokens(self) -> bool:
     """Do we have more tokens in the input?
 
     Returns:
         bool: True if there are more tokens, False otherwise.
     """
-    # Your code goes here!
-    pass
+
+    return self.current_token_id < len(self.tokens)
 
   def advance(self) -> None:
     """Gets the next token from the input and makes it the current token. 
     This method should be called if has_more_tokens() is true. 
     Initially there is no current token.
     """
-    # Your code goes here!
-    pass
+
+    self.current_token_id += 1
 
   def token_type(self) -> str:
     """
@@ -264,8 +266,23 @@ class JackTokenizer:
         str: the type of the current token, can be
         "KEYWORD", "SYMBOL", "IDENTIFIER", "INT_CONST", "STRING_CONST"
     """
-    # Your code goes here!
-    pass
+
+    return self.tokens[self.current_token_id].token_type
+
+  def token_tag(self) -> str:
+    type = self.token_type()
+    
+    if type == "KEYWORD":
+      return f"<keyword> {self.keyword()} </keyword>"
+    elif type == "SYMBOL":
+      return f"<symbol> {self.symbol()} </symbol>"
+    elif type == "IDENTIFIER":
+      return f"<identifier> {self.identifier()} </identifier>"
+    elif type == "INT_CONST":
+      return f"<integerConstant> {self.int_val()} </integerConstant>"
+    elif type == "STRING_CONST":
+      return f"<stringConstant> {self.string_val()} </stringConstant>"
+
 
   def keyword(self) -> str:
     """
@@ -276,8 +293,8 @@ class JackTokenizer:
         "BOOLEAN", "CHAR", "VOID", "VAR", "STATIC", "FIELD", "LET", "DO", 
         "IF", "ELSE", "WHILE", "RETURN", "TRUE", "FALSE", "NULL", "THIS"
     """
-    # Your code goes here!
-    pass
+
+    return self.tokens[self.current_token_id].token
 
   def symbol(self) -> str:
     """
@@ -285,8 +302,8 @@ class JackTokenizer:
         str: the character which is the current token.
         Should be called only when token_type() is "SYMBOL".
     """
-    # Your code goes here!
-    pass
+
+    return self.tokens[self.current_token_id].token
 
   def identifier(self) -> str:
     """
@@ -294,8 +311,8 @@ class JackTokenizer:
         str: the identifier which is the current token.
         Should be called only when token_type() is "IDENTIFIER".
     """
-    # Your code goes here!
-    pass
+
+    return self.tokens[self.current_token_id].token
 
   def int_val(self) -> int:
     """
@@ -303,8 +320,8 @@ class JackTokenizer:
         str: the integer value of the current token.
         Should be called only when token_type() is "INT_CONST".
     """
-    # Your code goes here!
-    pass
+
+    return int(self.tokens[self.current_token_id].token)
 
   def string_val(self) -> str:
     """
@@ -312,5 +329,5 @@ class JackTokenizer:
         str: the string value of the current token, without the double 
         quotes. Should be called only when token_type() is "STRING_CONST".
     """
-    # Your code goes here!
-    pass
+
+    return self.tokens[self.current_token_id].token

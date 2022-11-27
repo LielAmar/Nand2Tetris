@@ -5,7 +5,9 @@ and as allowed by the Creative Common Attribution-NonCommercial-ShareAlike 3.0
 Unported License (https://creativecommons.org/licenses/by-nc-sa/3.0/).
 """
 import typing
-import JackTokenizer
+
+from JackTokenizer import *
+from Constants import *
 
 class CompilationEngine:
     """
@@ -13,24 +15,63 @@ class CompilationEngine:
     output stream.
     """
 
-    def __init__(self, input_stream: JackTokenizer, output_stream) -> None:
+    def __init__(self, tokenizer: JackTokenizer, output_stream: typing.TextIO) -> None:
         """
         Creates a new compilation engine with the given input and output. The
         next routine called must be compileClass()
         :param input_stream: The input stream.
         :param output_stream: The output stream.
         """
-        # Your code goes here!
-        pass
+
+        self.tokenizer: JackTokenizer = tokenizer
+        self.output = output_stream
+
+        self.recursion_depth = 0
+
+        # We are promised that the jack files given are valid.
+        # Therefore, the first token is always the keyword 'class'.
+        # We'll then execute our compilation recursively from compile_class()
+        # and on
+        self.compile_class()
+
+    def __write_line(self, line):
+        self.output.write((TAB * self.recursion_depth) + line + "\n")
+
+    def __write_open_tag(self, tag):
+        self.output.write((TAB * self.recursion_depth) + f"<{tag}>\n")
+        
+        self.recursion_depth += 1
+
+    def __write_close_tag(self, tag):
+        self.recursion_depth -= 1
+
+        self.output.write((TAB * self.recursion_depth) + f"</{tag}>\n")
+
 
     def compile_class(self) -> None:
         """Compiles a complete class."""
-        # Your code goes here!
-        pass
+
+        self.__write_open_tag("class")
+
+        # Writing the first 3 tags. For example: 'class Main {'
+        for _ in range(3):
+            self.__write_line(self.tokenizer.token_tag())
+            self.tokenizer.advance()
+        
+        # Writing the all classVarDec tags
+        while self.tokenizer.keyword() == "static" or self.tokenizer.keyword() == "field":
+            self.compile_class_var_dec()
+            
+        # Writing the all subroutine tags
+        while self.tokenizer.keyword() == "constructor" or \
+                self.tokenizer.keyword() == "function" or \
+                self.tokenizer.keyword() == "method":
+            self.compile_subroutine()
+        
+        self.__write_close_tag("class")
 
     def compile_class_var_dec(self) -> None:
         """Compiles a static declaration or a field declaration."""
-        # Your code goes here!
         pass
 
     def compile_subroutine(self) -> None:
@@ -39,7 +80,21 @@ class CompilationEngine:
         You can assume that classes with constructors have at least one field,
         you will understand why this is necessary in project 11.
         """
-        # Your code goes here!
+
+        if self.tokenizer.keyword() == "constructor":
+            self.__constructor_subroutine()
+        elif self.tokenizer.keyword() == "function":
+            self.__function_subroutine()
+        elif self.tokenizer.keyword() == "method":
+            self.__method_subroutine()
+
+    def __constructor_subroutine(self):
+        pass
+
+    def __function_subroutine(self):
+        pass
+
+    def __method_subroutine(self):
         pass
 
     def compile_parameter_list(self) -> None:

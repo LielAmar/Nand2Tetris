@@ -2,6 +2,7 @@ class FlappyBirdGameManager {
   // Screen is 512x256
 
   // Constants
+  field int pillarVelocity;
   field Array pillarHeights;
 
   field Bird bird;
@@ -24,9 +25,10 @@ class FlappyBirdGameManager {
     let bird = Bird.new(birdX, birdY);
 
     // Initializing current 2 pillars
+    let pillarVelocity = -20;
     do initPillarHeights();
     let currentPillarType = 0;
-    let currentPillar = Pillar.new(pillarHeights[currentPillarType]);
+    let currentPillar = Pillar.new(pillarHeights[currentPillarType], pillarVelocity);
     let currentPillarType = currentPillarType + 1;
     let addedCurrentPilarScore = false;
 
@@ -37,18 +39,23 @@ class FlappyBirdGameManager {
   }
 
   method void initPillarHeights() {
-    let pillarHeights = Array.new(10);
+    let pillarHeights = Array.new(15);
 
-    let pillarHeights[0] = 20;
-    let pillarHeights[1] = 50;
-    let pillarHeights[2] = 30;
+    let pillarHeights[0] = 50;
+    let pillarHeights[1] = 60;
+    let pillarHeights[2] = 70;
     let pillarHeights[3] = 40;
     let pillarHeights[4] = 80;
-    let pillarHeights[5] = 75;
-    let pillarHeights[6] = 25;
+    let pillarHeights[5] = 90;
+    let pillarHeights[6] = 35;
     let pillarHeights[7] = 55;
     let pillarHeights[8] = 70;
     let pillarHeights[9] = 60;
+    let pillarHeights[10] = 90;
+    let pillarHeights[11] = 75;
+    let pillarHeights[12] = 45;
+    let pillarHeights[13] = 100;
+    let pillarHeights[14] = 50;
 
     return;
   }
@@ -82,12 +89,16 @@ class FlappyBirdGameManager {
       do currentPillar.erase();
       do currentPillar.dispose();
 
-      let currentPillar = Pillar.new(pillarHeights[currentPillarType]);
+      let currentPillar = Pillar.new(pillarHeights[currentPillarType], pillarVelocity);
       let currentPillarType = currentPillarType + 1;
       let addedCurrentPilarScore = false;
 
-      if(currentPillarType > 9) {
+      if(currentPillarType > 14) {
         let currentPillarType = 0;
+      }
+
+      if(currentPillarType = 0 | currentPillarType = 5 | currentPillarType = 10) {
+        let pillarVelocity = pillarVelocity - 5;
       }
     }
 

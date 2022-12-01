@@ -5,7 +5,7 @@ KEYWORDS = { "class", "constructor", "function", "method", "field", "static",
   "let", "do", "if", "else", "while", "return" }
 
 SYMBOLS = { '{', '}', '(', ')', '[', ']', '.', ',', ';', '+', '-', '*', '/',
-  '&', '<', '>', '=', '~' }
+  '&', '<', '>', '=', '~', '|' }
 
 TOKEN_TYPE_TAGS = {
   "KEYWORD": "keyword",

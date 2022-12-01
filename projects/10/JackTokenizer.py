@@ -114,6 +114,8 @@ class JackTokenizer:
     stipped_input = self.__remove_comments(input_stream.read())
     self.tokens = self.__tokenize(stipped_input)
 
+    # print("tokens are: ", [str(token) for token in self.tokens])
+
     self.current_token_id = 0
 
   def __remove_comments(self, input: str) -> str:
@@ -151,6 +153,8 @@ class JackTokenizer:
         # Replacing all \t that aren't in a string with spaces
         if input[index] == "\t":
           result += "  "
+          index += 1
+          continue
           
       result += input[index]
       index += 1
@@ -195,8 +199,7 @@ class JackTokenizer:
     tokens = []
 
     # Split the input into lines
-    # TODO: might wanna do this instead of line 152
-    # lines = input.replace("\t", "  ").split("\n")
+    lines = input.split("\n")
     
     # Removing all empty lines
     lines = list(filter(lambda x: x and len(x.replace(" ", "")) > 0 and len(x) > 0, lines))

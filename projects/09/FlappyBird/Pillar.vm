@@ -2,8 +2,7 @@ function Pillar.new 0
 push constant 4
 call Memory.alloc 1
 pop pointer 0
-push constant 20
-neg
+push argument 1
 pop this 0
 push constant 40
 pop this 1
@@ -48,6 +47,26 @@ add
 call Screen.drawRectangle 4
 pop temp 0
 push this 2
+push constant 5
+sub
+push constant 0
+call Math.max 2
+push this 3
+push constant 5
+sub
+push constant 0
+push this 2
+push this 1
+add
+push constant 5
+add
+call Math.max 2
+push constant 511
+call Math.min 2
+push this 3
+call Screen.drawRectangle 4
+pop temp 0
+push this 2
 push constant 0
 call Math.max 2
 push constant 255
@@ -61,6 +80,30 @@ call Math.max 2
 push constant 511
 call Math.min 2
 push constant 255
+call Screen.drawRectangle 4
+pop temp 0
+push this 2
+push constant 5
+sub
+push constant 0
+call Math.max 2
+push constant 255
+push this 3
+sub
+push constant 5
+sub
+push constant 0
+push this 2
+push this 1
+add
+push constant 5
+add
+call Math.max 2
+push constant 511
+call Math.min 2
+push constant 255
+push this 3
+sub
 call Screen.drawRectangle 4
 pop temp 0
 push constant 0
@@ -88,6 +131,26 @@ add
 call Screen.drawRectangle 4
 pop temp 0
 push this 2
+push constant 5
+sub
+push constant 0
+call Math.max 2
+push this 3
+push constant 5
+sub
+push constant 0
+push this 2
+push this 1
+add
+push constant 5
+add
+call Math.max 2
+push constant 511
+call Math.min 2
+push this 3
+call Screen.drawRectangle 4
+pop temp 0
+push this 2
 push constant 0
 call Math.max 2
 push constant 255
@@ -101,6 +164,30 @@ call Math.max 2
 push constant 511
 call Math.min 2
 push constant 255
+call Screen.drawRectangle 4
+pop temp 0
+push this 2
+push constant 5
+sub
+push constant 0
+call Math.max 2
+push constant 255
+push this 3
+sub
+push constant 5
+sub
+push constant 0
+push this 2
+push this 1
+add
+push constant 5
+add
+call Math.max 2
+push constant 511
+call Math.min 2
+push constant 255
+push this 3
+sub
 call Screen.drawRectangle 4
 pop temp 0
 push constant 0
@@ -151,9 +238,13 @@ function Pillar.hasColided 7
 push argument 0
 pop pointer 0
 push this 2
+push constant 5
+sub
 pop local 0
 push this 2
 push this 1
+add
+push constant 5
 add
 pop local 1
 push argument 1
@@ -210,7 +301,7 @@ push constant 0
 not
 return
 label IF_FALSE1
-push constant 512
+push constant 256
 push this 3
 sub
 pop local 2

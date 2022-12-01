@@ -1,5 +1,5 @@
 function FlappyBirdGameManager.new 2
-push constant 8
+push constant 9
 call Memory.alloc 1
 pop pointer 0
 push constant 150
@@ -13,61 +13,65 @@ pop local 1
 push local 0
 push local 1
 call Bird.new 2
-pop this 1
+pop this 2
+push constant 20
+neg
+pop this 0
 push pointer 0
 call FlappyBirdGameManager.initPillarHeights 1
 pop temp 0
 push constant 0
-pop this 4
-push this 4
-push this 0
+pop this 5
+push this 5
+push this 1
 add
 pop pointer 1
 push that 0
-call Pillar.new 1
-pop this 5
-push this 4
+push this 0
+call Pillar.new 2
+pop this 6
+push this 5
 push constant 1
 add
-pop this 4
-push constant 0
-pop this 6
+pop this 5
 push constant 0
 pop this 7
+push constant 0
+pop this 8
 push pointer 0
 return
 function FlappyBirdGameManager.initPillarHeights 0
 push argument 0
 pop pointer 0
-push constant 10
+push constant 15
 call Array.new 1
-pop this 0
+pop this 1
 push constant 0
-push this 0
-add
-push constant 20
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-push constant 1
-push this 0
+push this 1
 add
 push constant 50
 pop temp 0
 pop pointer 1
 push temp 0
 pop that 0
-push constant 2
-push this 0
+push constant 1
+push this 1
 add
-push constant 30
+push constant 60
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 2
+push this 1
+add
+push constant 70
 pop temp 0
 pop pointer 1
 push temp 0
 pop that 0
 push constant 3
-push this 0
+push this 1
 add
 push constant 40
 pop temp 0
@@ -75,7 +79,7 @@ pop pointer 1
 push temp 0
 pop that 0
 push constant 4
-push this 0
+push this 1
 add
 push constant 80
 pop temp 0
@@ -83,23 +87,23 @@ pop pointer 1
 push temp 0
 pop that 0
 push constant 5
-push this 0
+push this 1
 add
-push constant 75
+push constant 90
 pop temp 0
 pop pointer 1
 push temp 0
 pop that 0
 push constant 6
-push this 0
+push this 1
 add
-push constant 25
+push constant 35
 pop temp 0
 pop pointer 1
 push temp 0
 pop that 0
 push constant 7
-push this 0
+push this 1
 add
 push constant 55
 pop temp 0
@@ -107,7 +111,7 @@ pop pointer 1
 push temp 0
 pop that 0
 push constant 8
-push this 0
+push this 1
 add
 push constant 70
 pop temp 0
@@ -115,9 +119,49 @@ pop pointer 1
 push temp 0
 pop that 0
 push constant 9
-push this 0
+push this 1
 add
 push constant 60
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 10
+push this 1
+add
+push constant 90
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 11
+push this 1
+add
+push constant 75
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 12
+push this 1
+add
+push constant 45
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 13
+push this 1
+add
+push constant 100
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 14
+push this 1
+add
+push constant 50
 pop temp 0
 pop pointer 1
 push temp 0
@@ -127,7 +171,7 @@ return
 function FlappyBirdGameManager.dispose 0
 push argument 0
 pop pointer 0
-push this 1
+push this 2
 call Bird.dispose 1
 pop temp 0
 push pointer 0
@@ -138,19 +182,19 @@ return
 function FlappyBirdGameManager.tickBird 0
 push argument 0
 pop pointer 0
-push this 2
 push this 3
+push this 4
 and
 if-goto IF_TRUE0
 goto IF_FALSE0
 label IF_TRUE0
 push constant 0
-pop this 2
-push this 1
+pop this 3
+push this 2
 call Bird.jump 1
 pop temp 0
 label IF_FALSE0
-push this 1
+push this 2
 call Bird.tick 1
 pop temp 0
 push constant 0
@@ -158,42 +202,62 @@ return
 function FlappyBirdGameManager.tickPillar 0
 push argument 0
 pop pointer 0
-push this 5
+push this 6
 call Pillar.tick 1
 pop temp 0
-push this 5
+push this 6
 call Pillar.isOut 1
 if-goto IF_TRUE0
 goto IF_FALSE0
 label IF_TRUE0
-push this 5
+push this 6
 call Pillar.erase 1
 pop temp 0
-push this 5
+push this 6
 call Pillar.dispose 1
 pop temp 0
-push this 4
-push this 0
+push this 5
+push this 1
 add
 pop pointer 1
 push that 0
-call Pillar.new 1
-pop this 5
-push this 4
+push this 0
+call Pillar.new 2
+pop this 6
+push this 5
 push constant 1
 add
-pop this 4
+pop this 5
 push constant 0
-pop this 6
-push this 4
-push constant 9
+pop this 7
+push this 5
+push constant 14
 gt
 if-goto IF_TRUE1
 goto IF_FALSE1
 label IF_TRUE1
 push constant 0
-pop this 4
+pop this 5
 label IF_FALSE1
+push this 5
+push constant 0
+eq
+push this 5
+or
+push constant 5
+eq
+push this 5
+or
+push constant 10
+eq
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push this 0
+push constant 5
+sub
+pop this 0
+label IF_FALSE2
 label IF_FALSE0
 push constant 0
 return
@@ -234,7 +298,7 @@ push constant 32
 call String.appendChar 2
 call Output.printString 1
 pop temp 0
-push this 7
+push this 8
 call Output.printInt 1
 pop temp 0
 call Output.println 0
@@ -243,29 +307,29 @@ push constant 0
 push constant 0
 call Output.moveCursor 2
 pop temp 0
-push this 5
+push this 6
 call Pillar.getX 1
-push this 5
+push this 6
 call Pillar.getWidth 1
 add
-push this 1
+push this 2
 call Bird.getX 1
 lt
 if-goto IF_TRUE0
 goto IF_FALSE0
 label IF_TRUE0
-push this 6
+push this 7
 not
 if-goto IF_TRUE1
 goto IF_FALSE1
 label IF_TRUE1
 push constant 0
 not
-pop this 6
-push this 7
+pop this 7
+push this 8
 push constant 1
 add
-pop this 7
+pop this 8
 label IF_FALSE1
 label IF_FALSE0
 push constant 0
@@ -296,7 +360,7 @@ goto IF_FALSE0
 label IF_TRUE0
 push constant 0
 not
-pop this 3
+pop this 4
 label IF_FALSE0
 push local 0
 push constant 81
@@ -316,9 +380,9 @@ goto IF_FALSE2
 label IF_TRUE2
 push constant 0
 not
-pop this 2
-push constant 0
 pop this 3
+push constant 0
+pop this 4
 label IF_FALSE2
 push pointer 0
 call FlappyBirdGameManager.tickBird 1
@@ -329,18 +393,18 @@ pop temp 0
 push pointer 0
 call FlappyBirdGameManager.tickScore 1
 pop temp 0
-push this 5
-push this 1
+push this 6
+push this 2
 call Bird.getX 1
-push this 1
+push this 2
 call Bird.getY 1
-push this 1
+push this 2
 call Bird.getWidth 1
-push this 1
+push this 2
 call Bird.getHeight 1
 call Pillar.hasColided 5
 pop local 3
-push this 1
+push this 2
 call Bird.isDead 1
 pop local 2
 push constant 50
@@ -348,15 +412,15 @@ call Sys.wait 1
 pop temp 0
 goto WHILE_EXP0
 label WHILE_END0
-push this 5
+push this 6
 call Pillar.erase 1
 pop temp 0
-push this 1
+push this 2
 call Bird.erase 1
 pop temp 0
 push constant 0
 push constant 0
 call Output.moveCursor 2
 pop temp 0
-push this 7
+push this 8
 return

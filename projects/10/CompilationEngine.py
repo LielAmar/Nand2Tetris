@@ -34,14 +34,16 @@ class CompilationEngine:
         # and on
         self.compile_class()
 
+    def __write_line(self, line):
+        self.output.write(line + "\n")
 
     def __write_current_line(self, advance=True):
         """
         Writes a line to the output file.
         """
 
-        self.output.write((TAB * self.recursion_depth) + \
-            self.tokenizer.token_tag() + "\n")
+        self.__write_line((TAB * self.recursion_depth) + \
+            self.tokenizer.token_tag())
 
         if advance:
             self.tokenizer.advance()
@@ -53,7 +55,7 @@ class CompilationEngine:
         For example: <example>
         """
 
-        self.output.write((TAB * self.recursion_depth) + f"<{tag}>\n")
+        self.__write_line((TAB * self.recursion_depth) + f"<{tag}>")
         
         self.recursion_depth += 1
 
@@ -66,7 +68,7 @@ class CompilationEngine:
 
         self.recursion_depth -= 1
 
-        self.output.write((TAB * self.recursion_depth) + f"</{tag}>\n")
+        self.__write_line((TAB * self.recursion_depth) + f"</{tag}>")
 
 
     def compile_class(self) -> None:
@@ -95,6 +97,9 @@ class CompilationEngine:
                 self.tokenizer.keyword() == "method"):
             self.compile_subroutine()
         
+        # Writing the } tag
+        self.__write_current_line()
+
         self.__write_close_tag("class")
 
 
@@ -191,17 +196,11 @@ class CompilationEngine:
         # Writing the ( of the parameter list
         self.__write_current_line()
 
-        print("parameter list")
-
         # Compiling the parameter list (not including the parenthesis)
         self.compile_parameter_list()
 
-        print("parameter list done")
-
         # Writing the ) of the parameter list
         self.__write_current_line()
-
-        print("subroutine body")
 
         # Compiling the subroutine body
         self.compile_subroutine_body()
@@ -236,7 +235,7 @@ class CompilationEngine:
         self.__write_current_line()
 
         # Compiling the subroutine body
-        # TODO: compile the body statements!
+        self.compile_subroutine_body()
 
         self.__write_close_tag("subroutineDec")
 
@@ -249,10 +248,14 @@ class CompilationEngine:
         - '((type varName) (, type varName)*)?'
         """
 
+        self.__write_open_tag("parameterList")
+
         # As long as we didn't hit the closing parenthesis, we'll keep
         # on compiling the parameter list
         while self.tokenizer.symbol() != ")":
             self.__write_current_line()
+
+        self.__write_close_tag("parameterList")
 
     def compile_subroutine_body(self) -> None:
         """
@@ -272,6 +275,7 @@ class CompilationEngine:
             self.compile_var_dec()
 
         # TODO: Write all the statements
+        self.compile_statements()
 
         # Writing the } of the subroutine body
         self.__write_current_line()
@@ -380,7 +384,18 @@ class CompilationEngine:
         # then write the expression
         # Example input: let x = 5;
         # Example input: let x[5] = 5;
-        while self.tokenizer.symbol() != "=":
+        while self.tokenizer.token_type() != "SYMBOL":
+            self.__write_current_line()
+
+        # If we have a '['
+        if self.tokenizer.symbol() == "[":
+            # Writing the [ of the expression
+            self.__write_current_line()
+
+            # Compiling the expression
+            self.compile_expression()
+
+            # Writing the ] of the expression
             self.__write_current_line()
 
         # Writing the = of the let statement
@@ -443,7 +458,7 @@ class CompilationEngine:
         self.__write_current_line()
 
         # If the next token is not a ; then we have an expression
-        if self.tokenizer.token_type != "SYMBOL" or \
+        if self.tokenizer.token_type() != "SYMBOL" or \
                 self.tokenizer.symbol() != ";":
             self.compile_expression()
 
@@ -516,10 +531,20 @@ class CompilationEngine:
 
         self.__write_open_tag("expression")
 
+        # Compiling the first term
+        self.compile_term()
 
+        # TODO: Make sure this is correct (list of symbols and logic)
+        while self.tokenizer.token_type() == "SYMBOL" and \
+                self.tokenizer.symbol() in \
+                ["+", "-", "*", "/", "&amp;", "|", "&lt;", "&gt;", "="]:
 
-        # Your code goes here!
-        pass
+            # Writing the symbol
+            self.__write_current_line()
+
+            self.compile_term()
+
+        self.__write_close_tag("expression")
 
     def compile_term(self) -> None:
         """Compiles a term. 
@@ -531,8 +556,71 @@ class CompilationEngine:
         to distinguish between the three possibilities. Any other token is not
         part of this term and should not be advanced over.
         """
-        # Your code goes here!
-        pass
+
+        self.__write_open_tag("term")
+
+        # Saving the previous token, writing it and advancing
+        previous_token_type = self.tokenizer.token_type()
+        previous_token_symbol = self.tokenizer.symbol()
+
+        self.__write_current_line()
+
+        # if previous token is (, we want to handle the case of an expression
+        if previous_token_type == "SYMBOL" and \
+                previous_token_symbol == "(":
+            self.compile_expression()
+
+            # Writing the ) of the expression
+            self.__write_current_line()
+
+        # if previous token is an unary op (~,-), we handle it
+        elif previous_token_type == "SYMBOL" and \
+                previous_token_symbol in ["~", "-"]:
+            self.compile_term()
+
+        # Otherwise, we have an intergerConstant, stringConstant, keywordConstant,
+        # varName, varName[expression], or subroutineCall
+
+        # Checking if we have a '[' case
+        # Example: variable[5]
+        elif self.tokenizer.token_type() == "SYMBOL" and \
+                self.tokenizer.symbol() == "[":
+            
+            # Writing the [ symbol
+            self.__write_current_line()
+
+            # Compiling the expression
+            self.compile_expression()
+
+            # Writing the ] symbol
+            self.__write_current_line()
+        
+        # Checking if we have a subroutineCall case
+        # Example: subroutineCall()
+        # Example: Class.subroutineCall()
+        elif self.tokenizer.token_type() == "SYMBOL" and \
+                self.tokenizer.symbol() in ["(", "."]:
+            
+            if self.tokenizer.symbol() == ".":
+                # Writing the . symbol
+                self.__write_current_line()
+
+                # Write the subroutineName
+                self.__write_current_line()
+
+            # Writing the ( symbol
+            self.__write_current_line()
+
+            # Compiling the expressionList
+            self.compile_expression_list()
+
+            # Writing the ) symbol
+            self.__write_current_line()
+
+        # Else, we have a keyword constant, an integer constant or a string constant
+        # and we can end        
+
+        self.__write_close_tag("term")
 
     def compile_expression_list(self) -> None:
         """
@@ -544,6 +632,9 @@ class CompilationEngine:
         # Writing all the tokens until reaching a )
         # Example input: x, y, z
         while self.tokenizer.symbol() != ")":
-            self.__write_current_line()
+            if self.tokenizer.symbol() == ",":
+                self.__write_current_line()
+            else:
+                self.compile_expression()
     
         self.__write_close_tag("expressionList")

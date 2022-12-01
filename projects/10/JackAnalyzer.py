@@ -125,21 +125,22 @@ def analyze_file(
     """
 
     tokenizer = JackTokenizer(input_file)
-    # write_tokenizer_output(tokenizer, output_file)
+    # write_tokenizer_output(tokenizer)
 
     compilation_engine = CompilationEngine(tokenizer, output_file)
     
 
 
-def write_tokenizer_output(tokenizer: JackTokenizer, output_file: typing.TextIO) -> None:
-    output_file.write('<tokens>\n')
+def write_tokenizer_output(tokenizer: JackTokenizer) -> None:
+    with open("projects/10/ArrayTest/MainXML.xml", 'w') as output_file:
+        output_file.write('<tokens>\n')
 
-    while tokenizer.has_more_tokens():
-        output_file.write(tokenizer.token_tag() + "\n")
+        while tokenizer.has_more_tokens():
+            output_file.write(tokenizer.token_tag() + "\n")
 
-        tokenizer.advance()
+            tokenizer.advance()
 
-    output_file.write('</tokens>\n')
+        output_file.write('</tokens>\n')
 
 if "__main__" == __name__:
     # Parses the input path and calls analyze_file on each input file.

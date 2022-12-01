@@ -128,6 +128,7 @@ def analyze_file(
     # write_tokenizer_output(tokenizer, output_file)
 
     compilation_engine = CompilationEngine(tokenizer, output_file)
+    
 
 
 def write_tokenizer_output(tokenizer: JackTokenizer, output_file: typing.TextIO) -> None:

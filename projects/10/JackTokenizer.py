@@ -130,7 +130,9 @@ class JackTokenizer:
     inString = False
 
     while index < len(input):
-      if input[index] == '"':
+      # If we're starting/ending a string literal, and we don't have a \" 
+      # but rather "
+      if input[index] == '"' and input[index-1] != '\\':
         inString = not inString
 
       if not inString:
@@ -145,6 +147,10 @@ class JackTokenizer:
             index = input.find("*/", index) + 2
             result += " " # Adding a space to distinguish between tokens
             continue
+      
+        # Replacing all \t that aren't in a string with spaces
+        if input[index] == "\t":
+          result += "  "
           
       result += input[index]
       index += 1
@@ -189,7 +195,8 @@ class JackTokenizer:
     tokens = []
 
     # Split the input into lines
-    lines = input.replace("\t", " ").split("\n")
+    # TODO: might wanna do this instead of line 152
+    # lines = input.replace("\t", "  ").split("\n")
     
     # Removing all empty lines
     lines = list(filter(lambda x: x and len(x.replace(" ", "")) > 0 and len(x) > 0, lines))
@@ -230,12 +237,15 @@ class JackTokenizer:
             current_token += char
             inString = True
 
-          else: # we're in string
+          else: # we're in string. we want to make sure we have a " and not \"
             current_token += char
-            tokens.append(self.__create_token(current_token))
 
-            current_token = ""
-            inString = False
+            # if we're not in \", meaning we closed the string
+            if current_token[-1] != "\\":
+              tokens.append(self.__create_token(current_token))
+
+              current_token = ""
+              inString = False
 
         else:
           current_token += char

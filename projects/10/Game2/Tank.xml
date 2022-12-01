@@ -1,0 +1,217 @@
+<class>
+<keyword> class </keyword>
+<identifier> Tank </identifier>
+<symbol> { </symbol>
+<classVarDec>
+<keyword> field </keyword>
+<keyword> int </keyword>
+<identifier> coX </identifier>
+<symbol> , </symbol>
+<identifier> coY </identifier>
+<symbol> ; </symbol>
+</classVarDec>
+<classVarDec>
+<keyword> field </keyword>
+<identifier> String </identifier>
+<identifier> name </identifier>
+<symbol> ; </symbol>
+</classVarDec>
+<classVarDec>
+<keyword> field </keyword>
+<keyword> int </keyword>
+<identifier> angle </identifier>
+<symbol> , </symbol>
+<identifier> vInitial </identifier>
+<symbol> ; </symbol>
+</classVarDec>
+<classVarDec>
+<keyword> field </keyword>
+<identifier> Trigo </identifier>
+<identifier> trigo </identifier>
+<symbol> ; </symbol>
+</classVarDec>
+<classVarDec>
+<keyword> field </keyword>
+<keyword> int </keyword>
+<identifier> life </identifier>
+<symbol> ; </symbol>
+</classVarDec>
+<classVarDec>
+<keyword> field </keyword>
+<keyword> boolean </keyword>
+<identifier> isAlive </identifier>
+<symbol> ; </symbol>
+</classVarDec>
+<subroutineDec>
+<keyword> constructor </keyword>
+<identifier> Tank </identifier>
+<identifier> new </identifier>
+<symbol> ( </symbol>
+<parameterList>
+<identifier> String </identifier>
+<identifier> nam </identifier>
+<symbol> , </symbol>
+<keyword> int </keyword>
+<identifier> coordinateX </identifier>
+<symbol> , </symbol>
+<keyword> int </keyword>
+<identifier> coordinateY </identifier>
+</parameterList>
+<symbol> ) </symbol>
+<subroutineBody>
+<symbol> { </symbol>
+<varDec>
+<keyword> var </keyword>
+<keyword> int </keyword>
+<identifier> i </identifier>
+<symbol> ; </symbol>
+</varDec>
+<statements>
+<letStatement>
+<keyword> let </keyword>
+<identifier> coX </identifier>
+<symbol> = </symbol>
+<expression>
+<term>
+<identifier> coordinateX </identifier>
+</term>
+</expression>
+<symbol> ; </symbol>
+</letStatement>
+<letStatement>
+<keyword> let </keyword>
+<identifier> coY </identifier>
+<symbol> = </symbol>
+<expression>
+<term>
+<identifier> coordinateY </identifier>
+</term>
+<symbol> - </symbol>
+<term>
+<integerConstant> 5 </integerConstant>
+</term>
+</expression>
+<symbol> ; </symbol>
+</letStatement>
+<letStatement>
+<keyword> let </keyword>
+<identifier> name </identifier>
+<symbol> = </symbol>
+<expression>
+<term>
+<identifier> String </identifier>
+<symbol> . </symbol>
+<identifier> new </identifier>
+<symbol> ( </symbol>
+<expressionList>
+<expression>
+<term>
+<integerConstant> 5 </integerConstant>
+</term>
+</expression>
+</expressionList>
+<symbol> ) </symbol>
+</term>
+</expression>
+<symbol> ; </symbol>
+</letStatement>
+<letStatement>
+<keyword> let </keyword>
+<identifier> i </identifier>
+<symbol> = </symbol>
+<expression>
+<term>
+<integerConstant> 0 </integerConstant>
+</term>
+</expression>
+<symbol> ; </symbol>
+</letStatement>
+<whileStatement>
+<keyword> while </keyword>
+<symbol> ( </symbol>
+<expression>
+<term>
+<symbol> ( </symbol>
+<expression>
+<term>
+<identifier> i </identifier>
+</term>
+<symbol> &lt; </symbol>
+<term>
+<integerConstant> 5 </integerConstant>
+</term>
+</expression>
+<symbol> ) </symbol>
+</term>
+<symbol> &amp; </symbol>
+<term>
+<symbol> ( </symbol>
+<expression>
+<term>
+<identifier> i </identifier>
+</term>
+<symbol> &lt; </symbol>
+<term>
+<identifier> nam </identifier>
+<symbol> . </symbol>
+<identifier> length </identifier>
+<symbol> ( </symbol>
+<expressionList>
+</expressionList>
+<symbol> ) </symbol>
+</term>
+</expression>
+<symbol> ) </symbol>
+</term>
+</expression>
+<symbol> ) </symbol>
+<symbol> { </symbol>
+<statements>
+<letStatement>
+<keyword> let </keyword>
+<identifier> name </identifier>
+<symbol> = </symbol>
+<expression>
+<term>
+<identifier> name </identifier>
+<symbol> . </symbol>
+<identifier> appendChar </identifier>
+<symbol> ( </symbol>
+<expressionList>
+<expression>
+<term>
+<identifier> nam </identifier>
+<symbol> . </symbol>
+<keyword> char </keyword>
+<identifier> At </identifier>
+<expressionList>
+<expression>
+<term>
+<symbol> ( </symbol>
+<expression>
+<term>
+<identifier> i </identifier>
+</term>
+</expression>
+<symbol> ) </symbol>
+</term>
+</expression>
+</expressionList>
+<symbol> ) </symbol>
+</term>
+</expression>
+</expressionList>
+<symbol> ; </symbol>
+</term>
+</expression>
+<keyword> let </keyword>
+</letStatement>
+</statements>
+<identifier> i </identifier>
+</whileStatement>
+</statements>
+<symbol> = </symbol>
+</subroutineBody>
+</subroutineDec>
+<identifier> i </identifier>
+</class>

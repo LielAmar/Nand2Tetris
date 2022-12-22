@@ -4,8 +4,8 @@
   <symbol> { </symbol>
   <classVarDec>
     <keyword> static </keyword>
-    <identifier> Something </identifier>
-    <identifier-class-static-Something> test <identifier-class-static-Something>
+    <keyword> boolean </keyword>
+    <identifier> test </identifier>
     <symbol> ; </symbol>
   </classVarDec>
   <subroutineDec>
@@ -21,7 +21,7 @@
       <varDec>
         <keyword> var </keyword>
         <identifier> SquareGame </identifier>
-        <identifier-subroutine-var-SquareGame> game <identifier-subroutine-var-SquareGame>
+        <identifier> game </identifier>
         <symbol> ; </symbol>
       </varDec>
       <statements>
@@ -85,21 +85,21 @@
       <varDec>
         <keyword> var </keyword>
         <keyword> int </keyword>
-        <identifier-subroutine-var-int> i <identifier-subroutine-var-int>
+        <identifier> i </identifier>
         <symbol> , </symbol>
-        <identifier-subroutine-var-int> j <identifier-subroutine-var-int>
+        <identifier> j </identifier>
         <symbol> ; </symbol>
       </varDec>
       <varDec>
         <keyword> var </keyword>
         <identifier> String </identifier>
-        <identifier-subroutine-var-String> s <identifier-subroutine-var-String>
+        <identifier> s </identifier>
         <symbol> ; </symbol>
       </varDec>
       <varDec>
         <keyword> var </keyword>
         <identifier> Array </identifier>
-        <identifier-subroutine-var-Array> a <identifier-subroutine-var-Array>
+        <identifier> a </identifier>
         <symbol> ; </symbol>
       </varDec>
       <statements>

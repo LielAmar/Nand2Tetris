@@ -1,5 +1,13 @@
 TAB = "  "
 
+VARIABLE_KINDS = {
+  "static": "STATIC",
+  "field": "FIELD",
+  "local": "VAR",
+  "var": "VAR",
+  "argument": "ARG",
+}
+
 SEGMENTS = { 
   "CONST": "constant",
   "ARG": "argument",

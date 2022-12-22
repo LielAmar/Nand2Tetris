@@ -115,8 +115,6 @@ class JackTokenizer:
     stipped_input = self.__remove_comments(input_stream.read())
     self.tokens = self.__tokenize(stipped_input)
 
-    # print("tokens are: ", [str(token) for token in self.tokens])
-
     self.current_token_id = 0
 
   def __remove_comments(self, input: str) -> str:
@@ -283,25 +281,15 @@ class JackTokenizer:
 
     return self.tokens[self.current_token_id].token_type
 
-  def token_tag(self, additional_data = None) -> str:
+  def token_tag(self) -> str:
     type = self.token_type()
     
     if type == "KEYWORD":
       return f"<keyword> {self.keyword()} </keyword>"
     elif type == "SYMBOL":
       return f"<symbol> {self.symbol()} </symbol>"
-
-    # An identifier might have additional data. If we don't have it, we'll just return the identifier
-    # If we do have it, we'll return the identifier with the additional data in the tag
     elif type == "IDENTIFIER":
-      if additional_data == None or \
-          additional_data["scope"] == None or \
-          additional_data["kind"] == None or \
-          additional_data["type"] == None:
-        return f"<identifier> {self.identifier()} </identifier>"
-      
-      return f"<identifier-{additional_data['scope']}-{additional_data['kind']}-{additional_data['type']}> {self.identifier()} <identifier-{additional_data['scope']}-{additional_data['kind']}-{additional_data['type']}>"
-    
+      return f"<identifier> {self.identifier()} </identifier>"
     elif type == "INT_CONST":
       return f"<integerConstant> {self.int_val()} </integerConstant>"
     elif type == "STRING_CONST":

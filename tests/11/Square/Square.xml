@@ -5,15 +5,15 @@
   <classVarDec>
     <keyword> field </keyword>
     <keyword> int </keyword>
-    <identifier-class-field-int> x <identifier-class-field-int>
+    <identifier> x </identifier>
     <symbol> , </symbol>
-    <identifier-class-field-int> y <identifier-class-field-int>
+    <identifier> y </identifier>
     <symbol> ; </symbol>
   </classVarDec>
   <classVarDec>
     <keyword> field </keyword>
     <keyword> int </keyword>
-    <identifier-class-field-int> size <identifier-class-field-int>
+    <identifier> size </identifier>
     <symbol> ; </symbol>
   </classVarDec>
   <subroutineDec>
@@ -23,13 +23,13 @@
     <symbol> ( </symbol>
     <parameterList>
       <keyword> int </keyword>
-      <identifier-subroutine-argument-int> Ax <identifier-subroutine-argument-int>
+      <identifier> Ax </identifier>
       <symbol> , </symbol>
       <keyword> int </keyword>
       <identifier> Ay </identifier>
       <symbol> , </symbol>
       <keyword> int </keyword>
-      <identifier-subroutine-argument-int> Asize <identifier-subroutine-argument-int>
+      <identifier> Asize </identifier>
     </parameterList>
     <symbol> ) </symbol>
     <subroutineBody>

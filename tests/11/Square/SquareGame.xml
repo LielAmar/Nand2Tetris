@@ -5,13 +5,13 @@
   <classVarDec>
     <keyword> field </keyword>
     <identifier> Square </identifier>
-    <identifier-class-field-Square> square <identifier-class-field-Square>
+    <identifier> square </identifier>
     <symbol> ; </symbol>
   </classVarDec>
   <classVarDec>
     <keyword> field </keyword>
     <keyword> int </keyword>
-    <identifier-class-field-int> direction <identifier-class-field-int>
+    <identifier> direction </identifier>
     <symbol> ; </symbol>
   </classVarDec>
   <subroutineDec>
@@ -293,13 +293,13 @@
       <varDec>
         <keyword> var </keyword>
         <keyword> char </keyword>
-        <identifier-subroutine-var-char> key <identifier-subroutine-var-char>
+        <identifier> key </identifier>
         <symbol> ; </symbol>
       </varDec>
       <varDec>
         <keyword> var </keyword>
         <keyword> boolean </keyword>
-        <identifier-subroutine-var-boolean> exit <identifier-subroutine-var-boolean>
+        <identifier> exit </identifier>
         <symbol> ; </symbol>
       </varDec>
       <statements>

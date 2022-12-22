@@ -27,8 +27,7 @@ class Symbol:
         self.index = index
 
     def __str__(self) -> None:
-        return f"name: {self.name} | type: {self.type} |  \
-            kind: {self.kind} | index: {self.index}"
+        return f"name: {self.name} | type: {self.type} | kind: {self.kind} | index: {self.index}"
 
 
     def get_name(self) -> str: return self.name
@@ -47,8 +46,8 @@ class SymbolTable:
     def __init__(self) -> None:
         """Creates a new empty symbol table."""
         
-        self.class_symbols: dict[Symbol] = {}
-        self.routine_symbols: dict[Symbol] = {}
+        self.class_symbols = {}
+        self.routine_symbols = {}
         self.indices = {
             "STATIC": 0,
             "FIELD": 0,
@@ -59,10 +58,10 @@ class SymbolTable:
     def __str__(self) -> None:
         result = ""
 
-        for symbol in self.class_symbols:
+        for symbol in self.class_symbols.values():
             result = result + str(symbol) + "\n"
 
-        for symbol in self.routine_symbols:
+        for symbol in self.routine_symbols.values():
             result = result + str(symbol) + "\n"
 
         return result
@@ -90,9 +89,9 @@ class SymbolTable:
         """
 
         if kind == "STATIC" or kind == "FIELD":
-            self.class_symbols = Symbol(name, type, kind, self.indices[kind])
+            self.class_symbols[name] = Symbol(name, type, kind, self.indices[kind])
         elif kind == "ARG" or kind == "VAR":
-            self.routine_symbols = Symbol(name, type, kind, self.indices[kind])
+            self.routine_symbols[name] = Symbol(name, type, kind, self.indices[kind])
         else:
             raise ValueError("Invalid kind: " + kind)
 

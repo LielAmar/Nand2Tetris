@@ -8,6 +8,7 @@ Unported License (https://creativecommons.org/licenses/by-nc-sa/3.0/).
 import typing
 
 from JackTokenizer import *
+from SymbolTable import *
 from Constants import *
 
 class CompilationEngine:
@@ -28,9 +29,7 @@ class CompilationEngine:
         self.output = output_stream
 
         self.recursion_depth = 0
-        
-        # Used to save addition data about the current token we are handling
-        self.__reset_current_token_data()
+        self.symbol_table = SymbolTable()
 
         # We are promised that the jack files given are valid.
         # Therefore, the first token is always the keyword 'class'.
@@ -38,22 +37,20 @@ class CompilationEngine:
         # and on
         self.compile_class()
 
+        print(self.symbol_table)
+
 
     def __write_line(self, line):
         self.output.write(line + "\n")
 
-    def __write_current_line(self, advance = True, additional_data = False):
+    def __write_current_line(self, advance = True):
         """
         Writes a line to the output file.
         - If advance is True, we will advance the tokenizer to the next token
         - If additional_data is True, we will write the additional data
         """
 
-        self.__write_line((TAB * self.recursion_depth) + \
-            self.tokenizer.token_tag(self.current_token_data
-                if additional_data
-                else None
-        ))
+        self.__write_line((TAB * self.recursion_depth) + self.tokenizer.token_tag())
 
         if advance:
             self.tokenizer.advance()
@@ -134,18 +131,14 @@ class CompilationEngine:
 
         self.__write_open_tag("classVarDec")
 
-        # Updating the current variable's scope and kind
-        self.__update_current_token_data(scope="class", kind=self.tokenizer.keyword())
-
-        # Writing the first tag (the variable's kind)
+        # Saving the variable's kind (static or field) and writing it
+        kind = self.tokenizer.keyword()
         self.__write_current_line()
 
-        # Updating the current variable's type (int, char, boolean, or className)
-        self.__update_current_token_data(type=self.tokenizer.keyword()
+        # Saving the variable's type and writing it
+        type = self.tokenizer.keyword() \
                 if self.tokenizer.token_type() == "KEYWORD" \
-                else self.tokenizer.identifier())
-
-        # Writing the second tag (the variable's type)
+                else self.tokenizer.identifier()
         self.__write_current_line()
 
         # Writing all the tokens [variable names] until reaching a ;
@@ -153,18 +146,18 @@ class CompilationEngine:
         # Example input: x;
         # Example input: c, d;
         # Example input: c, d, e, f, g, i;
-        # * These tokens can have additional data
         while self.tokenizer.symbol() != ";":
-            self.__write_current_line(additional_data=True)
+            # Saving the current variable to the symbol table and writing it
+            if(self.tokenizer.token_type() == "IDENTIFIER"):
+                self.symbol_table.define(self.tokenizer.identifier(), 
+                    type, VARIABLE_KINDS[kind])
+
+            self.__write_current_line()
 
         # Writing the ; tag
         self.__write_current_line()
 
         self.__write_close_tag("classVarDec")
-
-        # Resetting current token data so we don't accidentally write wrong
-        # data to the next identifier
-        self.__reset_current_token_data()
 
 
     def compile_subroutine(self) -> None:
@@ -302,24 +295,27 @@ class CompilationEngine:
 
         self.__write_open_tag("parameterList")
 
-        # Updating the current variable's scope and kind
-        self.__update_current_token_data(scope="subroutine", kind="argument")
-
         # As long as we didn't hit the closing parenthesis, we'll keep
         # on compiling the parameter list.
-        # We know that each parameter is of the form: 'type varName'
-        # so we'll update the type of the current token
+        # We know that each parameter is of the form: 'type varName[,/)]'
         while self.tokenizer.symbol() != ")":
             # Saving the current variable's type (int, char, boolean, or className)
-            self.__update_current_token_data(type=self.tokenizer.keyword()
+            type = self.tokenizer.keyword() \
                     if self.tokenizer.token_type() == "KEYWORD" \
-                    else self.tokenizer.identifier())
+                    else self.tokenizer.identifier()
 
             # Writing the type of the parameter
             self.__write_current_line()
 
-            # Writing the name of the parameter, with its additional data
-            self.__write_current_line(additional_data=True)
+            # Saving the current variable to the symbol table and writing it
+            self.symbol_table.define(self.tokenizer.identifier(), 
+                    type, VARIABLE_KINDS["argument"])
+            self.__write_current_line()
+
+            # Writing the , of the parameter list
+            if self.tokenizer.symbol() == ",":
+                self.__write_current_line()
+            
 
         self.__write_close_tag("parameterList")
 
@@ -370,37 +366,33 @@ class CompilationEngine:
 
         self.__write_open_tag("varDec")
 
-        # Updating the current variable's scope and kind
-        self.__update_current_token_data(scope="subroutine", kind="var")
-
-        # Writing the first tag (the variable's kind)
+        # Saving the variable's kind (static or field) and writing it
+        kind = self.tokenizer.keyword()
         self.__write_current_line()
 
-        # Updating the current variable's type (int, char, boolean, or className)
-        self.__update_current_token_data(type=self.tokenizer.keyword()
+        # Saving the variable's type and writing it
+        type = self.tokenizer.keyword() \
                 if self.tokenizer.token_type() == "KEYWORD" \
-                else self.tokenizer.identifier())
-
-        # Writing the second tag (the variable's type)
+                else self.tokenizer.identifier()
         self.__write_current_line()
-
+        
         # Writing all the tokens [variable names] until reaching a ;
         # After hitting a ; we'll write it as well
         # Example input: x;
         # Example input: c, d;
         # Example input: c, d, e, f, g, i;
-        # * These tokens can have additional data
         while self.tokenizer.symbol() != ";":
-            self.__write_current_line(additional_data=True)
+            # Saving the current variable to the symbol table and writing it
+            if(self.tokenizer.token_type() == "IDENTIFIER"):
+                self.symbol_table.define(self.tokenizer.identifier(), 
+                    type, VARIABLE_KINDS[kind])
+
+            self.__write_current_line()
 
         # Writing the ; tag
         self.__write_current_line()
 
         self.__write_close_tag("varDec")
-
-        # Resetting current token data so we don't accidentally write wrong
-        # data to the next identifier
-        self.__reset_current_token_data()
 
     def compile_statements(self) -> None:
         """Compiles a sequence of statements, not including the enclosing 
@@ -736,17 +728,3 @@ class CompilationEngine:
                 self.compile_expression()
     
         self.__write_close_tag("expressionList")
-
-
-    # Helper functions for writing additional data for the current token
-    def __reset_current_token_data(self):
-        self.current_token_data = {
-            "scope": None,
-            "type": None,
-            "kind": None
-        }
-
-    def __update_current_token_data(self, scope = None, type = None, kind = None):
-        if scope is not None: self.current_token_data["scope"] = scope
-        if type is not None: self.current_token_data["type"] = type
-        if kind is not None: self.current_token_data["kind"] = kind

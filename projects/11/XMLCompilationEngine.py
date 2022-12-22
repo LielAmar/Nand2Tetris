@@ -8,6 +8,7 @@ Unported License (https://creativecommons.org/licenses/by-nc-sa/3.0/).
 import typing
 
 from JackTokenizer import *
+from SymbolTable import *
 from Constants import *
 
 class CompilationEngine:
@@ -28,6 +29,10 @@ class CompilationEngine:
         self.output = output_stream
 
         self.recursion_depth = 0
+        self.symbol_table = SymbolTable()
+        
+        # Used to save addition data about the current token we are handling
+        self.__reset_current_token_data()
 
         # We are promised that the jack files given are valid.
         # Therefore, the first token is always the keyword 'class'.
@@ -39,13 +44,18 @@ class CompilationEngine:
     def __write_line(self, line):
         self.output.write(line + "\n")
 
-    def __write_current_line(self, advance=True):
+    def __write_current_line(self, advance = True, additional_data = False):
         """
         Writes a line to the output file.
+        - If advance is True, we will advance the tokenizer to the next token
+        - If additional_data is True, we will write the additional data
         """
 
         self.__write_line((TAB * self.recursion_depth) + \
-            self.tokenizer.token_tag())
+            self.tokenizer.token_tag(self.current_token_data
+                if additional_data
+                else None
+        ))
 
         if advance:
             self.tokenizer.advance()
@@ -110,20 +120,53 @@ class CompilationEngine:
         Compiles a static declaration or a field declaration.
         Grammer: 
         - '~static|field~ type varName (, varName)* ;'
+
+        Notes:
+        - We know that every variable declared here is a class variable,
+          so we set the variable's scope to 'class'
+        - We know that every variable declared here is either static of field,
+          so we set the variable's kind to the *first* keyword
+        - We know that every variable declared here has a type, and its type
+          is defined by the *second* token.
+
+        Example input:
+        - static int x;
+        - field char c, d;
         """
-        
+
         self.__write_open_tag("classVarDec")
 
-        # Writing all the tokens until reaching a ;
-        # After hitting a ; we'll write it as well
-        # Example input: static int x;
-        # Example input: field char c, d;
-        while self.tokenizer.symbol() != ";":
-            self.__write_current_line()
+        # Updating the current variable's scope and kind
+        self.__update_current_token_data(scope="class", kind=self.tokenizer.keyword())
 
+        # Writing the first tag (the variable's kind)
+        self.__write_current_line()
+
+        # Updating the current variable's type (int, char, boolean, or className)
+        self.__update_current_token_data(type=self.tokenizer.keyword()
+                if self.tokenizer.token_type() == "KEYWORD" \
+                else self.tokenizer.identifier())
+
+        # Writing the second tag (the variable's type)
+        self.__write_current_line()
+
+        # Writing all the tokens [variable names] until reaching a ;
+        # After hitting a ; we'll write it as well
+        # Example input: x;
+        # Example input: c, d;
+        # Example input: c, d, e, f, g, i;
+        # * These tokens can have additional data
+        while self.tokenizer.symbol() != ";":
+            self.__write_current_line(additional_data=True)
+
+        # Writing the ; tag
         self.__write_current_line()
 
         self.__write_close_tag("classVarDec")
+
+        # Resetting current token data so we don't accidentally write wrong
+        # data to the next identifier
+        self.__reset_current_token_data()
 
 
     def compile_subroutine(self) -> None:
@@ -246,14 +289,39 @@ class CompilationEngine:
         enclosing "()".
         Grammer:
         - '((type varName) (, type varName)*)?'
+
+        Notes:
+        - We know that every variable declared here is a subroutine variable,
+          so we set the variable's scope to 'subroutine'
+        - We know that every variable declared here is an argument,
+          so we set the variable's kind to the argument
+        - We know that every variable declared here has a type, and its type
+          is defined by the *second* token.
+
+        Example input:
+        - int x, boolean y, char z, Object w
         """
 
         self.__write_open_tag("parameterList")
 
+        # Updating the current variable's scope and kind
+        self.__update_current_token_data(scope="subroutine", kind="argument")
+
         # As long as we didn't hit the closing parenthesis, we'll keep
-        # on compiling the parameter list
+        # on compiling the parameter list.
+        # We know that each parameter is of the form: 'type varName'
+        # so we'll update the type of the current token
         while self.tokenizer.symbol() != ")":
+            # Saving the current variable's type (int, char, boolean, or className)
+            self.__update_current_token_data(type=self.tokenizer.keyword()
+                    if self.tokenizer.token_type() == "KEYWORD" \
+                    else self.tokenizer.identifier())
+
+            # Writing the type of the parameter
             self.__write_current_line()
+
+            # Writing the name of the parameter, with its additional data
+            self.__write_current_line(additional_data=True)
 
         self.__write_close_tag("parameterList")
 
@@ -288,20 +356,53 @@ class CompilationEngine:
         Compiles a var declaration.
         Grammer:
         - '~var~ type varName (, varName)* ;'
+
+        Notes:
+        - We know that every variable declared here is a subroutine variable,
+          so we set the variable's scope to 'subroutine'
+        - We know that every variable declared here is a local variable,
+          so we set the variable's kind to var
+        - We know that every variable declared here has a type, and its type
+          is defined by the *second* token.
+
+        Example input:
+        - var int x;
+        - var char c, d;
         """
 
         self.__write_open_tag("varDec")
 
-        # Writing all the tokens until reaching a ;
-        # After hitting a ; we'll write it as well
-        # Example input: var int x;
-        # Example input: var char c, d;
-        while self.tokenizer.symbol() != ";":
-            self.__write_current_line()
+        # Updating the current variable's scope and kind
+        self.__update_current_token_data(scope="subroutine", kind="var")
 
+        # Writing the first tag (the variable's kind)
+        self.__write_current_line()
+
+        # Updating the current variable's type (int, char, boolean, or className)
+        self.__update_current_token_data(type=self.tokenizer.keyword()
+                if self.tokenizer.token_type() == "KEYWORD" \
+                else self.tokenizer.identifier())
+
+        # Writing the second tag (the variable's type)
+        self.__write_current_line()
+
+        # Writing all the tokens [variable names] until reaching a ;
+        # After hitting a ; we'll write it as well
+        # Example input: x;
+        # Example input: c, d;
+        # Example input: c, d, e, f, g, i;
+        # * These tokens can have additional data
+        while self.tokenizer.symbol() != ";":
+            self.__write_current_line(additional_data=True)
+
+        # Writing the ; tag
         self.__write_current_line()
 
         self.__write_close_tag("varDec")
+
+        # Resetting current token data so we don't accidentally write wrong
+        # data to the next identifier
+        self.__reset_current_token_data()
 
     def compile_statements(self) -> None:
         """Compiles a sequence of statements, not including the enclosing 
@@ -637,3 +738,17 @@ class CompilationEngine:
                 self.compile_expression()
     
         self.__write_close_tag("expressionList")
+
+
+    # Helper functions for writing additional data for the current token
+    def __reset_current_token_data(self):
+        self.current_token_data = {
+            "scope": None,
+            "type": None,
+            "kind": None
+        }
+
+    def __update_current_token_data(self, scope = None, type = None, kind = None):
+        if scope is not None: self.current_token_data["scope"] = scope
+        if type is not None: self.current_token_data["type"] = type
+        if kind is not None: self.current_token_data["kind"] = kind

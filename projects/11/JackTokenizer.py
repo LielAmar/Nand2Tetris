@@ -283,15 +283,28 @@ class JackTokenizer:
 
     return self.tokens[self.current_token_id].token_type
 
-  def token_tag(self) -> str:
+  def token_tag(self, additional_data = None) -> str:
+    """
+    Writes the current token as an XML element
+    if additional_data is not None, it will be used to write the identifier tag
+    """
+    
     type = self.token_type()
     
     if type == "KEYWORD":
       return f"<keyword> {self.keyword()} </keyword>"
     elif type == "SYMBOL":
       return f"<symbol> {self.symbol()} </symbol>"
+
     elif type == "IDENTIFIER":
-      return f"<identifier> {self.identifier()} </identifier>"
+      if additional_data == None or \
+          additional_data["scope"] == None or \
+          additional_data["kind"] == None or \
+          additional_data["type"] == None:
+        return f"<identifier> {self.identifier()} </identifier>"
+      
+      return f"<identifier-{additional_data['scope']}-{additional_data['kind']}-{additional_data['type']}> {self.identifier()} <identifier-{additional_data['scope']}-{additional_data['kind']}-{additional_data['type']}>"
+    
     elif type == "INT_CONST":
       return f"<integerConstant> {self.int_val()} </integerConstant>"
     elif type == "STRING_CONST":

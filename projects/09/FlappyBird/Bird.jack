@@ -37,7 +37,6 @@ class Bird {
 
   /** Renders the bird on the screen. */
   method void render() {
-    // TODO: draw the bird pixel by pixel
     do Screen.setColor(true);
 
     do Screen.drawRectangle(x + 6, y, (x + 6) + 5, y);
@@ -74,7 +73,6 @@ class Bird {
 
   /** Erases the bird from the screen. */
   method void erase() {
-    // TODO: erase the bird pixel by pixel
     do Screen.setColor(false);
 
     do Screen.drawRectangle(x + 6, y, (x + 6) + 5, y);

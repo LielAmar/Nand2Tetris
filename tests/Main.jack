@@ -1,0 +1,16 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/09/Average/Main.jack
+
+// Inputs some numbers and computes their average
+class Main {
+   function void main() {
+      var Point p1, p2;
+      
+      let p1 = Point.new(1, 2);
+      let p2 = Point.new(3, 4);
+
+      let p1.x = 5;
+   }
+}

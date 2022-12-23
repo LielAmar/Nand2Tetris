@@ -573,9 +573,9 @@ class CompilationEngine:
             # Writing the ) of the expression
             self.__write_current_line()
 
-        # if previous token is an unary op (~,-), we handle it
+        # if previous token is an unary op (~,-,^,#), we handle it
         elif previous_token_type == "SYMBOL" and \
-                previous_token_symbol in ["~", "-"]:
+                previous_token_symbol in ["~", "-", "^", "#"]:
             self.compile_term()
 
         # Otherwise, we have an intergerConstant, stringConstant, keywordConstant,

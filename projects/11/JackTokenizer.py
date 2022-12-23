@@ -358,3 +358,13 @@ class JackTokenizer:
     """
 
     return self.tokens[self.current_token_id].token
+
+  def value(self) -> str:
+    return self.tokens[self.current_token_id].token
+
+
+  def next_token_value(self) -> str:
+    return self.tokens[self.current_token_id + 1].token
+  
+  def next_token_type(self) -> str:
+    return self.tokens[self.current_token_id + 1].token_type

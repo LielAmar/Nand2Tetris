@@ -28,7 +28,7 @@ class Symbol:
 
   def __str__(self) -> None:
     return f'''name: {self.name} | type: {self.type} | \
-      kind: {self.kind} | index: {self.index}'''
+kind: {self.kind} | index: {self.index}'''
 
 
   def get_name(self) -> str: return self.name
@@ -61,10 +61,10 @@ class SymbolTable:
   def __str__(self) -> None:
     result = ""
 
-    for symbol in self.class_symbols:
+    for symbol in self.class_symbols.values():
       result = result + str(symbol) + "\n"
 
-    for symbol in self.routine_symbols:
+    for symbol in self.routine_symbols.values():
       result = result + str(symbol) + "\n"
 
     return result
@@ -93,9 +93,9 @@ class SymbolTable:
     """
 
     if kind == "STATIC" or kind == "FIELD":
-      self.class_symbols = Symbol(name, type, kind, self.indices[kind])
+      self.class_symbols[name] = Symbol(name, type, kind, self.indices[kind])
     elif kind == "ARG" or kind == "VAR":
-      self.routine_symbols = Symbol(name, type, kind, self.indices[kind])
+      self.routine_symbols[name] = Symbol(name, type, kind, self.indices[kind])
     else:
       raise ValueError("Invalid kind: " + kind)
 
@@ -124,11 +124,11 @@ class SymbolTable:
       if the identifier is unknown in the current scope.
     """
 
-    if name in self.class_symbols:
-      return self.class_symbols[name].get_kind()
-    
     if name in self.routine_symbols:
       return self.routine_symbols[name].get_kind()
+    
+    if name in self.class_symbols:
+      return self.class_symbols[name].get_kind()
 
     return None
 
@@ -141,11 +141,11 @@ class SymbolTable:
       str: the type of the named identifier in the current scope.
     """
 
-    if name in self.class_symbols:
-      return self.class_symbols[name].get_type()
-    
     if name in self.routine_symbols:
       return self.routine_symbols[name].get_type()
+    
+    if name in self.class_symbols:
+      return self.class_symbols[name].get_type()
     
     return None
 
@@ -158,10 +158,14 @@ class SymbolTable:
       int: the index assigned to the named identifier.
     """
 
-    if name in self.class_symbols:
-      return self.class_symbols[name].get_index()
-    
     if name in self.routine_symbols:
       return self.routine_symbols[name].get_index()
     
+    if name in self.class_symbols:
+      return self.class_symbols[name].get_index()
+    
     return None
+
+
+  def contains(self, name: str) -> bool:
+    return name in self.class_symbols or name in self.routine_symbols

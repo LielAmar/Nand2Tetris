@@ -107,6 +107,7 @@ class VMWriter:
       n_locals (int): the number of local variables the function uses.
     """
 
+    self.__write_blank_line()
     self.__write_command__("function", name, str(n_locals))
 
   def write_return(self) -> None:
@@ -123,3 +124,10 @@ class VMWriter:
     """
 
     self.output.write(f"{cmd} {arg1} {arg2}\n")
+
+  def __write_blank_line(self) -> None:
+    """
+    Writes a blank line to the output file.
+    """
+
+    self.output.write("\n")

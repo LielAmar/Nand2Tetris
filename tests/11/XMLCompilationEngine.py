@@ -37,8 +37,6 @@ class CompilationEngine:
         # and on
         self.compile_class()
 
-        print(self.symbol_table)
-
 
     def __write_line(self, line):
         self.output.write(line + "\n")
@@ -172,6 +170,8 @@ class CompilationEngine:
 
         if self.tokenizer.token_type() != "KEYWORD":
             return
+
+        self.symbol_table.start_subroutine()
 
         if self.tokenizer.keyword() == "constructor":
             self.__constructor_subroutine()

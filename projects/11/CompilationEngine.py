@@ -5,639 +5,832 @@ and as allowed by the Creative Common Attribution-NonCommercial-ShareAlike 3.0
 Unported License (https://creativecommons.org/licenses/by-nc-sa/3.0/).
 """
 
-import typing
-
 from JackTokenizer import *
 from VMWriter import *
+from SymbolTable import *
 from Constants import *
 
 class CompilationEngine:
   """
   Gets input from a JackTokenizer and emits its parsed structure into an
-  output stream.
+  output stream in an XML format.
   """
 
   def __init__(self, tokenizer: JackTokenizer, writer: VMWriter) -> None:
-      """
-      Creates a new compilation engine with the given input and output. The
-      next routine called must be compileClass()
-      :param input_stream: The input stream.
-      :param output_stream: The output stream.
-      """
+    """
+    Creates a new compilation engine with the given input and output. The
+    next routine called must be compileClass()
+    :param input_stream: The input stream.
+    :param output_stream: The output stream.
+    """
 
-      self.tokenizer: JackTokenizer = tokenizer
-      self.writer: VMWriter = writer
+    self.tokenizer: JackTokenizer = tokenizer
+    self.symbol_table = SymbolTable()
+    self.writer: VMWriter = writer
 
-      self.recursion_depth = 0
+    self.class_name = ""
+    self.subroutine_name = ""
+    self.subroutine_type = ""
 
-      # We are promised that the jack files given are valid.
-      # Therefore, the first token is always the keyword 'class'.
-      # We'll then execute our compilation recursively from compile_class()
-      # and on
-      self.compile_class()
+    self.call_id = 0
 
-
-  def __write_line(self, line):
-      self.output.write(line + "\n")
-
-  def __write_current_line(self, advance=True):
-      """
-      Writes a line to the output file.
-      """
-
-      self.__write_line((TAB * self.recursion_depth) + \
-          self.tokenizer.token_tag())
-
-      if advance:
-          self.tokenizer.advance()
-
-  def __write_open_tag(self, tag):
-      """
-      Writes an open tag to the output file.
-      After it writes the open tag, we want to increase the recursion depth
-      For example: <example>
-      """
-
-      self.__write_line((TAB * self.recursion_depth) + f"<{tag}>")
-      
-      self.recursion_depth += 1
-
-  def __write_close_tag(self, tag):
-      """
-      Writes an close tag to the output file.
-      After it writes the close tag, we want to decrease the recursion depth
-      For example: </example>
-      """
-
-      self.recursion_depth -= 1
-
-      self.__write_line((TAB * self.recursion_depth) + f"</{tag}>")
+    # We are promised that the jack files given are valid.
+    # Therefore, the first token is always the keyword 'class'.
+    # We'll then execute our compilation recursively from compile_class()
+    # and on
+    self.compile_class()
 
 
   def compile_class(self) -> None:
-      """
-      Compiles a complete class.
-      Grammer:
-      - '~class~ className ~{~ classVarDec* subroutineDec* ~}~'
-      """
+    """
+    Compiles a complete class.
+    Grammer:
+    - '~class~ className ~{~ classVarDec* subroutineDec* ~}~'
+    """
 
-      self.__write_open_tag("class")
-
-      # Writing the first 3 tags. For example: 'class Main {'
-      for _ in range(3):
-          self.__write_current_line()
+    # Skipping the first 3 tags, and saving the class name.
+    # For example: 'class Main {'
+    self.tokenizer.advance()
+    self.class_name = self.tokenizer.identifier()
+    self.tokenizer.advance()
+    self.tokenizer.advance()      
       
-      # Writing the all classVarDec tags (making sure we don't have an empty class)
-      while self.tokenizer.token_type() == "KEYWORD" and ( \
-              self.tokenizer.keyword() == "static" or \
-              self.tokenizer.keyword() == "field"):
-          self.compile_class_var_dec()
+    # Writing all class variable (using classVarDec)
+    while self.tokenizer.token_type() == "KEYWORD" and ( \
+          self.tokenizer.keyword() == "static" or \
+          self.tokenizer.keyword() == "field"):
+      self.compile_class_var_dec()
                   
-      # Writing the all subroutine tags (making sure we don't have an empty class)
-      while self.tokenizer.token_type() == "KEYWORD" and ( \
-              self.tokenizer.keyword() == "constructor" or \
-              self.tokenizer.keyword() == "function" or \
-              self.tokenizer.keyword() == "method"):
-          self.compile_subroutine()
+    # Writing the all subroutine tags (making sure we don't have an empty class)
+    while self.tokenizer.token_type() == "KEYWORD" and ( \
+          self.tokenizer.keyword() == "constructor" or \
+          self.tokenizer.keyword() == "function" or \
+          self.tokenizer.keyword() == "method"):
+      self.compile_subroutine()
       
-      # Writing the } tag
-      self.__write_current_line()
-
-      self.__write_close_tag("class")
+    # Skipping the final tag.
+    self.tokenizer.advance()
 
 
   def compile_class_var_dec(self) -> None:
-      """
-      Compiles a static declaration or a field declaration.
-      Grammer: 
-      - '~static|field~ type varName (, varName)* ;'
-      """
+    """
+    Compiles a static declaration or a field declaration.
+    Grammer: 
+    - '~static|field~ type varName (, varName)* ;'
+
+    Notes:
+    - We know that every variable declared here is a class variable,
+      so we set the variable's scope to 'class'
+    - We know that every variable declared here is either static of field,
+      so we set the variable's kind to the *first* keyword
+    - We know that every variable declared here has a type, and its type
+      is defined by the *second* token.
+
+    Example input:
+    - static int x;
+    - field char c, d;
+    """
+
+    # Saving the variable's kind (static or field) and advancing
+    kind = self.tokenizer.keyword()
+    self.tokenizer.advance()
+
+    # Saving the variable's type and advancing
+    type = self.tokenizer.keyword() \
+        if self.tokenizer.token_type() == "KEYWORD" \
+        else self.tokenizer.identifier()
+    self.tokenizer.advance()
+
+    # Writing all the tokens [variable names] until reaching a ;
+    # After hitting a ; we'll write it as well
+    # Example input: x;
+    # Example input: c, d;
+    # Example input: c, d, e, f, g, i;
+    while self.tokenizer.symbol() != ";":
+      # Saving the current variable to the symbol table
+      if self.tokenizer.token_type() == "IDENTIFIER":
+        self.symbol_table.define(self.tokenizer.identifier(), type, VARIABLE_KINDS[kind])
       
-      self.__write_open_tag("classVarDec")
+      # Advance to the next token
+      self.tokenizer.advance()
 
-      # Writing all the tokens until reaching a ;
-      # After hitting a ; we'll write it as well
-      # Example input: static int x;
-      # Example input: field char c, d;
-      while self.tokenizer.symbol() != ";":
-          self.__write_current_line()
-
-      self.__write_current_line()
-
-      self.__write_close_tag("classVarDec")
+    # Skipping the ;
+    self.tokenizer.advance()
 
 
   def compile_subroutine(self) -> None:
-      """
-      Compiles a complete method, function, or constructor.
-      You can assume that classes with constructors have at least one field,
-      you will understand why this is necessary in project 11.
+    """
+    Compiles a complete method, function, or constructor.
+    You can assume that classes with constructors have at least one field,
+    you will understand why this is necessary in project 11.
+    
+    Grammer: 
+    - '~static|field~ type varName (, varName)* ;'
+    """
+
+    if self.tokenizer.token_type() != "KEYWORD":
+      return
+
+    # When writing a subroutine, we want to reset the symbol table
+    self.symbol_table.start_subroutine()
+
+    # If we are writing a method, we need to add the 'this' argument
+    if self.tokenizer.keyword() == "method":
+      self.symbol_table.define("this", self.class_name, "argument")
+    
+    self.__subroutine()
+
+    print(f"{self.class_name}.{self.subroutine_name} symbol table:")
+    print(self.symbol_table)
       
-      Grammer: 
-      - '~static|field~ type varName (, varName)* ;'
-      """
+  def __subroutine(self):
+    """
+    Compiles a subroutine.
+    Grammer:
+    - '~constructor~ type subroutineName ~(~ parameterList ~)~ subroutineBody'
+    """
 
-      if self.tokenizer.token_type() != "KEYWORD":
-          return
+    # Skipping all the tokens (while saving subroutine name) until reaching a '('
+    # After hitting a ( we'll skip it, and then handle the parameter
+    # list
+    # Example input: constructor void Main()
+    # Example input: constructor void Main(int x, int y)
+    self.subroutine_type = self.tokenizer.keyword()
+    self.tokenizer.advance()
+    self.tokenizer.advance()
+    self.subroutine_name = self.tokenizer.identifier()
+    
+    while self.tokenizer.symbol() != "(":
+      self.tokenizer.advance()
 
-      if self.tokenizer.keyword() == "constructor":
-          self.__constructor_subroutine()
-      elif self.tokenizer.keyword() == "function":
-          self.__function_subroutine()
-      elif self.tokenizer.keyword() == "method":
-          self.__method_subroutine()
+    # Skipping the ( of the parameter list
+    self.tokenizer.advance()
 
-  # TODO: possibly combine all three: constructor, function and method
-  def __constructor_subroutine(self):
-      """
-      Compiles a constructor subroutine.
-      Grammer:
-      - '~constructor~ type subroutineName ~(~ parameterList ~)~ subroutineBody'
-      """
+    # Compiling the parameter list (not including the parenthesis)
+    self.compile_parameter_list()
 
-      self.__write_open_tag("subroutineDec")
+    # Skipping the ) of the parameter list
+    self.tokenizer.advance()
 
-      # Writing all the tokens until reaching a (
-      # After hitting a ( we'll write it as well, and then write the parameter
-      # list
-      # Example input: constructor void Main()
-      # Example input: constructor void Main(int x, int y)
-      while self.tokenizer.symbol() != "(":
-          self.__write_current_line()
-
-      # Writing the ( of the parameter list
-      self.__write_current_line()
-
-      # Compiling the parameter list (not including the parenthesis)
-      self.compile_parameter_list()
-
-      # Writing the ) of the parameter list
-      self.__write_current_line()
-
-      # Compiling the subroutine body
-      self.compile_subroutine_body()
-
-      self.__write_close_tag("subroutineDec")
-
-  def __function_subroutine(self):
-      """
-      Compiles a function subroutine.
-      Grammer:
-      - '~function~ type subroutineName ~(~ parameterList ~)~ subroutineBody'
-      """
-
-      self.__write_open_tag("subroutineDec")
-
-      # Writing all the tokens until reaching a (
-      # After hitting a ( we'll write it as well, and then write the parameter
-      # list
-      # Example input: function void Main()
-      # Example input: function void Main(int x, int y)
-      while self.tokenizer.symbol() != "(":
-          self.__write_current_line()
-
-      # Writing the ( of the parameter list
-      self.__write_current_line()
-
-      # Compiling the parameter list (not including the parenthesis)
-      self.compile_parameter_list()
-
-      # Writing the ) of the parameter list
-      self.__write_current_line()
-
-      # Compiling the subroutine body
-      self.compile_subroutine_body()
-
-      self.__write_close_tag("subroutineDec")
-
-
-  def __method_subroutine(self):
-      """
-      Compiles a method subroutine.
-      Grammer:
-      - '~method~ type subroutineName ~(~ parameterList ~)~ subroutineBody'
-      """
-
-      self.__write_open_tag("subroutineDec")
-
-      # Writing all the tokens until reaching a (
-      # After hitting a ( we'll write it as well, and then write the parameter
-      # list
-      # Example input: method void Main()
-      # Example input: method void Main(int x, int y)
-      while self.tokenizer.symbol() != "(":
-          self.__write_current_line()
-
-      # Writing the ( of the parameter list
-      self.__write_current_line()
-
-      # Compiling the parameter list (not including the parenthesis)
-      self.compile_parameter_list()
-
-      # Writing the ) of the parameter list
-      self.__write_current_line()
-
-      # Compiling the subroutine body
-      self.compile_subroutine_body()
-
-      self.__write_close_tag("subroutineDec")
+    # Compiling the subroutine body
+    self.compile_subroutine_body()
 
 
   def compile_parameter_list(self) -> None:
-      """
-      Compiles a (possibly empty) parameter list, not including the 
-      enclosing "()".
-      Grammer:
-      - '((type varName) (, type varName)*)?'
-      """
+    """
+    Compiles a (possibly empty) parameter list, not including the 
+    enclosing "()".
+    Grammer:
+    - '((type varName) (, type varName)*)?'
 
-      self.__write_open_tag("parameterList")
+    Notes:
+    - We know that every variable declared here is a subroutine variable,
+      so we set the variable's scope to 'subroutine'
+    - We know that every variable declared here is an argument,
+      so we set the variable's kind to the argument
+    - We know that every variable declared here has a type, and its type
+      is defined by the *second* token.
 
-      # As long as we didn't hit the closing parenthesis, we'll keep
-      # on compiling the parameter list
-      while self.tokenizer.symbol() != ")":
-          self.__write_current_line()
+    Example input:
+    - int x, boolean y, char z, Object w
+    """
 
-      self.__write_close_tag("parameterList")
+    # As long as we didn't hit the closing parenthesis, we'll keep
+    # on compiling the parameter list.
+    # We know that each parameter is of the form: 'type varName[,/)]'
+    while self.tokenizer.symbol() != ")":
+      # Saving the current variable's type (int, char, boolean, or className)
+      # and advancing
+      type = self.tokenizer.keyword() \
+          if self.tokenizer.token_type() == "KEYWORD" \
+          else self.tokenizer.identifier()
+      self.tokenizer.advance()
 
+      # Saving the current variable to the symbol table and advancing
+      self.symbol_table.define(self.tokenizer.identifier(), type, VARIABLE_KINDS["argument"])
+      self.tokenizer.advance()
+
+      # If we hit a comma, we'll advance and continue to the next parameter
+      if self.tokenizer.symbol() == ",":
+        self.tokenizer.advance()
+        
   def compile_subroutine_body(self) -> None:
-      """
-      Compiles a subroutine's body.
-      Grammer:
-      - '{' varDec* statements '}'
-      """
+    """
+    Compiles a subroutine's body.
+    Grammer:
+    - '{' varDec* statements '}'
+    """
 
-      self.__write_open_tag("subroutineBody")
+    # Skipping the { of the subroutine body
+    self.tokenizer.advance()
 
-      # Writing the { of the subroutine body
-      self.__write_current_line()
+    # Compiling all variables
+    num_vars = 0
+    while self.tokenizer.token_type() == "KEYWORD" and ( \
+          self.tokenizer.keyword() == "var"):
+      num_vars += self.compile_var_dec()
 
-      # Writing all variables
-      while self.tokenizer.token_type() == "KEYWORD" and ( \
-              self.tokenizer.keyword() == "var"):
-          self.compile_var_dec()
+    # Writing the function VM declaration to the output file
+    # Meaning, "function Class.Subroutine numVars"
+    self.writer.write_function(f"{self.class_name}.{self.subroutine_name}", num_vars)
 
-      # TODO: Write all the statements
-      self.compile_statements()
+    # If we're in a constructor, we need to alloc enough memory for the fields
+    # and then save the base address in pointer 0 (this)
+    if self.subroutine_type == "constructor":
+      self.writer.write_push("constant", self.symbol_table.var_count("field"))
+      self.writer.write_call("Memory.alloc", 1)
+      self.writer.write_pop("pointer", 0)
 
-      # Writing the } of the subroutine body
-      self.__write_current_line()
+    # If we're in a method, we need to save the given base address in arg 0
+    # in pointer 0 (this)
+    if self.subroutine_type == "method":
+      self.writer.write_push("argument", 0)
+      self.writer.write_pop("pointer", 0)
 
-      self.__write_close_tag("subroutineBody")
+    # Compiling all the statements
+    self.compile_statements()
+
+    # Skipping the } of the subroutine body
+    self.tokenizer.advance()
 
 
   def compile_var_dec(self) -> None:
-      """
-      Compiles a var declaration.
-      Grammer:
-      - '~var~ type varName (, varName)* ;'
-      """
+    """
+    Compiles a var declaration.
+    Grammer:
+    - '~var~ type varName (, varName)* ;'
 
-      self.__write_open_tag("varDec")
+    Notes:
+    - We know that every variable declared here is a subroutine variable,
+      so we set the variable's scope to 'subroutine'
+    - We know that every variable declared here is a local variable,
+      so we set the variable's kind to var
+    - We know that every variable declared here has a type, and its type
+      is defined by the *second* token.
 
-      # Writing all the tokens until reaching a ;
-      # After hitting a ; we'll write it as well
-      # Example input: var int x;
-      # Example input: var char c, d;
-      while self.tokenizer.symbol() != ";":
-          self.__write_current_line()
+    Example input:
+    - var int x;
+    - var char c, d;
+    """
 
-      self.__write_current_line()
+    num_vars = 0
 
-      self.__write_close_tag("varDec")
+    # Saving the variable's kind (var) and writing it
+    kind = self.tokenizer.keyword()
+    self.tokenizer.advance()
+
+    # Saving the variable's type and writing it
+    type = self.tokenizer.keyword() \
+        if self.tokenizer.token_type() == "KEYWORD" \
+        else self.tokenizer.identifier()
+    self.tokenizer.advance()
+
+    # Writing all the tokens [variable names] until reaching a ;
+    # After hitting a ; we'll write it as well
+    # Example input: x;
+    # Example input: c, d;
+    # Example input: c, d, e, f, g, i;
+    while self.tokenizer.symbol() != ";":
+      # Saving the current variable to the symbol table
+      if self.tokenizer.token_type() == "IDENTIFIER":
+        self.symbol_table.define(self.tokenizer.identifier(), type, VARIABLE_KINDS[kind])
+
+        num_vars += 1
+
+      # Advance to the next token
+      self.tokenizer.advance()
+
+    # Skipping the ; tag
+    self.tokenizer.advance()
+
+    return num_vars
 
   def compile_statements(self) -> None:
-      """Compiles a sequence of statements, not including the enclosing 
-      "{}".
-      Grammer:
-      - statement*
-      """
+    """Compiles a sequence of statements, not including the enclosing 
+    "{}".
+    Grammer:
+    - statement*
+    """
 
-      self.__write_open_tag("statements")
+    # Compiling the sequence of statements, until hiting a }.
+    # Examples:
+    # - let x = 5;
+    # - if (x > 5) { let x = 5; }
+    # - while (x > 5) { let x = 5; }
+    # - do Output.write(x);
+    # - return x;
+    while self.tokenizer.token_type() == "KEYWORD" and ( \
+          self.tokenizer.keyword() == "let" or \
+          self.tokenizer.keyword() == "if" or \
+          self.tokenizer.keyword() == "while" or \
+          self.tokenizer.keyword() == "do" or \
+          self.tokenizer.keyword() == "return"):
 
-      # Writing all possible statements.
-      # Examples:
-      # - let x = 5;
-      # - if (x > 5) { let x = 5; }
-      # - while (x > 5) { let x = 5; }
-      # - do Output.write(x);
-      # - return x;
-      while self.tokenizer.token_type() == "KEYWORD" and ( \
-              self.tokenizer.keyword() == "let" or \
-              self.tokenizer.keyword() == "if" or \
-              self.tokenizer.keyword() == "while" or \
-              self.tokenizer.keyword() == "do" or \
-              self.tokenizer.keyword() == "return"):
-
-          if self.tokenizer.keyword() == "let":
-              self.compile_let()
-          elif self.tokenizer.keyword() == "if":
-              self.compile_if()
-          elif self.tokenizer.keyword() == "while":
-              self.compile_while()
-          elif self.tokenizer.keyword() == "do":
-              self.compile_do()
-          elif self.tokenizer.keyword() == "return":
-              self.compile_return()
-
-      self.__write_close_tag("statements")
+      if self.tokenizer.keyword() == "let":
+        self.compile_let()
+      elif self.tokenizer.keyword() == "if":
+        self.compile_if()
+      elif self.tokenizer.keyword() == "while":
+        self.compile_while()
+      elif self.tokenizer.keyword() == "do":
+        self.compile_do()
+      elif self.tokenizer.keyword() == "return":
+        self.compile_return()
 
 
   def compile_do(self) -> None:
-      """
-      Compiles a do statement.
-      Grammer:
-      - '~do~ subroutineCall ;'
-      """
+    """
+    Compiles a do statement.
+    Grammer:
+    - '~do~ subroutineCall ;'
+    """
 
-      self.__write_open_tag("doStatement")
+    # Skipping the 'do' keyword
+    self.tokenizer.advance()
 
-      # Writing all the tokens until reaching a (
-      # After hitting a ( we'll write it as well and
-      # then write the expressionList
-      # Example input: do Output.write(x);
-      while self.tokenizer.symbol() != "(":
-          self.__write_current_line()
+    # if item in symbol table call method
+    function_name = ""
 
-      # Writing the ( of the expression list
-      self.__write_current_line()
+    # Saving the name of the function to call until reaching a '('
+    # After hitting a ( we'll write skip it and continue to the expression list
+    # Example input: do Output.write(x);
+    while self.tokenizer.symbol() != "(":
+      function_name += self.tokenizer.value()
+      self.tokenizer.advance()
 
-      # Compiling the expression list (not including the parenthesis)
-      self.compile_expression_list()
+    # Skipping the ( of the expression list
+    self.tokenizer.advance()
 
-      # Writing the ) of the expression list
-      self.__write_current_line()
+    # Counting the number of arguments we have
+    num_args = 0
 
-      # Writing the ; of the do statement
-      self.__write_current_line()
+    # If we're calling a method, we need to push the object's address to the stack
+    # We are if the object is in the symbol table, or if we are within the same class
+    # Examples:
+    # - do point.distance(x);   point is in the symbol table
+    # - do distance(x);         we're within the Point class
+    if self.symbol_table.contains(function_name.split('.')[0]):
+      num_args += 1
 
-      self.__write_close_tag("doStatement")
+      object_name, called_function = function_name.split('.')
+      object_type = self.symbol_table.type_of(object_name)
+      object_kind = self.symbol_table.kind_of(object_name)
+      object_index = self.symbol_table.index_of(object_name)
 
+      # Updating the function name to be the full name (Class.function)
+      function_name = f"{object_type}.{called_function}"
+
+      # Pushing the caller object's address to the stack
+      self.writer.write_push(KIND_SEGMENTS[object_kind], object_index)
+
+    if '.' not in function_name:
+      # Pushing the current object's address to the stack
+      self.writer.write_push("POINTER", 0)
+
+      function_name = f"{self.class_name}.{function_name}"
+
+    # Compiling the expression list (not including the parenthesis)
+    num_args += self.compile_expression_list()
+
+    # Update function_name to add the class name if we're calling a method
+    self.writer.write_call(function_name, num_args)
+
+    # Skipping the ) of the expression list
+    self.tokenizer.advance()
+
+    # Skipping the ; of the do statement
+    self.tokenizer.advance()
+
+    # Since we're calling a function using do, meaning we don't do anything
+    # with the return value, we need to pop the returned value from the stack
+    self.writer.write_pop("TEMP", 0)
+  
   def compile_let(self) -> None:
-      """
-      Compiles a let statement.
-      Grammer:
-      - '~let~ varName (~[~ expression ~]~)? = expression ;'
-      """
+    """
+    Compiles a let statement.
+    Grammer:
+    - '~let~ varName (~[~ expression ~]~)? = expression ;'
+    """
 
-      self.__write_open_tag("letStatement")
+    # Writing all the tokens until reaching a =
+    # After hitting a = we'll write it as well and
+    # then write the expression
+    # Example input: let x = 5;
+    # Example input: let x[5] = 5;
 
-      # Writing all the tokens until reaching a =
-      # After hitting a = we'll write it as well and
-      # then write the expression
-      # Example input: let x = 5;
-      # Example input: let x[5] = 5;
-      while self.tokenizer.token_type() != "SYMBOL":
-          self.__write_current_line()
+    # Skipping the 'let' keyword
+    self.tokenizer.advance()
 
-      # If we have a '['
-      if self.tokenizer.symbol() == "[":
-          # Writing the [ of the expression
-          self.__write_current_line()
+    variable_name = ""
 
-          # Compiling the expression
-          self.compile_expression()
+    # Skipping the variable name and saving it
+    while self.tokenizer.token_type() != "SYMBOL":
+      variable_name += self.tokenizer.identifier()
 
-          # Writing the ] of the expression
-          self.__write_current_line()
+      self.tokenizer.advance()
 
-      # Writing the = of the let statement
-      self.__write_current_line()
+    object_kind = self.symbol_table.kind_of(variable_name)
+    object_index = self.symbol_table.index_of(variable_name)
 
-      # Compiling the expression
+    is_array = self.tokenizer.symbol() == "["
+
+    # If we have a '[', we're in an array assignment.
+    # In this case we want to push the array's address to the stack
+    # and then push the index to the stack as well
+    if is_array:      
+      # Skipping the [ of the expression
+      self.tokenizer.advance()
+
       self.compile_expression()
 
-      # Writing the ; of the let statement
-      self.__write_current_line()
+      # Skipping the ] of the expression
+      self.tokenizer.advance()
 
-      self.__write_close_tag("letStatement")
+      # Pushing the array's base address to the stack
+      self.writer.write_push(KIND_SEGMENTS[object_kind], object_index)
 
-  def compile_while(self) -> None:
-      """
-      Compiles a while statement.
-      Grammer:
-      - '~while~ (expression) { statements }'
-      """
+      # Adding the index to the array's address
+      self.writer.write_arithmetic("ADD")
 
-      self.__write_open_tag("whileStatement")
+    # Skipping the = of the assignment
+    self.tokenizer.advance()
 
-      # Writing all the tokens until reaching a (
-      # After hitting a ( we'll write it as well and
-      # then write the expression
-      # Example input: while (x > 5) { let x = 5; }
-      while self.tokenizer.symbol() != "(":
-          self.__write_current_line()
+    # Compiling the expression
+    self.compile_expression()
 
-      # Writing the ( of the expression
-      self.__write_current_line()
+    # If we're in an array assignment, we want to set the array's value
+    # to the value of the expression. To do this we need to pop the value
+    # store it in the temp segment, pop the array's address to the pointer
+    # segment, push the value from the temp segment to the stack, and pop
+    # the value to the that segment
+    if is_array:
+      self.writer.write_pop("TEMP", 0)
+      self.writer.write_pop("POINTER", 1)
+      self.writer.write_push("TEMP", 0)
+      self.writer.write_pop("THAT", 0)
+    else:
+      self.writer.write_pop(KIND_SEGMENTS[object_kind], object_index)
 
-      # Compiling the expression
-      self.compile_expression()
-
-      # Writing the ) of the expression
-      self.__write_current_line()
-
-      # Writing the { of the while
-      self.__write_current_line()
-
-      # Compiling the statements
-      self.compile_statements()
-
-      # Writing the } of the while
-      self.__write_current_line()
-
-      self.__write_close_tag("whileStatement")        
+    # Skipping the ; of the let statement
+    self.tokenizer.advance()
 
   def compile_return(self) -> None:
-      """
-      Compiles a return statement.
-      Grammer:
-      - '~return~ expression? ;'
-      """
+    """
+    Compiles a return statement.
+    Grammer:
+    - '~return~ expression? ;'
+    """
 
-      self.__write_open_tag("returnStatement")
+    # Skipping the 'return' keyword
+    self.tokenizer.advance()
 
-      # Writing the "return" keyword
-      self.__write_current_line()
+    # If the next token is not a ; then we have an expression
+    # we want to compile the expression (then it's pushed to the stack)
+    # Otherwise, we push 0 to the stack
+    if self.tokenizer.token_type() != "SYMBOL" or \
+        self.tokenizer.symbol() != ";":
+      self.compile_expression()
+    else:
+      self.writer.write_push("CONST", 0)
 
-      # If the next token is not a ; then we have an expression
-      if self.tokenizer.token_type() != "SYMBOL" or \
-              self.tokenizer.symbol() != ";":
-          self.compile_expression()
+    # Calling write_return to return the value
+    self.writer.write_return()
 
-      # Writing the ; of the return statement
-      self.__write_current_line()
-
-      self.__write_close_tag("returnStatement")
+    # Skipping the ; of the return statement
+    self.tokenizer.advance()
 
   def compile_if(self) -> None:
-      """
-      Compiles a if statement, possibly with a trailing else clause.
-      Grammer:
-      - '~if~ (expression) { statements } (~else~ { statements })?'
-      """
+    """
+    Compiles a if statement, possibly with a trailing else clause.
+    Grammer:
+    - '~if~ (expression) { statements } (~else~ { statements })?'
+    """
 
-      self.__write_open_tag("ifStatement")
+    # Incrementing the call id
+    self.call_id += 1
+    current_call_id = self.call_id
 
-      # Writing all the tokens until reaching a (
-      # After hitting a ( we'll write it as well and
-      # then write the statements
-      # Example input: if (x > 5) { let x = 5; }
-      # Example input: if (x > 5) { let x = 5; } else { let x = 5; }
-      while self.tokenizer.symbol() != "(":
-          self.__write_current_line()
+    # Skipping all the tokens until reaching a (
+    # After hitting a ( we'll skip it as well and
+    # then compile the statment
+    # Example input: if (x > 5) { let x = 5; }
+    # Example input: if (x > 5) { let x = 5; } else { let x = 5; }
+    while self.tokenizer.symbol() != "(":
+      self.tokenizer.advance()
 
-      # Writing the ( of the expression
-      self.__write_current_line()
+    # Skipping the ( of the expression
+    self.tokenizer.advance()
 
-      # Compiling the expression
-      self.compile_expression()
+    # Compiling the expression
+    self.compile_expression()
 
-      # Writing the ) of the expression
-      self.__write_current_line()
+    # Negating the expression
+    self.writer.write_arithmetic("NOT")
 
-      # Writing the { of the if
-      self.__write_current_line()
+    # Skipping the ) of the expression
+    self.tokenizer.advance()
+
+    # Skipping the { of the if
+    self.tokenizer.advance()
+
+    # If the expression was false, we want to skip the statements
+    self.writer.write_if(f"IF_FALSE.{current_call_id}")
+
+    # Compiling the statements
+    self.compile_statements()
+
+    # Skipping the } of the if
+    self.tokenizer.advance()
+
+    # if we got here, the expression was true, so we want to skip the else
+    self.writer.write_goto(f"IF_END.{current_call_id}")
+
+    # Writing the label for the false case
+    self.writer.write_label(f"IF_FALSE.{current_call_id}")
+
+    # If the next token is an else, we have an else clause
+    if self.tokenizer.token_type() == "KEYWORD" and \
+        self.tokenizer.keyword() == "else":
+        
+      # Skipping the else keyword
+      self.tokenizer.advance()
+
+      # Skipping the { of the else
+      self.tokenizer.advance()
 
       # Compiling the statements
       self.compile_statements()
 
-      # Writing the } of the if
-      self.__write_current_line()
+      # Skipping the } of the else
+      self.tokenizer.advance()
 
-      # If the next token is an else, we have an else clause
-      if self.tokenizer.token_type() == "KEYWORD" and \
-              self.tokenizer.keyword() == "else":
-          
-          # Writing the else keyword
-          self.__write_current_line()
+    # Writing the label for the true case
+    self.writer.write_label(f"IF_END.{current_call_id}")
 
-          # Writing the { of the else
-          self.__write_current_line()
+  def compile_while(self) -> None:
+    """
+    Compiles a while statement.
+    Grammer:
+    - '~while~ (expression) { statements }'
+    """
 
-          # Compiling the statements
-          self.compile_statements()
+    # Incrementing the call id
+    self.call_id += 1
+    current_call_id = self.call_id
 
-          # Writing the } of the else
-          self.__write_current_line()
+    # Skipping all the tokens until reaching a (
+    # After hitting a ( we'll skip it as well and
+    # then write the expression
+    # Example input: while (x > 5) { let x = 5; }
+    while self.tokenizer.symbol() != "(":
+      self.tokenizer.advance()
 
-      self.__write_close_tag("ifStatement")
-      
+    # While the expression is true, we want to compile the statements
+    self.writer.write_label(f"WHILE_EXP.{current_call_id}")
+
+    # Skipping the ( of the expression
+    self.tokenizer.advance()
+
+    # Compiling the expression
+    self.compile_expression()
+
+    # Negating the expression
+    self.writer.write_arithmetic("NOT")
+
+    # Skipping the ) of the expression
+    self.tokenizer.advance()
+
+    # Skipping the { of the while
+    self.tokenizer.advance()
+
+    # If the expression was false, we want to skip the statements
+    self.writer.write_if(f"WHILE_END.{current_call_id}")
+
+    # Compiling the statements
+    self.compile_statements()
+
+    # Skipping the } of the while
+    self.tokenizer.advance()
+
+    # Going back to the expression
+    self.writer.write_goto(f"WHILE_EXP.{current_call_id}")
+
+    # Writing the label for the end of the while
+    self.writer.write_label(f"WHILE_END.{current_call_id}")
 
 
   def compile_expression(self) -> None:
-      """
-      Compiles an expression.
-      Grammer:
-      - term (op term)*
-      """
+    """
+    Compiles an expression.
+    Grammer:
+    - term (op term)*
+    """
 
-      self.__write_open_tag("expression")
+    # Compiling the first term
+    self.compile_term()
 
-      # Compiling the first term
+    # As long as we have an operator, we'll compile the next term 
+    # and then execute the operator on the two terms
+    while self.tokenizer.token_type() == "SYMBOL" and \
+          self.tokenizer.symbol() in OPERATORS.keys():
+
+      operator = self.tokenizer.symbol()
+      self.tokenizer.advance()
+
       self.compile_term()
 
-      # TODO: Make sure this is correct (list of symbols and logic)
-      while self.tokenizer.token_type() == "SYMBOL" and \
-              self.tokenizer.symbol() in \
-              ["+", "-", "*", "/", "&amp;", "|", "&lt;", "&gt;", "="]:
-
-          # Writing the symbol
-          self.__write_current_line()
-
-          self.compile_term()
-
-      self.__write_close_tag("expression")
+      if operator not in ["*", "/"]:
+        self.writer.write_arithmetic(OPERATORS[operator])
+      else:
+        self.writer.write_call(OPERATORS[operator], 2)
 
   def compile_term(self) -> None:
-      """Compiles a term. 
-      This routine is faced with a slight difficulty when
-      trying to decide between some of the alternative parsing rules.
-      Specifically, if the current token is an identifier, the routing must
-      distinguish between a variable, an array entry, and a subroutine call.
-      A single look-ahead token, which may be one of "[", "(", or "." suffices
-      to distinguish between the three possibilities. Any other token is not
-      part of this term and should not be advanced over.
-      """
+    """
+    Compiles a term. 
+    This routine is faced with a slight difficulty when
+    trying to decide between some of the alternative parsing rules.
+    Specifically, if the current token is an identifier, the routing must
+    distinguish between a variable, an array entry, and a subroutine call.
+    A single look-ahead token, which may be one of "[", "(", or "." suffices
+    to distinguish between the three possibilities. Any other token is not
+    part of this term and should not be advanced over.
+    """
 
-      self.__write_open_tag("term")
+    # If we have an expression in parentheses, we'll compile it
+    if self.tokenizer.token_type() == "SYMBOL" and \
+        self.tokenizer.symbol() == "(":
 
-      # Saving the previous token, writing it and advancing
-      previous_token_type = self.tokenizer.token_type()
-      previous_token_symbol = self.tokenizer.symbol()
+      # Skipping the ( of the expression
+      self.tokenizer.advance()
 
-      self.__write_current_line()
+      self.compile_expression()
 
-      # if previous token is (, we want to handle the case of an expression
-      if previous_token_type == "SYMBOL" and \
-              previous_token_symbol == "(":
-          self.compile_expression()
+      # Skipping the ) of the expression
+      self.tokenizer.advance()
 
-          # Writing the ) of the expression
-          self.__write_current_line()
+    # If we have an integer constant, we'll push it
+    elif self.tokenizer.token_type() == "INT_CONST":
+      self.writer.write_push("CONST", self.tokenizer.int_val())
 
-      # if previous token is an unary op (~,-), we handle it
-      elif previous_token_type == "SYMBOL" and \
-              previous_token_symbol in ["~", "-"]:
-          self.compile_term()
+      self.tokenizer.advance()
 
-      # Otherwise, we have an intergerConstant, stringConstant, keywordConstant,
-      # varName, varName[expression], or subroutineCall
+    # If we have a string constant, we'll push it
+    elif self.tokenizer.token_type() == "STRING_CONST":
+      self.writer.write_push("CONST", len(self.tokenizer.string_val()))
+      self.writer.write_call("String.new", 1)
 
-      # Checking if we have a '[' case
-      # Example: variable[5]
-      elif self.tokenizer.token_type() == "SYMBOL" and \
-              self.tokenizer.symbol() == "[":
-          
-          # Writing the [ symbol
-          self.__write_current_line()
+      for char in self.tokenizer.string_val():
+        self.writer.write_push("CONST", ord(char))
+        self.writer.write_call("String.appendChar", 2)
 
-          # Compiling the expression
-          self.compile_expression()
+      self.tokenizer.advance()
 
-          # Writing the ] symbol
-          self.__write_current_line()
+    # If we have a keyword constant, we'll push 0 (unless it's true, in which case we'll push 1)
+    # If we have a this keyword, we'll push the pointer 0 value
+    elif self.tokenizer.token_type() == "KEYWORD":
+      if self.tokenizer.keyword() == "this":
+        self.writer.write_push("POINTER", 0)
+
+      elif self.tokenizer.keyword() in ["true", "false", "null"]:
+        self.writer.write_push("CONST", 0)
+
+        if self.tokenizer.keyword() == "true":
+          self.writer.write_arithmetic("NOT")
+
+        self.tokenizer.advance()
+
+    # If we have an unary operator, we'll compile the term after it
+    elif self.tokenizer.token_type() == "SYMBOL" and \
+        self.tokenizer.symbol() in UNARY_OPERATORS.keys():
+      operator = self.tokenizer.symbol()
+
+      self.tokenizer.advance()
+
+      # Compiling the term after the unary op
+      self.compile_term()
+
+      # Executing the unary op on the previously compiled term
+      self.writer.write_arithmetic(UNARY_OPERATORS[operator])
+    
+    # If we have an array access
+    elif self.tokenizer.next_token_type() == "SYMBOL" and \
+        self.tokenizer.next_token_value() == "[":
       
-      # Checking if we have a subroutineCall case
-      # Example: subroutineCall()
-      # Example: Class.subroutineCall()
-      elif self.tokenizer.token_type() == "SYMBOL" and \
-              self.tokenizer.symbol() in ["(", "."]:
-          
-          if self.tokenizer.symbol() == ".":
-              # Writing the . symbol
-              self.__write_current_line()
+      # Getting the array name
+      array_name = self.tokenizer.identifier()
+      
+      # Skipping the array name
+      self.tokenizer.advance()
 
-              # Write the subroutineName
-              self.__write_current_line()
+      # Skipping the [
+      self.tokenizer.advance()
 
-          # Writing the ( symbol
-          self.__write_current_line()
+      # Compiling the expression in the []
+      self.compile_expression()
 
-          # Compiling the expressionList
-          self.compile_expression_list()
+      # Skipping the ]
+      self.tokenizer.advance()
 
-          # Writing the ) symbol
-          self.__write_current_line()
+      # Getting the array kind and index
+      array_kind = self.symbol_table.kind_of(array_name)
+      array_index = self.symbol_table.index_of(array_name)
 
-      # Else, we have a keyword constant, an integer constant or a string constant
-      # and we can end        
+      # Pushing the array base address
+      self.writer.write_push(array_kind, array_index)
 
-      self.__write_close_tag("term")
+      # Adding the index to the base address
+      self.writer.write_arithmetic("add")
 
-  def compile_expression_list(self) -> None:
-      """
-      Compiles a (possibly empty) comma-separated list of expressions.
-      """
+      # Re-position the THAT pointer to the array element
+      self.writer.write_pop("POINTER", 1)
 
-      self.__write_open_tag("expressionList")
+      # Push the value of the array element to the stack
+      self.writer.write_push("THAT", 0)
 
-      # Writing all the tokens until reaching a )
-      # Example input: x, y, z
-      while self.tokenizer.symbol() != ")":
-          if self.tokenizer.symbol() == ",":
-              self.__write_current_line()
-          else:
-              self.compile_expression()
-  
-      self.__write_close_tag("expressionList")
+
+    # If we have a function call
+    elif self.tokenizer.next_token_type() == "SYMBOL" and \
+        self.tokenizer.next_token_value() in ["(", "."]:
+
+      # The number of arguments in the function call
+      num_args = 0
+
+      # Saving the name of the called function and the object/class it's called on
+      name = self.tokenizer.identifier()
+      call_name = name
+      
+      # Skipping the name
+      self.tokenizer.advance()
+      
+      # If we have a '.', we'll have a subroutine call after it
+      if self.tokenizer.token_type() == "SYMBOL" and \
+          self.tokenizer.symbol() == ".":
+        self.tokenizer.advance()
+
+        # Saving the subroutine name
+        call_name = call_name + "." + self.tokenizer.identifier()
+
+        # Skipping the subroutine name
+        self.tokenizer.advance()
+      
+
+      # If we called a method, we'll push the object pointer as the first
+      # argument, we'll increment the number of arguments and rewrite the
+      # call name to include the class name
+      if self.symbol_table.contains(name):
+        variable_type = self.symbol_table.type_of(name)
+        variable_kind = self.symbol_table.kind_of(name)
+        variable_index = self.symbol_table.index_of(name)
+
+        self.writer.write_push(KIND_SEGMENTS[variable_kind], variable_index)
+
+        call_name = variable_type + "." + name
+        num_args += 1
+
+      # Skipping the (
+      self.tokenizer.advance()
+
+      # Compiling the expression list
+      num_args += self.compile_expression_list()
+
+      # Skipping the )
+      self.tokenizer.advance()
+
+      # If we don't have a class name, add the current class name
+      if "." not in call_name:
+        call_name = self.class_name + "." + call_name
+
+      # Calling the function
+      self.writer.write_call(call_name, num_args)
+
+    # If we have a variable, we'll push it
+    # This needs to come after array and function calls, because they can 
+    # also be variables
+    elif self.tokenizer.token_type() == "IDENTIFIER" and \
+        self.symbol_table.contains(self.tokenizer.identifier()):
+      
+      variable_kind = self.symbol_table.kind_of(self.tokenizer.identifier())
+      variable_index = self.symbol_table.index_of(self.tokenizer.identifier())
+
+      self.writer.write_push(KIND_SEGMENTS[variable_kind], variable_index)
+
+      self.tokenizer.advance()
+
+  def compile_expression_list(self) -> int:
+    """
+    Compiles a (possibly empty) comma-separated list of expressions.
+    """
+
+    num_args = 0
+
+    # Writing all the tokens until reaching a )
+    # Example input: x, y, z
+    while self.tokenizer.symbol() != ")":
+      if self.tokenizer.symbol() == ",":
+        self.tokenizer.advance()
+      else:
+        self.compile_expression()
+        
+        num_args += 1
+
+    return num_args

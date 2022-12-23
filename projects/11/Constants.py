@@ -1,5 +1,20 @@
 TAB = "  "
 
+VARIABLE_KINDS = {
+  "static": "STATIC",
+  "field": "FIELD",
+  "local": "VAR",
+  "var": "VAR",
+  "argument": "ARG",
+}
+
+KIND_SEGMENTS = {
+  "STATIC": "STATIC",
+  "FIELD": "THIS",
+  "VAR": "LOCAL",
+  "ARG": "ARG",
+}
+
 SEGMENTS = { 
   "CONST": "constant",
   "ARG": "argument",
@@ -68,7 +83,28 @@ SYMBOLS = {
   '>',
   '=',
   '~',
-  '|'
+  '|',
+  "#",
+  "^"
+}
+
+OPERATORS = {
+  "+": "ADD",
+  "-": "SUB",
+  "*": "Math.multiply",
+  "/": "Math.divide",
+  "&amp;": "AND",
+  "|": "OR",
+  "&lt;": "LT",
+  "&gt;": "GT",
+  "=": "EQ"
+}
+
+UNARY_OPERATORS = {
+  "~": "NOT",
+  "-": "NEG", 
+  "^": "SHIFTLEFT", 
+  "#": "SHIFTRIGHT"
 }
 
 TOKEN_TYPE_TAGS = {

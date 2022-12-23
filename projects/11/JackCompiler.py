@@ -10,7 +10,6 @@ import sys
 import typing
 from CompilationEngine import CompilationEngine
 from JackTokenizer import JackTokenizer
-from SymbolTable import SymbolTable
 from VMWriter import VMWriter
 
 def compile_file(input_file: typing.TextIO, output_file: typing.TextIO) -> None:
@@ -84,8 +83,10 @@ def compile_file(input_file: typing.TextIO, output_file: typing.TextIO) -> None:
     it and compare your compiler to it.
     """
     
-  # Your code goes here!
-  pass
+  tokenizer = JackTokenizer(input_file)
+  writer = VMWriter(output_file)
+
+  compilation_engine = CompilationEngine(tokenizer, writer)
 
 
 if "__main__" == __name__:

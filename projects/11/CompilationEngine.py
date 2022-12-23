@@ -136,7 +136,7 @@ class CompilationEngine:
 
     # If we are writing a method, we need to add the 'this' argument
     if self.tokenizer.keyword() == "method":
-      self.symbol_table.define("this", self.class_name, "argument")
+      self.symbol_table.define("this", self.class_name, VARIABLE_KINDS["argument"])
     
     self.__subroutine()
 
@@ -237,15 +237,15 @@ class CompilationEngine:
     # If we're in a constructor, we need to alloc enough memory for the fields
     # and then save the base address in pointer 0 (this)
     if self.subroutine_type == "constructor":
-      self.writer.write_push("constant", self.symbol_table.var_count("field"))
+      self.writer.write_push("CONST", self.symbol_table.var_count("FIELD"))
       self.writer.write_call("Memory.alloc", 1)
-      self.writer.write_pop("pointer", 0)
+      self.writer.write_pop("POINTER", 0)
 
     # If we're in a method, we need to save the given base address in arg 0
     # in pointer 0 (this)
     if self.subroutine_type == "method":
-      self.writer.write_push("argument", 0)
-      self.writer.write_pop("pointer", 0)
+      self.writer.write_push("ARG", 0)
+      self.writer.write_pop("POINTER", 0)
 
     # Compiling all the statements
     self.compile_statements()
@@ -384,6 +384,8 @@ class CompilationEngine:
       self.writer.write_push(KIND_SEGMENTS[object_kind], object_index)
 
     if '.' not in function_name:
+      num_args += 1
+
       # Pushing the current object's address to the stack
       self.writer.write_push("POINTER", 0)
 
@@ -697,7 +699,7 @@ class CompilationEngine:
         if self.tokenizer.keyword() == "true":
           self.writer.write_arithmetic("NOT")
 
-        self.tokenizer.advance()
+      self.tokenizer.advance()
 
     # If we have an unary operator, we'll compile the term after it
     elif self.tokenizer.token_type() == "SYMBOL" and \
@@ -736,10 +738,10 @@ class CompilationEngine:
       array_index = self.symbol_table.index_of(array_name)
 
       # Pushing the array base address
-      self.writer.write_push(array_kind, array_index)
+      self.writer.write_push(KIND_SEGMENTS[array_kind], array_index)
 
       # Adding the index to the base address
-      self.writer.write_arithmetic("add")
+      self.writer.write_arithmetic("ADD")
 
       # Re-position the THAT pointer to the array element
       self.writer.write_pop("POINTER", 1)
@@ -751,7 +753,6 @@ class CompilationEngine:
     # If we have a function call
     elif self.tokenizer.next_token_type() == "SYMBOL" and \
         self.tokenizer.next_token_value() in ["(", "."]:
-
       # The number of arguments in the function call
       num_args = 0
 
@@ -772,7 +773,6 @@ class CompilationEngine:
 
         # Skipping the subroutine name
         self.tokenizer.advance()
-      
 
       # If we called a method, we'll push the object pointer as the first
       # argument, we'll increment the number of arguments and rewrite the
@@ -784,7 +784,7 @@ class CompilationEngine:
 
         self.writer.write_push(KIND_SEGMENTS[variable_kind], variable_index)
 
-        call_name = variable_type + "." + name
+        call_name = variable_type + "." + call_name.split(".")[1]
         num_args += 1
 
       # Skipping the (

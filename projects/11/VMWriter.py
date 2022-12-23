@@ -107,7 +107,7 @@ class VMWriter:
       n_locals (int): the number of local variables the function uses.
     """
 
-    self.__write_blank_line()
+    # self.__write_blank_line()
     self.__write_command__("function", name, str(n_locals))
 
   def write_return(self) -> None:

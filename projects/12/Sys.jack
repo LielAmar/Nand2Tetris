@@ -1,27 +1,81 @@
-// This file is part of www.nand2tetris.org
-// and the book "The Elements of Computing Systems"
-// by Nisan and Schocken, MIT Press.
-// File name: projects/12/Sys.jack
+// This file is part of nand2tetris, as taught in The Hebrew University, and
+// was written by Aviv Yaish. It is an extension to the specifications given
+// [here](https://www.nand2tetris.org) (Shimon Schocken and Noam Nisan, 2017),
+// as allowed by the Creative Common Attribution-NonCommercial-ShareAlike 3.0
+// Unported [License](https://creativecommons.org/licenses/by-nc-sa/3.0/).
 
 /**
  * A library that supports various program execution services.
  */
 class Sys {
 
-    /** Performs all the initializations required by the OS. */
+    // A variable used to track number of loops in a single millisecond
+    static int LOOPS_PER_MS;
+    
+    /**
+     * Performs all the initializations required by the OS.
+     */
     function void init() {
+        // Initializes constants
+        let LOOPS_PER_MS = 100;
+
+        // Initializing all libraries
+        do String.init();
+        do Keyboard.init();
+
+        do Math.init();
+        do Memory.init();
+        do Screen.init();
+
+        // Calls the main entry point of the program
+        do Main.main();
+
+        // Halts the program
+        do Sys.halt();
+        return;
     }
 
-    /** Halts the program execution. */
+    /**
+     * Halts program execution.
+     */
     function void halt() {
+        while(true) {}
+        return;
     }
 
-    /** Waits approximately duration milliseconds and returns.  */
+    /**
+     * Waits approximately duration milliseconds and returns.
+     */
     function void wait(int duration) {
+        var int ms, loops;
+        
+        let ms = 0;
+
+        // (Executing code that takes ~ 1ms) x ${duration} times
+        while(ms < duration) {
+            let loops = 0;
+
+            // Executing ${LOOPS_PER_MS} loops to wait ~ 1ms
+            while(loops < LOOPS_PER_MS) {
+                loops = loops+1;
+            }
+
+            let ms = ms + 1;
+        }
+
+        return;
     }
 
-    /** Displays the given error code in the form "ERR<errorCode>",
-     *  and halts the program's execution. */
+    /**
+     * Displays the given error code in the form "ERR<errorCode>",
+     * and halts the program's execution.
+     */
     function void error(int errorCode) {
+        do Output.moveCursor(0, 0);
+        do Output.printString("ERR");
+        do Output.printInt(errorCode);
+
+        do halt();
+        return;
     }
 }

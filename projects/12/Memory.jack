@@ -1,10 +1,8 @@
-// This file is part of nand2tetris, as taught in The Hebrew University,
-// and was written by Aviv Yaish, and is published under the Creative 
-// Common Attribution-NonCommercial-ShareAlike 3.0 Unported License 
-// https://creativecommons.org/licenses/by-nc-sa/3.0/
-// It is an extension to the specifications given in  
-// https://www.nand2tetris.org (Shimon Schocken and Noam Nisan, 2017)
-// as allowed by the Creative Common Attribution-NonCommercial-ShareAlike 3.0 
+// This file is part of nand2tetris, as taught in The Hebrew University, and
+// was written by Aviv Yaish. It is an extension to the specifications given
+// [here](https://www.nand2tetris.org) (Shimon Schocken and Noam Nisan, 2017),
+// as allowed by the Creative Common Attribution-NonCommercial-ShareAlike 3.0
+// Unported [License](https://creativecommons.org/licenses/by-nc-sa/3.0/).
 // File name: projects/12/Memory.jack
 
 /**
@@ -13,7 +11,6 @@
  * consists of 32,768 words, each holding a 16-bit binary number.
  */ 
 class Memory {
-
     /** Initializes the class. */
     function void init() {
         // Pseudocode:
@@ -51,12 +48,12 @@ class Memory {
     function void deAlloc(Array o) {
         // Pseudocode:
         // 1. segment = o - 1
-        // 2. Insert segment into the freeLis
+        // 2. Insert segment into the freeList
     }    
 
     /** Returns the maximal element contained in the given Array/object. 
-     * Assume inputs are initialized and contain at least one element. */
-	function int max(Array o) {
+     *  Assume inputs are initialized and contain at least one element. */
+    function int max(Array o) {
         // Hint: the algorithm you need to implement in Memory.alloc saves the
         // size of the allocated block in the memory cell right before the 
         // start of the block, and this can be used to implement Memory.max.

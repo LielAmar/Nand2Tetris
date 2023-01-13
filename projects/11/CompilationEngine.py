@@ -140,8 +140,8 @@ class CompilationEngine:
     
     self.__subroutine()
 
-    print(f"{self.class_name}.{self.subroutine_name} symbol table:")
-    print(self.symbol_table)
+    # print(f"{self.class_name}.{self.subroutine_name} symbol table:")
+    # print(self.symbol_table)
       
   def __subroutine(self):
     """

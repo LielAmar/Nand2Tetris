@@ -114,8 +114,6 @@ class JackTokenizer:
     stipped_input = self.__remove_comments(input_stream.read())
     self.tokens = self.__tokenize(stipped_input)
 
-    # print("tokens are: ", [str(token) for token in self.tokens])
-
     self.current_token_id = 0
 
   def __remove_comments(self, input: str) -> str:

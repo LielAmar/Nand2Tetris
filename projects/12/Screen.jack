@@ -11,65 +11,254 @@
  * the screen is indexed (0,0).
  */
 class Screen {
-        /** Initializes the Screen. */
-        function void init() {
+
+    static Array powersOfTwo;
+
+    static boolean color;
+
+    /**
+     * Initializes the Screen.
+     */
+    function void init() {
+        let powersOfTwo = Array.new(16);
+        let powersOfTwo[0] = 1;
+        let powersOfTwo[1] = 2;
+        let powersOfTwo[2] = 4;
+        let powersOfTwo[3] = 8;
+        let powersOfTwo[4] = 16;
+        let powersOfTwo[5] = 32;
+        let powersOfTwo[6] = 64;
+        let powersOfTwo[7] = 128;
+        let powersOfTwo[8] = 256;
+        let powersOfTwo[9] = 512;
+        let powersOfTwo[10] = 1024;
+        let powersOfTwo[11] = 2048;
+        let powersOfTwo[12] = 4096;
+        let powersOfTwo[13] = 8192;
+        let powersOfTwo[14] = 16384;
+        let powersOfTwo[15] = 16384 + 16384;
+
+        // Sets the color to black
+        do Screen.setColor(true);
+
+        return;
+    }
+
+    /**
+     * Erases the entire screen.
+     */
+    function void clearScreen() {
+        var int index;
+
+        let index = 0;
+
+        while(index < 8192) {
+            do Memory.poke(16384 + index, 0);
+
+            let index = index + 1;
+        }
+    
+        return;
+    }
+
+    /**
+     * Sets the current color, to be used for all subsequent drawXXX commands.
+     * Black is represented by true, white by false.
+     */
+    function void setColor(boolean b) {
+        let color = b;
+
+        return;
+    }
+
+    /**
+     * Draws the (x,y) pixel, using the current color.
+     */
+    function void drawPixel(int x, int y) {
+        var int address, row, col;
+        var int bitLocation;
+
+        let row = ^^^^^y; // Shifts y 5 times to the left. same as y*32
+        let col = ####x;  // Shifts x 4 times to the right. Same as x/16
+
+        let address = 16384 + row + col;
+
+        if(color) {
+            // To paint in black, we want to only have the (x & 15)th bit
+            // being '1', then using "Logical or" with current value
+            // 1010010101101100 [current value]
+            // 0000001000000000
+            // ----------------
+            // 1010011101101100 [new value]
+            do Memory.poke(address, Memory.peek(address) | powersOfTwo[(x & 15)]);
+        } else {
+            // To paint in white, we want to only have the (x & 15)th bit
+            // being '0', then using "Logical and" with current value
+            // 1010011101101100 [current value]
+            // 1111110111111111
+            // ----------------
+            // 1010010101101100 [new value]
+            do Memory.poke(address, Memory.peek(address) & ~powersOfTwo[(x & 15)]);
         }
 
-        /** Erases the entire screen. */
-        function void clearScreen() {
+        return;
+    }
+
+    /**
+     * Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color.
+     */
+    function void drawLine(int x1, int y1, int x2, int y2) {
+        var int dx, dy;
+        var int x, y;
+
+        let dx = Math.abs(x1 - x2);
+        let dy = Math.abs(y1 - y2);
+
+        let x = Math.min(x1, x2);
+        let y = Math.min(y1, y2);
+
+        // Horizontal line
+        if(dy = 0) {
+            do Screen.drawHorizontalLine(x, dx, y1);
+            return;
         }
 
-        /** Sets the current color, to be used for all subsequent drawXXX commands.
-         *    Black is represented by true, white by false. */
-        function void setColor(boolean b) {
+        // Vertical line
+        if(dx = 0) {
+            do Screen.drawVerticalLine(y, dy, x1);
+            return;
         }
 
-        /** Draws the (x,y) pixel, using the current color. */
-        function void drawPixel(int x, int y) {
-            // For this function, you will need to calculate the value x%16.
-            // It should be calculated quickly without using multiplication or
-            // division, using exactly one basic math/logical operation.
-            // In addition, calculating 16384 + y * 32 + x/16 should not use
-            // division or multiplication.
-            // Pseudocode:
-            // 1. Compute the RAM address where the (x,y) pixel is
-            //    represented: 16384 + (32*y) + (x/16).
-            // 2. Use Memory.peek to get the 16-bit value of this address
-            // 3. Use some bitwise operation to set (only) the bit that corresponds
-            //    to the pixel to the current color.
-            // 4. Use Memory.poke to write the modified 16-bit value to the RAM
-            // address.
+        // Swapping x1 and x2, y1 and y2 if needed
+        if(x1 > x2) {
+            let x1 = x1 + x2;
+            let x2 = x1 - x2;
+            let x1 = x1 - x2;
+
+            let y1 = y1 + y2;
+            let y2 = y1 - y2;
+            let y1 = y1 - y2;
         }
 
-        /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
-        function void drawLine(int x1, int y1, int x2, int y2) {
-            // The case where x1 != x2 and y1 != y2 should be implemented without
-            // multiplication or division.
-            // Pseudocode:
-            // 1. let x = x1, y = y1, a = 0, b = 0, diff = 0
-            // 2. Compute dx and dy
-            // 3. while ((a <= dx) and (b <= dy))
-            // 4.   do drawPixel(x+a, y+b)
-            // 5.   if (diff < 0) { let a=a+1, diff=diff+dy }
-            // 6.   else          { let b=b+1, diff=diff-dx }
-            //
-            // The case where y1 == y2 can be implemented efficiently by
-            // trying to draw as many pixels as possible in a single assignment,
-            // similarly to Fill in project 4.
+        do Screen.drawDiagonalLine(x1, y1, x2, y2);
+        return;
+    }
+
+    /**
+     * Draws an horizontal line
+     */
+    function void drawHorizontalLine(int startX, int length, int y) {
+        var int index;
+
+        while(index < (length + 1)) {
+            do Screen.drawPixel(startX + index, y);
+            let index = index + 1;
         }
 
-        /** Draws a filled rectangle whose top left corner is (x1, y1)
-         * and bottom right corner is (x2,y2), using the current color. */
-        function void drawRectangle(int x1, int y1, int x2, int y2) {
+        return;
+    }
+
+    /**
+     * Draws a vertical line
+     */
+    function void drawVerticalLine(int startY, int length, int x) {
+        var int index;
+
+        while(index < (length + 1)) {
+            do Screen.drawPixel(x, startY + index);
+            let index = index + 1;
         }
 
-        /** Draws a filled circle of radius r<=181 around (x,y), using the current color. */
-        function void drawCircle(int x, int y, int r) {
-            // This can be implemented efficiently by drawing multiple lines at
-            // each iteration. You can use multiplication and sqrt.
-            // Pseudocode:
-            // 1. for (dy = -r ... r)
-            // 2.   let halfWidth = sqrt(r*r - dy*dy)
-            // 3.   do drawLine(x-halfWidth, y+dy, x+halfWidth, y+dy)
+        return;
+    }
+
+    /**
+     * Draws a diagonal line whereas x1 < x2.
+     */
+    function void drawDiagonalLine(int x1, int y1, int x2, int y2) {
+        var int dx, dy;
+        var int a, b;
+        var int yDiffSign;
+        var int diff;
+
+        let dx = x2 - x1;
+        let dy = y2 - y1;
+
+        let a = 0;
+        let b = 0;
+
+        let yDiffSign = dy / Math.abs(dy);
+        let diff = 0;
+
+        while(~(a > dx) & (((yDiffSign = 1) & ~(b > dy)) | ((yDiffSign = -1) & ~(b < dy)))) {
+            do Screen.drawPixel(x1 + a, y1 + b);
+
+            if(diff < 0) {
+                let a = a + 1;
+                let diff = diff + (dy * yDiffSign);
+            } else {
+                let b = b + yDiffSign;
+                let diff = diff - dx;
+            }
         }
+
+        return;
+    }
+
+    /**
+     * Draws a filled rectangle whose top left corner is (x1, y1)
+     * and bottom right corner is (x2,y2), using the current color.
+     */
+    function void drawRectangle(int x1, int y1, int x2, int y2) {
+        var int dx, dy;
+        var int x, y;
+        var int xDir, yDir;
+
+        let dx = Math.abs(x1 - x2);
+        let dy = Math.abs(y1 - y2);
+
+        let x = Math.min(x1, x2);
+        let y = Math.min(y1, y2);
+
+        let yDir = 0;
+
+        while(~(yDir > dy)) {
+            let xDir = 0;
+
+            while(~(xDir > dx)) {
+                do Screen.drawPixel(x + xDir, y + yDir);
+
+                let xDir = xDir + 1;
+            }
+
+            let yDir = yDir + 1;
+        }
+        
+        return;
+    }
+
+    /**
+     * Draws a filled circle of radius r<=181 around (x,y), using the current color.
+     */
+    function void drawCircle(int x, int y, int r) {
+        var int dx, dy;
+
+        var int xDiff;
+
+        if(~(r > -1) & ~(r < 182)) {
+            do Sys.error(13);
+        }
+
+        let dy = -r;
+
+        while(~(dy > r)) {
+            let dx = Math.sqrt((r*r) - (dy*dy));
+
+            do Screen.drawHorizontalLine(x - dx, dx + dx, y + dy);
+
+            let dy = dy + 1;
+        }
+
+        return;
+    }
 }

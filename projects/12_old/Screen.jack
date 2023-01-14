@@ -1,0 +1,57 @@
+// This file is part of nand2tetris, as taught in The Hebrew University,
+// and was written by Aviv Yaish, and is published under the Creative 
+// Common Attribution-NonCommercial-ShareAlike 3.0 Unported License 
+// https://creativecommons.org/licenses/by-nc-sa/3.0/
+// It is an extension to the specifications given in  
+// https://www.nand2tetris.org (Shimon Schocken and Noam Nisan, 2017)
+// as allowed by the Creative Common Attribution-NonCommercial-ShareAlike 3.0 
+// File name: projects/12/Screen.jack
+
+/**
+ * A library of functions for displaying graphics on the screen.
+ * The Hack physical screen consists of 256 rows (indexed 0..255, top to bottom)
+ * of 512 pixels each (indexed 0..511, left to right). The top left pixel on 
+ * the screen is indexed (0,0).
+ */
+class Screen {
+
+    /** Initializes the Screen. */
+    function void init() {
+    }
+
+    /** Erases the entire screen. */
+    function void clearScreen() {
+    }
+
+    /** Sets the current color, to be used for all subsequent drawXXX commands.
+     *  Black is represented by true, white by false. */
+    function void setColor(boolean b) {
+    }
+
+    /** Draws the (x,y) pixel, using the current color. */
+    function void drawPixel(int x, int y) {
+		// For this function, you will need to calculate the value x%16.
+		// It should be calculated quickly without using multiplication or
+		// division, using exactly one basic math/logical operation.
+		// In addition, calculating 16384 + y * 32 + x/16 should not use
+		// division or multiplication.
+    }
+
+    /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
+    function void drawLine(int x1, int y1, int x2, int y2) {
+		// The case where x1 != x2 and y1 != y2 should be implemented without
+		// multiplication or division.
+		// Also, the case where y1 == y2 can be implemented efficiently by
+		// trying to draw as many pixels as possible in a single assignment,
+		// similarly to Fill in project 4.
+    }
+
+    /** Draws a filled rectangle whose top left corner is (x1, y1)
+     * and bottom right corner is (x2,y2), using the current color. */
+    function void drawRectangle(int x1, int y1, int x2, int y2) {
+    }
+
+    /** Draws a filled circle of radius r<=181 around (x,y), using the current color. */
+    function void drawCircle(int x, int y, int r) {
+    }
+}

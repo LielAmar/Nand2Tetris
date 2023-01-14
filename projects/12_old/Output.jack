@@ -1,8 +1,6 @@
-// This file is part of nand2tetris, as taught in The Hebrew University, and
-// was written by Aviv Yaish. It is an extension to the specifications given
-// [here](https://www.nand2tetris.org) (Shimon Schocken and Noam Nisan, 2017),
-// as allowed by the Creative Common Attribution-NonCommercial-ShareAlike 3.0
-// Unported [License](https://creativecommons.org/licenses/by-nc-sa/3.0/).
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
 // File name: projects/12/Output.jack
 
 /**
@@ -19,27 +17,15 @@
 class Output {
 
     // Character map for displaying characters
-    static Array charMaps;
-
-    static int cursorRow, cursorCol;
+    static Array charMaps; 
 
     /**
-     * Initializes the screen, and locates the cursor at the screen's top-left.
+     * Initializes the screen, and locates the cursor at the screen's top-left. 
      */
     function void init() {
-        // Initializes the characters bit map
-        do Output.initMap();
-
-        // Moves cursor to (0,0)
-        let cursorRow = 0;
-        let cursorCol = 0;
-        
-        return;
     }
 
-    /**
-     * Initializes the character map array
-     */
+    // Initializes the character map array
     function void initMap() {
         var int i;
     
@@ -87,7 +73,7 @@ class Output {
         do Output.create(64,30,51,51,59,59,59,27,3,30,0,0);  // @
         do Output.create(63,30,51,51,24,12,12,0,12,12,0,0);  // ?
 
-        do Output.create(65,12,30,51,51,63,51,51,51,51,0,0); // A
+        do Output.create(65,0,0,0,0,0,0,0,0,0,0,0);          // A ** TO BE FILLED **
         do Output.create(66,31,51,51,51,31,51,51,51,31,0,0); // B
         do Output.create(67,28,54,35,3,3,3,35,54,28,0,0);    // C
         do Output.create(68,15,27,51,51,51,51,51,27,15,0,0); // D
@@ -156,10 +142,7 @@ class Output {
 	    return;
     }
 
-    /**
-     * Creates the character map array of the given character index,
-     * using the given values.
-     */
+    // Creates the character map array of the given character index, using the given values.
     function void create(int index, int a, int b, int c, int d, int e,
                          int f, int g, int h, int i, int j, int k) {
 	    var Array map;
@@ -182,218 +165,42 @@ class Output {
         return;
     }
     
-    /**
-     * Returns the character map (array of size 11) of the given character.
-     * If the given character is invalid or non-printable, returns the
-     * character map of a black square.
-     */
+    // Returns the character map (array of size 11) of the given character.
+    // If the given character is invalid or non-printable, returns the
+    // character map of a black square.
     function Array getMap(char c) {
         if ((c < 32) | (c > 126)) {
             let c = 0;
         }
-
+        
         return charMaps[c];
     }
 
-    /**
-     * Moves the cursor to the j-th column of the i-th row,
-     * and erases the character displayed there.
-     * - Max row is (256/11 - 1) = 22
-     * - Max col is (512/8 - 1) = 63
-     */
+    /** Moves the cursor to the j-th column of the i-th row,
+     *  and erases the character displayed there. */
     function void moveCursor(int i, int j) {
-        if((~(i > -1) & ~(i < 23)) | (~(j > -1) & ~(j < 64))) {
-            do Sys.error(20);
-        }
-
-        let cursorRow = i;
-        let cursorCol = j;
-
-        return;
     }
 
-    /**
-     * Advances the cursor forward by 1 position
-     */
-    function void advanceCursor() {
-        var int newRow, newCol;
-
-        let newRow = cursorRow;
-        let newCol = cursorCol + 1;
-
-        if(newCol = 64) {
-            let newRow = newRow + 1;
-            let newCol = 0;
-        }
-
-        // TODO: make sure we should return to first line if reached the end
-        if(newRow = 23) {
-            let newRow = 0;
-        }
-
-        do Output.moveCursor(newRow, newCol);
-
-        return;
-    }
-
-    /**
-     * Retreats the cursor backwards by 1 position
-     */
-    function void retreatCursor() {
-        var int newRow, newCol;
-
-        let newRow = cursorRow;
-        let newCol = cursorCol - 1;
-
-        if(newCol = -1) {
-            let newRow = newRow - 1;
-            let newCol = 63;
-        }
-
-        // TODO: make sure we should return to first line if reached the end
-        if(newRow = -1) {
-            let newRow = 0;
-            let newCol = 0;
-        }
-
-        do Output.moveCursor(newRow, newCol);
-
-        return;
-    }
-
-    /**
-     * Displays the given character at the cursor location,
-     * and advances the cursor one column forward.
-     * 
-     * - Note that a register is 16 bit long. Therefore, we have to do some
-     *   manipulations to only update 8 at a time ('cause a pixel is 8 bits long)
-     *
-     * - Note that multiplying by 256 (2^8) is the same as 8 shifts left
-     * - Note that dividing by 256 (2^8) is the same as 8 shifts right
-     */
+    /** Displays the given character at the cursor location,
+     *  and advances the cursor one column forward. */
     function void printChar(char c) {
-        var Array charBitMap;
-        var int charBitRow;
-
-        var int clear_half, current_register_value;
-
-        var int address;
-        var int index;
-        var int is_even;
-
-        // Handles special cases
-        if(c = String.newLine()) {
-            do Output.println();
-            return;
-        }
-        
-        if(c = String.backSpace()) {
-            do Output.backSpace();
-            return;
-        }
-
-        // The characters bit map
-        let charBitMap = Output.getMap(c);
-
-        // Calculates the relative address to the screen register
-        // Meaning, (row=0,col=0) should return (0)
-        // Notice that we have 512 pixels per row, and we have 256 rows.
-        // However, each output entry is 11x8, so we need to calculate the
-        // correct relative address.
-        // We have 512/16 (32) registers representing a single row, therefore
-        // we want to jump by 32 (times 11, for the number of rows) for every
-        // row.
-        // As for columns: we want to jump by (col * 8) bits, however, we have
-        // 16 bits per register, so we'll divide it by 16.
-        let address = 16384 + (cursorRow * 11 * 32) + (cursorCol / 2);
-
-        // We edit the address according to the whether the column index is even or odd
-        // Odd column  <=> edit the right-hand-side 8 bits of the ram address
-        // Even column <=> edit the left-hand-size 8 bits of the ram addres
-        let is_even = cursorCol & 1;
-
-        let index = 0;
-
-        // Sets all 11 addresses
-        while (index < 11) {
-			let charBitRow = charBitMap[index];
-
-			if (is_even = 1) {
-                let charBitRow = (Memory.peek(address) & 255) | (charBitRow * 256);
-			} else {
-                let charBitRow = (Memory.peek(address) & (255 * 256)) | charBitRow;
-			}
-			
-			do Memory.poke(address, charBitRow);
-
-            let address = address + 32;
-            let index = index + 1;
-        }
-        
-        do Output.advanceCursor();
-        
-        return;
     }
 
-    /**
-     * displays the given string starting at the cursor location,
-     * and advances the cursor appropriately.
-     */
-    function void printString(String str) {
-        var int length, index;
-
-        let length = str.length();
-        let index = 0;
-
-        while(index < length) {
-            do Output.printChar(str.charAt(index));
-
-            let index = index + 1;
-        }
-
-        return;
+    /** displays the given string starting at the cursor location,
+     *  and advances the cursor appropriately. */
+    function void printString(String s) {
     }
 
-    /**
-     * Displays the given integer starting at the cursor location,
-     * and advances the cursor appropriately.
-     *
-     * - The max integer in a 16-bit architecture is 65,535 (5 digits)
-     */
+    /** Displays the given integer starting at the cursor location,
+     *  and advances the cursor appropriately. */
     function void printInt(int i) {
-        var String str;
-        
-        let str = String.new(6);
-        
-        do str.setInt(i);
-        do Output.printString(str);
-        do str.dispose();
-
-        return;
     }
 
-    /**
-     * Advances the cursor to the beginning of the next line.
-     * - Every line is 11 pixels high, so we have 256/11 = 23 rows
-     */
+    /** Advances the cursor to the beginning of the next line. */
     function void println() {
-        if(cursorRow < 23) {
-            do Output.moveCursor(cursorRow + 1, 0);
-        }
-
-        return;
     }
 
-    /**
-     * Moves the cursor one column back.
-     */
+    /** Moves the cursor one column back. */
     function void backSpace() {
-        if(cursorCol > 0) {
-            do Output.retreatCursor();
-            do Output.printChar(32);
-            do Output.retreatCursor();
-        }
-
-        return;
     }
 }

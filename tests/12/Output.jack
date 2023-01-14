@@ -20,6 +20,7 @@ class Output {
 
     // Character map for displaying characters
     static Array charMaps;
+    static Array screenRegister;
 
     static int cursorRow, cursorCol;
 
@@ -29,6 +30,9 @@ class Output {
     function void init() {
         // Initializes the characters bit map
         do Output.initMap();
+
+        // Initializes the screen register
+        let screenRegister = 16384;
 
         // Moves cursor to (0,0)
         let cursorRow = 0;
@@ -295,7 +299,7 @@ class Output {
         // The characters bit map
         let charBitMap = Output.getMap(c);
 
-        // Calculates the relative address to the screen register
+        // Calculates the relative address to ${screenRegister}
         // Meaning, (row=0,col=0) should return (0)
         // Notice that we have 512 pixels per row, and we have 256 rows.
         // However, each output entry is 11x8, so we need to calculate the

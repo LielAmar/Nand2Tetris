@@ -8,83 +8,144 @@
  * A library for handling user input from the keyboard.
  */
 class Keyboard {
-        /** Initializes the keyboard. */
-        function void init() {
-        } 
 
-        /**
-         * Returns the character of the currently pressed key on the keyboard;
-         * if no key is currently pressed, returns 0.
-         *
-         * Recognizes all ASCII characters, as well as the following keys:
-         * new line = 128 = String.newline()
-         * backspace = 129 = String.backspace()
-         * left arrow = 130
-         * up arrow = 131
-         * right arrow = 132
-         * down arrow = 133
-         * home = 134
-         * End = 135
-         * page up = 136
-         * page down = 137
-         * insert = 138
-         * delete = 139
-         * ESC = 140
-         * F1 - F12 = 141 - 152
-         */
-        function char keyPressed() {
-            // Uses Memory.peek
+    // An array that starts at the keyboard ram address, allowing access
+    // to the value in that address.
+    static Array keyboardRegister;
+
+    /**
+     * Initializes the keyboard register.
+     */
+    function void init() {
+        // TODO: use Memory.poke
+        let keyboardRegister = 24576;
+
+        return;
+    } 
+
+    /**
+        * Returns the character of the currently pressed key on the keyboard;
+        * if no key is currently pressed, returns 0.
+        *
+        * Recognizes all ASCII characters, as well as the following keys:
+        * new line = 128 = String.newline()
+        * backspace = 129 = String.backspace()
+        * left arrow = 130
+        * up arrow = 131
+        * right arrow = 132
+        * down arrow = 133
+        * home = 134
+        * End = 135
+        * page up = 136
+        * page down = 137
+        * insert = 138
+        * delete = 139
+        * ESC = 140
+        * F1 - F12 = 141 - 152
+        */
+    function char keyPressed() {
+        // TODO: use Memory.peek
+        return keyboardRegister[0];
+    }
+
+    /**								
+     * Waits until a key is pressed on the keyboard and released,
+     * then echoes the key to the screen, and returns the character 
+     * of the pressed key.
+     */
+    function char readChar() {
+        var char clickedChar;
+
+        // Dispaly the cursor
+        do Output.printChar(0);
+
+        // Waiting for a key to be pressed
+        while(Keyboard.keyPressed() = 0) {}
+
+        // Saving pressed key
+        let clickedChar = Keyboard.keyPressed();
+
+        // Waiting for the key to be released
+        while(~(Keyboard.keyPressed() = 0)) {}
+
+        // Removing cursor
+        do Output.backSpace();
+
+        // If the given character is not a backSpace, print it
+        if(~(clickedChar = String.backSpace())) {
+            do Output.printChar(clickedChar);
         }
 
-        /**								
-         * Waits until a key is pressed on the keyboard and released,
-         * then echoes the key to the screen, and returns the character 
-         * of the pressed key.
-         */
-        function char readChar() {
-            // This should behave exactly like the built-in OS.
-            // Pseudocode:
-            // 1. display the cursor
-            // 2. while (keyPressed() = 0): do nothing
-            // 3. let c = code of the currently pressed key
-            // 4. while (~(keyPressed() = 0)): do nothing
-            // 5. display c at the current cursor location
-            // 6. advance the cursor
-            // 7. return c
+        return clickedChar;
+    }
+
+    /**								
+     * Displays the message on the screen, reads from the keyboard the entered
+     * text until a newline character is detected, echoes the text to the screen,
+     * and returns its value. Also handles user backspaces if the current value
+     * is longer than a single character.
+     */
+    function String readLine(String message) {
+        var String str;
+        var char currentChar;
+
+        do Output.printString(message);
+
+        let str = String.new(64);
+        let currentChar = Keyboard.readChar();
+
+        // Keep on reading characters until hitting a \n
+        while(~(currentChar = String.newLine())) {
+            if(currentChar = String.backSpace()) {
+                // Erase last character and move cursor backwards
+                // only if the string's length is not 0
+                if(~(str.length() = 0)) {
+                    do str.eraseLastChar();
+                    do Output.backSpace(); 
+                }
+            } else {
+                // Add the new character
+                do str.appendChar(currentChar);
+            }
+
+            let currentChar = Keyboard.readChar();
         }
 
-        /**								
-         * Displays the message on the screen, reads from the keyboard the entered
-         * text until a newline character is detected, echoes the text to the screen,
-         * and returns its value. Also handles user backspaces if the current value
-         * is longer than a single character.
-         */
-        function String readLine(String message) {
-            // This should behave exactly like the built-in OS.
-            // You can assume input is at most 64 characters long.
-            // Why? Because this is the width of our screen!
-            // Pseudocode:
-            // 1. printString(message)
-            // 2. let str = ""
-            // 3. while true
-            // 4.   let c = readChar()
-            // 5.   if (c = newLine)
-            // 6.      display newLine (if not displayed already by readChar())
-            // 7.      return str
-            // 8.   else if (c = backSpace)
-            // 9.      remove the last character from str, if possible
-            // 10.     move the cursor accordingly
-            // 11.  else
-            // 12.    str.appendChar(c)
-        }     
+        return str;
 
-        /**								
-         * Displays the message on the screen, reads from the keyboard the entered
-         * text until a newline character is detected, echoes the text to the screen,
-         * and returns its integer value (until the first non-digit character in the
-         * entered text is detected). Also handles user backspaces. 
-         */
-        function int readInt(String message) {
-            // This should behave exactly like the built-in OS.
-        }
+
+        // This should behave exactly like the built-in OS.
+        // You can assume input is at most 64 characters long.
+        // Why? Because this is the width of our screen!
+        // Pseudocode:
+        // 1. printString(message)
+        // 2. let str = ""
+        // 3. while true
+        // 4.   let c = readChar()
+        // 5.   if (c = newLine)
+        // 6.      display newLine (if not displayed already by readChar())
+        // 7.      return str
+        // 8.   else if (c = backSpace)
+        // 9.      remove the last character from str, if possible
+        // 10.     move the cursor accordingly
+        // 11.  else
+        // 12.    str.appendChar(c)
+    }     
+
+    /**								
+     * Displays the message on the screen, reads from the keyboard the entered
+     * text until a newline character is detected, echoes the text to the screen,
+     * and returns its integer value (until the first non-digit character in the
+     * entered text is detected). Also handles user backspaces. 
+     */
+    function int readInt(String message) {
+        var String str;
+        var int number;
+
+        let str = Keyboard.readLine(message);
+        let number = str.intValue();
+
+        do str.dispose();
+        return number;
+    }
 }

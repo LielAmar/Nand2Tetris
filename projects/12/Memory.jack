@@ -147,13 +147,30 @@ class Memory {
         return;
     }    
 
-    /** Returns the maximal element contained in the given Array/object. 
-     *  Assume inputs are initialized and contain at least one element. */
-    function int max(Array o) {
+    /**
+     * Returns the maximal element contained in the given Array/object. 
+     * Assume inputs are initialized and contain at least one element.
+     */
+    function int max(Array object) {
         // Hint: the algorithm you need to implement in Memory.alloc saves the
         // size of the allocated block in the memory cell right before the 
         // start of the block, and this can be used to implement Memory.max.
-        
-        return 0;
+        var int size;
+        var int index;
+        var int max;
+
+        let size = object - 1;
+        let index = 1;
+        let max = object[0];
+
+        while(index < size) {
+            if(object[index] > max) {
+                let max = object[index];
+            }
+
+            let index = index + 1;
+        }
+    
+        return max;
     }
 }

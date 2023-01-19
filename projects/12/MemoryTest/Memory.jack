@@ -65,10 +65,6 @@ class Memory {
         var int previousNodeAddress;
         var int blockAddress;
 
-        if(size < 1) {
-            do Sys.error(5);
-        }
-
         let currentNodeAddress = free;
         let previousNodeAddress = -1;
 
@@ -129,7 +125,6 @@ class Memory {
             let currentNodeAddress = memory[currentNodeAddress + 1];
         }
         
-        do Sys.error(6);
         return -1;
     }
 

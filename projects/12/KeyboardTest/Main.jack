@@ -28,13 +28,16 @@ class Main {
         
             do Output.println();
         
-            if (c = 137) {
+            if (c = 133) {
        	        do Output.printString("ok");
 	            do Output.println();
 	            let ok = true;
 	        }
+            else {
+                do Output.printChar(c);
+            }
 	    }
-	
+
 	    let ok = false;
         do Output.printString("readChar test:");
         do Output.println();

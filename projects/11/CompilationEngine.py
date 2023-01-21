@@ -797,7 +797,10 @@ class CompilationEngine:
       self.tokenizer.advance()
 
       # If we don't have a class name, add the current class name
+      # and push "this" to the stack
       if "." not in call_name:
+        self.writer.write_push("THIS", 0)
+
         call_name = self.class_name + "." + call_name
 
       # Calling the function

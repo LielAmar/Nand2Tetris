@@ -171,15 +171,15 @@ class Screen {
         // to color all the way to the end of the byte.
         if(~(currentX = 0)) {
             if((currentX + length) < 16) {
-                let bitsToChange = powersOfTwo[currentX + length] - 1;
+                let bitsToChange = powersOfTwo[currentX + lengt + 1h] - 1;
             } else {
                 let bitsToChange = -1;
             }
 
             // We want to change the ${currentX-1} first bits to 0, so we don't
             // edit them.
-            // To do that, we take bitsToChange and subtract (2^(currentX) - 1)
-            let bitsToChange = bitsToChange - (powersOfTwo[currentX] - 1);
+            // To do that, we take bitsToChange and subtract (2^(currentX - 1) - 1)
+            let bitsToChange = bitsToChange - (powersOfTwo[currentX -1] - 1);
 
             // Coloring the bits
             if(color) {

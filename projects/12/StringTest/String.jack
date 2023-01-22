@@ -74,7 +74,7 @@ class String {
     method void setCharAt(int j, char c) {
         // Error: String index out of bounds
         if(~(j > -1) & ~(j < length)) {
-            do Sys.error(16);
+            do Sys.error(15);
         }
 
         let characters[j] = c;

@@ -115,10 +115,6 @@ class Screen {
         var int dx, dy;
         var int x, y;
 
-        if(x1 < 0 | y1 < 0 | x1 > 511 | y1 > 255 | x2 < 0 | y2 < 0 | x2 > 511 | y2 > 255) {
-            do Sys.error(8);
-        }
-
         let dx = Math.abs(x1 - x2);
         let dy = Math.abs(y1 - y2);
 
@@ -219,7 +215,7 @@ class Screen {
 
         // Color the remaining bits
         if(length > 0) {
-            let bitsToChange = powersOfTwo[length] - 1;
+            let bitsToChange = powersOfTwo[length + 1] - 1;
         
             // Coloring the bits
             if(color) {
@@ -288,11 +284,6 @@ class Screen {
         var int x, y;
         var int yDir;
 
-        if(x1 < 0 | y1 < 0 | x1 > 511 | y1 > 255 | x2 < 0 | y2 < 0 | x2 > 511 | y2 > 255) {
-            do Sys.error(9);
-        }
-
-
         let dx = Math.abs(x1 - x2);
         let dy = Math.abs(y1 - y2);
 
@@ -317,10 +308,6 @@ class Screen {
         var int dx, dy;
 
         var int xDiff;
-
-        if(x < 0 | y < 0 | x > 511 | y > 255) {
-            do Sys.error(12);
-        }
 
         if(~(r > -1) & ~(r < 182)) {
             do Sys.error(13);

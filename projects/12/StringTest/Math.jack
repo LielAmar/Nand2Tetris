@@ -105,16 +105,14 @@ class Math {
     function int divide(int x, int y) {
         var int result;
         var boolean negative;
-
-        if(y = 0) {
-            do Sys.error(3);
-        }
+        let negative = false;
 
         // If the result would be negative, remember it
         if(((x > 0) & (y < 0)) | ((x < 0) & (y > 0))) {
             let negative = true;
         }
 
+        let divisionSum = 0;
         let result = Math.divideAbs(Math.abs(x), Math.abs(y));
 
         if(negative) {
@@ -128,7 +126,6 @@ class Math {
         var int q;
 
         if(y > x | y < 0) {
-            let divisionSum = 0;
             return 0;
         }
 

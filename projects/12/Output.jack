@@ -275,11 +275,9 @@ class Output {
         var Array charBitMap;
         var int charBitRow;
 
-        var int clear_half, current_register_value;
-
         var int address;
         var int index;
-        var int is_even;
+        var int isEven;
 
         // Handles special cases
         if(c = String.newLine()) {
@@ -310,7 +308,7 @@ class Output {
         // We edit the address according to the whether the column index is even or odd
         // Odd column  <=> edit the right-hand-side 8 bits of the ram address
         // Even column <=> edit the left-hand-size 8 bits of the ram addres
-        let is_even = cursorCol & 1;
+        let isEven = cursorCol & 1;
 
         let index = 0;
 
@@ -318,7 +316,7 @@ class Output {
         while (index < 11) {
 			let charBitRow = charBitMap[index];
 
-			if (is_even = 1) {
+			if (isEven = 1) {
                 let charBitRow = (Memory.peek(address) & 255) | (charBitRow * 256);
 			} else {
                 let charBitRow = (Memory.peek(address) & (255 * 256)) | charBitRow;

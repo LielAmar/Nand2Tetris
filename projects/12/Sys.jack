@@ -8,51 +8,77 @@
  * A library that supports various program execution services.
  */
 class Sys {
-    /** Performs all the initializations required by the OS. */
+
+    // A variable used to track number of loops in a single millisecond
+    static int LOOPS_PER_MS;
+    
+    /**
+     * Performs all the initializations required by the OS.
+     */
     function void init() {
+        // Initializes constants
+        let LOOPS_PER_MS = 1100;
+
+        // Initializing all libraries
         do Memory.init();
         do Math.init();
         do Screen.init();
         do Output.init();
         do Keyboard.init();
 
+    
+        // Calls the main entry point of the program
         do Main.main();
+
+        // Halts the program
         do Sys.halt();
         return;
     }
 
-    /** Halts program execution. */
+    /**
+     * Halts program execution.
+     */
     function void halt() {
         while(true) {}
         return;
     }
 
-    /** Waits approximately duration milliseconds and returns.  */
+    /**
+     * Waits approximately duration milliseconds and returns.
+     */
     function void wait(int duration) {
-        var int startOuter, startInner;
+        var int ms, loops;
 
-        if(duration < 1) {
+        if(duration < 0) {
             do Sys.error(1);
         }
+        
+        let ms = 0;
 
-        let startOuter = 0;
-        let startInner = 0;
+        // (Executing code that takes ~ 1ms) x ${duration} times
+        while(ms < duration) {
+            let loops = 0;
 
-        while( startOuter < duration ) {
-            let startOuter = startOuter + 1;
-            while( startInner < 110 ) {
-                let startInner = startInner + 1;
+            // Executing ${LOOPS_PER_MS} loops to wait ~ 1ms
+            while(loops < LOOPS_PER_MS) {
+                let loops = loops + 1;
             }
-            let startInner = 0;
+
+            let ms = ms + 1;
         }
+
         return;
     }
 
-    /** Displays the given error code in the form "ERR<errorCode>",
-     *  and halts the program's execution. */
+    /**
+     * Displays the given error code in the form "ERR<errorCode>",
+     * and halts the program's execution.
+     */
     function void error(int errorCode) {
-        do Output.printString("Runtime error: ");
-        do Output.printInt (errorCode);
+        do Output.moveCursor(0, 0);
+        do Output.printString("ERR");
+        do Output.printInt(errorCode);
+
         do Sys.halt();
         return;
     }

@@ -11,7 +11,7 @@ class Keyboard {
 
     // An array that starts at the keyboard ram address, allowing access
     // to the value in that address.
-    static Array keyboardRegister;
+    static int keyboardRegister;
 
     /**
      * Initializes the keyboard register.

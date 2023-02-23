@@ -64,9 +64,9 @@
   <h2 align="left" style="border-bottom: 1px solid gray">Media</h2>
 
   <div align="left">
-    <a href="./Exercise 9"><img src="./projects/09/media/1.png" alt="flappy-bird-game" width="300px" /></a>
+    <a href="./projects/09"><img src="./projects/09/media/1.png" alt="flappy-bird-game" width="300px" /></a>
     <br>
-    <a href="./Exercise 12"><img src="./projects/12/media/1.png" alt="os-pong-game" width="300px" /></a>
+    <a href="./projects/12"><img src="./projects/12/media/1.png" alt="os-pong-game" width="300px" /></a>
   </div>
 </div>
 

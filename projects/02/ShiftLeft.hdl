@@ -3,6 +3,10 @@
 // Common Attribution-NonCommercial-ShareAlike 3.0 Unported License 
 // https://creativecommons.org/licenses/by-nc-sa/3.0/
 
+/**
+ * Shifts a 16-bit value left by 1 bit.
+ */
+
 CHIP ShiftLeft{
     IN in[16];
     OUT out[16];

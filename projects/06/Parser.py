@@ -7,6 +7,7 @@ Unported License (https://creativecommons.org/licenses/by-nc-sa/3.0/).
 """
 
 import typing
+
 from enum import Enum
 
 class CommandType(Enum):
@@ -65,7 +66,7 @@ class Parser:
       self.current_command = self.lines[self.current_line_number].replace(' ', '')
       self.current_command = self.current_command.split("//")[0].strip()
 
-  def command_type(self) -> str:
+  def command_type(self) -> CommandType:
     """
       Returns:
         str: the type of the current command:
@@ -78,8 +79,9 @@ class Parser:
       return CommandType.A_COMMAND
     elif self.current_command[0] == "(":
       return CommandType.L_COMMAND
-    else:
-      return CommandType.C_COMMAND
+    
+    return CommandType.C_COMMAND
+
 
   def symbol(self) -> str:
     """

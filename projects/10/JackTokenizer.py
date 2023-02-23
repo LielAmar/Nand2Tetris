@@ -9,15 +9,16 @@ import typing
 
 from Constants import *
 
-
 class Token:
+  """
+  A helper class that stores data on a single token
+  """
 
   def __init__(self, token: str, token_type: str) -> None:
     self.token = token
     self.token_type = token_type
 
   def __str__(self):
-    # return f"{self.token} ({len(self.token)})"
     return f"{self.token} of type {self.token_type}"
 
 
@@ -102,7 +103,6 @@ class JackTokenizer:
   is invalid. Otherwise, it is valid.
   """
 
-
   def __init__(self, input_stream: typing.TextIO) -> None:
     """
     Opens the input stream and gets ready to tokenize it.
@@ -115,6 +115,7 @@ class JackTokenizer:
     self.tokens = self.__tokenize(stipped_input)
 
     self.current_token_id = 0
+
 
   def __remove_comments(self, input: str) -> str:
     """

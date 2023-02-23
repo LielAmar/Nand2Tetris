@@ -1,29 +1,8 @@
-TAB = "  "
-
-VARIABLE_KINDS = {
-  "static": "STATIC",
-  "field": "FIELD",
-  "local": "VAR",
-  "var": "VAR",
-  "argument": "ARG",
-}
-
 KIND_SEGMENTS = {
-  "STATIC": "STATIC",
-  "FIELD": "THIS",
-  "VAR": "LOCAL",
-  "ARG": "ARG",
-}
-
-SEGMENTS = { 
-  "CONST": "constant",
-  "ARG": "argument",
-  "LOCAL": "local",
   "STATIC": "static",
-  "THIS": "this",
-  "THAT": "that",
-  "POINTER": "pointer",
-  "TEMP": "temp"
+  "FIELD": "this",
+  "VAR": "local",
+  "ARG": "argument",
 }
 
 ARITHMETIC_COMMANDS = {
@@ -105,12 +84,4 @@ UNARY_OPERATORS = {
   "-": "NEG", 
   "^": "SHIFTLEFT", 
   "#": "SHIFTRIGHT"
-}
-
-TOKEN_TYPE_TAGS = {
-  "KEYWORD": "keyword",
-  "SYMBOL": "symbol",
-  "IDENTIFIER": "identifier",
-  "INT_CONST": "integerConstant",
-  "STRING_CONST": "stringConstant"
 }

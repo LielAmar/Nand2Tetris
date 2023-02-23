@@ -118,16 +118,6 @@ class Pillar {
 
       let bottomPillarStartY = 256 - height;
 
-      // do Output.moveCursor(10, 0);
-      // do Output.printString("Object is within pillar x");
-      // do Output.println();
-      // do Output.printString("Object Y: ");
-      // do Output.printInt(objStartingY);
-      // do Output.println();
-      // do Output.printString("Pillar Y: ");
-      // do Output.printInt(bottomPillarStartY);
-      // do Output.moveCursor(10, 0);
-
       // Checking bottom pillar
       if(((objStartingY > bottomPillarStartY) & (objStartingY < 512)) |
           ((objEndingY > bottomPillarStartY) & (objEndingY < 512))) {

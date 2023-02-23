@@ -23,23 +23,6 @@ def translate_file(input_file: typing.TextIO, output_file: typing.TextIO) -> Non
       output_file (typing.TextIO): writes all output to this file.
   """
 
-  parser = Parser(input_file)
-  code_writer = CodeWriter(output_file)
-
-  # Setting the file name & debug flag
-  code_writer.set_file_name(os.path.splitext(os.path.basename(input_file.name))[0])
-
-  # Parsing the file
-  while parser.has_more_commands():
-    parser.advance()
-    command_type = parser.command_type()
-  
-    if command_type == "C_ARITHMETIC":
-      code_writer.write_arithmetic(parser.arg1())
-
-    elif command_type in ["C_PUSH", "C_POP"]:
-      code_writer.write_push_pop(command_type, parser.arg1(), parser.arg2())
-
   """
   We propose implementing the basic VM translator in two stages. This will
   allow you to unit-test your implementation incrementally, using the test
@@ -124,7 +107,23 @@ def translate_file(input_file: typing.TextIO, output_file: typing.TextIO) -> Non
   For more information, see the VM emulator tutorial in the lectures and in
   the submission page.
   """
-  pass
+  
+  parser = Parser(input_file)
+  code_writer = CodeWriter(output_file)
+
+  # Setting the file name
+  code_writer.set_file_name(os.path.splitext(os.path.basename(input_file.name))[0])
+
+  # Parsing the file
+  while parser.has_more_commands():
+    parser.advance()
+    command_type = parser.command_type()
+  
+    if command_type == "C_ARITHMETIC":
+      code_writer.write_arithmetic(parser.arg1())
+
+    elif command_type in ["C_PUSH", "C_POP"]:
+      code_writer.write_push_pop(command_type, parser.arg1(), parser.arg2())
 
 
 if "__main__" == __name__:

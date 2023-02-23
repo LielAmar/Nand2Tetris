@@ -32,7 +32,7 @@ class VMWriter:
       index (int): the index to push to.
     """
 
-    self.__write_command__("push", SEGMENTS[segment], index)
+    self.__write_command__("push", segment, index)
 
   def write_pop(self, segment: str, index: int) -> None:
     """
@@ -44,7 +44,8 @@ class VMWriter:
       index (int): the index to pop from.
     """
 
-    self.__write_command__("pop", SEGMENTS[segment], index)
+    self.__write_command__("pop", segment, index)
+
 
   def write_arithmetic(self, command: str) -> None:
     """
@@ -56,6 +57,7 @@ class VMWriter:
     """
 
     self.__write_command__(ARITHMETIC_COMMANDS[command])
+
 
   def write_label(self, label: str) -> None:
     """
@@ -86,6 +88,7 @@ class VMWriter:
     """
 
     self.__write_command__("if-goto", label)
+
 
   def write_call(self, name: str, n_args: int) -> None:
     """
@@ -124,10 +127,3 @@ class VMWriter:
     """
 
     self.output.write(f"{cmd} {arg1} {arg2}\n")
-
-  def __write_blank_line(self) -> None:
-    """
-    Writes a blank line to the output file.
-    """
-
-    self.output.write("\n")

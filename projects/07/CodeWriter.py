@@ -6,16 +6,60 @@ and as allowed by the Creative Common Attribution-NonCommercial-ShareAlike 3.0
 Unported License (https://creativecommons.org/licenses/by-nc-sa/3.0/).
 """
 
-from http.client import OK
 import typing
 
 from Constants import *
+
+
+actions = {
+  # Saves the last item in the stack in the D-Register
+  "SAVE_LAST_ITEM": [
+    "@SP",   # Going to address 0, to get the pointer of the stack
+    "A=M-1", # Going to the address of the last item in the stack
+    "D=M",   # Saving the last item in the stack
+  ],
+
+  # Saves the 2nd to last item in the stack in the D-Register
+  "SAVE_PENULT_ITEM": [
+    "@SP",   # Going to address 0, to get the pointer of the stack
+    "A=M-1", # Going to the address of the last item in the stack
+    "A=A-1", # Going to the item before the last item in the stack
+    "D=M",   # Saving the 2nd to last item in the stack
+  ],
+
+  # Changes the A-Register to point to the last item in the stack
+  "GO_TO_LAST_ITEM": [
+    "@SP",   # Going to address 0, to get the pointer of the stack
+    "A=M-1", # Going to the address of the last item in the stack
+  ],
+
+  # Changes the A-Register to point to the 2nd to last item in the stack
+  "GO_TO_PENULT_ITEM": [
+    "@SP",   # Going to address 0, to get the pointer of the stack
+    "A=M-1", # Going to the address of the last item in the stack
+    "A=A-1", # Going to the item before the last item in the stack
+  ],
+
+  # Reduces the SP value by 1
+  "REDUCE_SP": [
+    "@SP",   # Going to address 0, to get the pointer of the stack
+    "M=M-1", # Decreasing the stack pointer by 1
+  ],
+    
+  # Increases the SP value by 1
+  "INCREASE_SP": [
+    "@SP",   # Going to address 0, to get the pointer of the stack
+    "M=M+1", # Increasing the stack pointer by 1
+  ]
+}
+
 
 class CodeWriter:
   """
   Translates VM commands into Hack assembly code.
   """
 
+  # A static variable to save the current command id
   command_id = 0
 
   def __init__(self, output_stream: typing.TextIO) -> None:
@@ -26,14 +70,11 @@ class CodeWriter:
     """
 
     self.output_stream = output_stream
-    self.debug = False
 
     self.filename = ""
-    self.function_name = "null"
+    self.function_name = ""
 
     self.call_id = 0
-
-    self.loc = {"local":"LCL", "argument":"ARG", "this":"THIS", "that":"THAT","temp": "5", "constant": "0"}
 
 
   def set_file_name(self, filename: str) -> None:
@@ -44,19 +85,8 @@ class CodeWriter:
         filename (str): The name of the VM file.
     """
 
-    # Your code goes here!
-    # This function is useful when translating code that handles the
-    # static segment.
-    # To avoid problems with Linux/Windows/MacOS differences with regards
-    # to filenames and paths, you are advised to parse the filename in
-    # the function "translate_file" in Main.py using python's os library,
-    # For example, using code similar to:
-    # input_filename, input_extension = os.path.splitext(os.path.basename(input_file.name))
     self.filename = filename
-    self.function_name = "null"
-
-  def set_debug(self, debug: bool) -> None:
-    self.debug = debug
+    self.function_name = ""
 
 
   def write_arithmetic(self, command: str) -> None:
@@ -77,80 +107,80 @@ class CodeWriter:
 
     # Adding the last 2 items in the stack
     if command == "add":
-      lines.extend(self.__get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
-      lines.extend(self.__get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.extend(actions["SAVE_LAST_ITEM"])
+      lines.extend(actions["GO_TO_PENULT_ITEM"])
       lines.append("M=M+D")
-      lines.extend(self.__get_common_command(CommonCommand.REDUCE_SP_BY_1))
+      lines.extend(actions["REDUCE_SP"])
 
     # Subtracting the last 2 items in the stack
     elif command == "sub":
-      lines.extend(self.__get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
-      lines.extend(self.__get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.extend(actions["SAVE_LAST_ITEM"])
+      lines.extend(actions["GO_TO_PENULT_ITEM"])
       lines.append("M=M-D")
-      lines.extend(self.__get_common_command(CommonCommand.REDUCE_SP_BY_1))
+      lines.extend(actions["REDUCE_SP"])
     
     # Negating the last item in the stack
     elif command == "neg":
-      lines.extend(self.__get_common_command(CommonCommand.GO_TO_LAST_ITEM))
+      lines.extend(actions["GO_TO_LAST_ITEM"])
       lines.append("M=-M")
 
     # Chaning the last item in the stack to 'not' item
     elif command == "not":
-      lines.extend(self.__get_common_command(CommonCommand.GO_TO_LAST_ITEM))
+      lines.extend(actions["GO_TO_LAST_ITEM"])
       lines.append("M=!M")
 
     # Checking if the last 2 items in the stack are true
     elif command == "and":
-      lines.extend(self.__get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
-      lines.extend(self.__get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.extend(actions["SAVE_LAST_ITEM"])
+      lines.extend(actions["GO_TO_PENULT_ITEM"])
       lines.append("M=D&M")
-      lines.extend(self.__get_common_command(CommonCommand.REDUCE_SP_BY_1))
+      lines.extend(actions["REDUCE_SP"])
 
     # Checking if one of the last 2 items in the stack is true
     elif command == "or":
-      lines.extend(self.__get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
-      lines.extend(self.__get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.extend(actions["SAVE_LAST_ITEM"])
+      lines.extend(actions["GO_TO_PENULT_ITEM"])
       lines.append("M=D|M")
-      lines.extend(self.__get_common_command(CommonCommand.REDUCE_SP_BY_1))
+      lines.extend(actions["REDUCE_SP"])
 
     # Shifting the last item in the stack left
     elif command == "shiftleft":
-      lines.extend(self.__get_common_command(CommonCommand.GO_TO_LAST_ITEM))
+      lines.extend(actions["GO_TO_LAST_ITEM"])
       lines.append("M=M<<")
 
     # Shifting the last item in the stack right
     elif command == "shiftright":
-      lines.extend(self.__get_common_command(CommonCommand.GO_TO_LAST_ITEM))
+      lines.extend(actions["GO_TO_LAST_ITEM"])
       lines.append("M=M>>")
 
     # Checking if the last 2 items in the stack are equal
     elif command == "eq":
-      lines.extend(self.__get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
-      lines.extend(self.__get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.extend(actions["SAVE_LAST_ITEM"])
+      lines.extend(actions["GO_TO_PENULT_ITEM"])
       lines.append("D=M-D")
 
       lines.append(f"@TRUE{CodeWriter.command_id}")
       lines.append("D;JEQ")
 
       lines.append(f"(FALSE{CodeWriter.command_id})")
-      lines.extend(self.__get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.extend(actions["GO_TO_PENULT_ITEM"])
       lines.append("M=0")
       lines.append(f"@END{CodeWriter.command_id}")
       lines.append("0;JMP")
 
       lines.append(f"(TRUE{CodeWriter.command_id})")
-      lines.extend(self.__get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.extend(actions["GO_TO_PENULT_ITEM"])
       lines.append("M=-1")
 
       lines.append(f"(END{CodeWriter.command_id})")
-      lines.extend(self.__get_common_command(CommonCommand.REDUCE_SP_BY_1))
+      lines.extend(actions["REDUCE_SP"])
 
     # Checking if the 2nd to last item is greater than the last item
     elif command == "gt":
       # ===== Checks if the numbers have different signs (to avoid overflow) ===== #
 
       # Get the last item
-      lines.extend(self.__get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
+      lines.extend(actions["SAVE_LAST_ITEM"])
 
       # If the last item is negative, we want to check if
       # the 2nd to last item is positive (or zero)
@@ -159,7 +189,7 @@ class CodeWriter:
 
       # Otherwise, the last item is positive (or zero), we want to check if
       #  the 2nd to last item is negative
-      lines.extend(self.__get_common_command(CommonCommand.SAVE_2ND_TO_LAST_ITEM_TO_D))
+      lines.extend(actions["SAVE_PENULT_ITEM"])
 
       # If the second item is negative, then the last item is greater,
       # so we want to jump to FALSE
@@ -172,7 +202,7 @@ class CodeWriter:
 
       # We check if the 2nd to last item is positive (or zero)
       lines.append(f"(CHECK_SECOND_ITEM_POSITIVE{CodeWriter.command_id})")
-      lines.extend(self.__get_common_command(CommonCommand.SAVE_2ND_TO_LAST_ITEM_TO_D))
+      lines.extend(actions["SAVE_PENULT_ITEM"])
 
       # If the second item is positive, then the last item is smaller,
       # so we want to jump to TRUE
@@ -182,32 +212,32 @@ class CodeWriter:
 
       # ===== Checks if first item is greater by subtracting ===== #
       lines.append(f"(CODE_START{CodeWriter.command_id})")
-      lines.extend(self.__get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
-      lines.extend(self.__get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.extend(actions["SAVE_LAST_ITEM"])
+      lines.extend(actions["GO_TO_PENULT_ITEM"])
       lines.append("D=D-M")
 
       lines.append(f"@TRUE{CodeWriter.command_id}")
       lines.append("D;JLT")
 
       lines.append(f"(FALSE{CodeWriter.command_id})")
-      lines.extend(self.__get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.extend(actions["GO_TO_PENULT_ITEM"])
       lines.append("M=0")
       lines.append(f"@END{CodeWriter.command_id}")
       lines.append("0;JMP")
 
       lines.append(f"(TRUE{CodeWriter.command_id})")
-      lines.extend(self.__get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.extend(actions["GO_TO_PENULT_ITEM"])
       lines.append("M=-1")
 
       lines.append(f"(END{CodeWriter.command_id})")
-      lines.extend(self.__get_common_command(CommonCommand.REDUCE_SP_BY_1))
+      lines.extend(actions["REDUCE_SP"])
 
     # Checking if the 2nd to last item is smaller than the last item
     elif command == "lt":
       # ===== Checks if the numbers have different signs (to avoid overflow) ===== #
 
       # Get the last item
-      lines.extend(self.__get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
+      lines.extend(actions["SAVE_LAST_ITEM"])
 
       # If the last item is negative, we want to check if
       # the 2nd to last item is positive (or zero)
@@ -216,7 +246,7 @@ class CodeWriter:
 
       # Otherwise, the last item is positive (or zero), we want to check if
       #  the 2nd to last item is negative
-      lines.extend(self.__get_common_command(CommonCommand.SAVE_2ND_TO_LAST_ITEM_TO_D))
+      lines.extend(actions["SAVE_PENULT_ITEM"])
 
       # If the second item is negative, then the last item is greater,
       # so we want to jump to TRUE
@@ -229,7 +259,7 @@ class CodeWriter:
 
       # We check if the 2nd to last item is positive (or zero)
       lines.append(f"(CHECK_SECOND_ITEM_POSITIVE{CodeWriter.command_id})")
-      lines.extend(self.__get_common_command(CommonCommand.SAVE_2ND_TO_LAST_ITEM_TO_D))
+      lines.extend(actions["SAVE_PENULT_ITEM"])
 
       # If the second item is positive, then the last item is smaller,
       # so we want to jump to FALSE
@@ -239,25 +269,25 @@ class CodeWriter:
 
       # ===== Checks if first item is greater by subtracting ===== #
       lines.append(f"(CODE_START{CodeWriter.command_id})")
-      lines.extend(self.__get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
-      lines.extend(self.__get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.extend(actions["SAVE_LAST_ITEM"])
+      lines.extend(actions["GO_TO_PENULT_ITEM"])
       lines.append("D=D-M") # item1 - item0
 
       lines.append(f"@TRUE{CodeWriter.command_id}")
       lines.append("D;JGT")
 
       lines.append(f"(FALSE{CodeWriter.command_id})")
-      lines.extend(self.__get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.extend(actions["GO_TO_PENULT_ITEM"])
       lines.append("M=0")
       lines.append(f"@END{CodeWriter.command_id}")
       lines.append("0;JMP")
 
       lines.append(f"(TRUE{CodeWriter.command_id})")
-      lines.extend(self.__get_common_command(CommonCommand.GO_TO_2ND_TO_LAST_ITEM))
+      lines.extend(actions["GO_TO_PENULT_ITEM"])
       lines.append("M=-1")
 
       lines.append(f"(END{CodeWriter.command_id})")
-      lines.extend(self.__get_common_command(CommonCommand.REDUCE_SP_BY_1))
+      lines.extend(actions["REDUCE_SP"])
 
     self.__write_to_file(lines)
 
@@ -337,61 +367,14 @@ class CodeWriter:
   def write_return(self) -> None:
     pass
 
+
   # ===== UTILITIES ===== #
-  def __get_common_command(self, command: CommonCommand) -> list[str]:
-    """
-    Returns a list of lines that are common to all commands.
-    """
-
-    if command == CommonCommand.SAVE_LAST_ITEM_TO_D:
-      return [
-        "@SP",   # Going to address 0, to get the pointer of the stack
-        "A=M-1", # Going to the address of the last item in the stack
-        "D=M",   # Saving the last item in the stack
-      ]
-
-    elif command == CommonCommand.SAVE_2ND_TO_LAST_ITEM_TO_D:
-      return [
-        "@SP",   # Going to address 0, to get the pointer of the stack
-        "A=M-1", # Going to the address of the last item in the stack
-        "A=A-1", # Going to the item before the last item in the stack
-        "D=M",   # Saving the 2nd to last item in the stack
-      ]
-
-    elif command == CommonCommand.GO_TO_LAST_ITEM:
-      return [
-        "@SP",   # Going to address 0, to get the pointer of the stack
-        "A=M-1", # Going to the address of the last item in the stack
-      ]
-
-    elif command == CommonCommand.GO_TO_2ND_TO_LAST_ITEM:
-      return [
-        "@SP",   # Going to address 0, to get the pointer of the stack
-        "A=M-1", # Going to the address of the last item in the stack
-        "A=A-1", # Going to the item before the last item in the stack
-      ]
-
-    elif command == CommonCommand.REDUCE_SP_BY_1:
-      return [
-        "@SP",   # Going to address 0, to get the pointer of the stack
-        "M=M-1", # Decreasing the stack pointer by 1
-      ]
-    
-    elif command == CommonCommand.INCREASE_SP_BY_1:
-      return [
-        "@SP",   # Going to address 0, to get the pointer of the stack
-        "M=M+1", # Increasing the stack pointer by 1
-      ]
-
   def __write_to_file(self, lines: list[str]) -> None:
     """
     Writes the given lines to the output file.
     """
 
     for line in lines:
-      if self.debug:
-        print(line)
-        
       if self.output_stream != None:
         self.output_stream.write(line + "\n")
 
@@ -417,7 +400,7 @@ class CodeWriter:
     lines.append("A=M")
     lines.append("M=D")
 
-    lines.extend(self.__get_common_command(CommonCommand.INCREASE_SP_BY_1))
+    lines.extend(actions["INCREASE_SP"])
 
     return lines
 
@@ -438,7 +421,7 @@ class CodeWriter:
     lines.append("A=M")
     lines.append("M=D")
 
-    lines.extend(self.__get_common_command(CommonCommand.INCREASE_SP_BY_1))
+    lines.extend(actions["INCREASE_SP"])
 
     return lines
 
@@ -458,22 +441,7 @@ class CodeWriter:
     lines.append("A=M")
     lines.append("M=D")
 
-    lines.extend(self.__get_common_command(CommonCommand.INCREASE_SP_BY_1))
-
-    return lines
-
-  def __write_push_from_d_register(self) -> list[str]:
-    """
-    Writes assembly code that pushes the current value in D to the stack.
-    """
-
-    lines = []
-
-    lines.append("@SP")
-    lines.append("A=M")
-    lines.append("M=D")
-
-    lines.extend(self.__get_common_command(CommonCommand.INCREASE_SP_BY_1))
+    lines.extend(actions["INCREASE_SP"])
 
     return lines
 
@@ -500,13 +468,13 @@ class CodeWriter:
     lines.append("M=D")
 
     # Popping item from SP and saving it in the address saved in R13
-    lines.extend(self.__get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
+    lines.extend(actions["SAVE_LAST_ITEM"])
     
     lines.append("@R13")
     lines.append("A=M")
     lines.append("M=D")
 
-    lines.extend(self.__get_common_command(CommonCommand.REDUCE_SP_BY_1))
+    lines.extend(actions["REDUCE_SP"])
 
     return lines
 
@@ -522,11 +490,11 @@ class CodeWriter:
     lines = []
 
     # Popping item from SP and saving it in the address saved in R13
-    lines.extend(self.__get_common_command(CommonCommand.SAVE_LAST_ITEM_TO_D))
+    lines.extend(actions["SAVE_LAST_ITEM"])
     
     lines.append(f"@{address}")
     lines.append("M=D")
 
-    lines.extend(self.__get_common_command(CommonCommand.REDUCE_SP_BY_1))
+    lines.extend(actions["REDUCE_SP"])
 
     return lines

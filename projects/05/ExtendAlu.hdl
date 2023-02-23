@@ -55,5 +55,4 @@ CHIP ExtendAlu {
      Mux16(a=extendedOut, b=regularOut, sel=useRegular, out=out);
      Mux(a=extendedZR, b=regularZR, sel=useRegular, out=zr);
      Mux(a=extendedNG, b=regularNG, sel=useRegular, out=ng);
-
 }

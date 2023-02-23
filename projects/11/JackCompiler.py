@@ -8,6 +8,7 @@ Unported License (https://creativecommons.org/licenses/by-nc-sa/3.0/).
 import os
 import sys
 import typing
+
 from CompilationEngine import CompilationEngine
 from JackTokenizer import JackTokenizer
 from VMWriter import VMWriter
@@ -19,6 +20,7 @@ def compile_file(input_file: typing.TextIO, output_file: typing.TextIO) -> None:
       input_file (typing.TextIO): the file to compile.
       output_file (typing.TextIO): writes all output to this file.
   """
+
   """
     The proposed implementation is based on morphing the syntax analyzer
     built in the previous project into a the full-scale compiler. In
@@ -86,7 +88,7 @@ def compile_file(input_file: typing.TextIO, output_file: typing.TextIO) -> None:
   tokenizer = JackTokenizer(input_file)
   writer = VMWriter(output_file)
 
-  compilation_engine = CompilationEngine(tokenizer, writer)
+  CompilationEngine(tokenizer, writer)
 
 
 if "__main__" == __name__:
@@ -103,8 +105,7 @@ if "__main__" == __name__:
   
   if os.path.isdir(argument_path):
     files_to_assemble = [
-      os.path.join(argument_path, filename)
-      for filename in os.listdir(argument_path)
+      os.path.join(argument_path, filename) for filename in os.listdir(argument_path)
     ]
   else:
     files_to_assemble = [argument_path]

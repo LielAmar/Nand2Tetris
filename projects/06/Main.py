@@ -14,7 +14,7 @@ from SymbolTable import SymbolTable
 from Parser import Parser, CommandType
 from Code import Code
 
-def assemble_file(input_file: typing.TextIO, output_file: typing.TextIO, debug: bool = False) -> None:
+def assemble_file(input_file: typing.TextIO, output_file: typing.TextIO) -> None:
   """
   Assembles a single file.
 
@@ -131,12 +131,6 @@ def assemble_file(input_file: typing.TextIO, output_file: typing.TextIO, debug: 
   while parser.has_more_commands():
     parser.advance()
 
-    if debug:
-      print("current command: ", parser.current_command)
-      print("comp: ", parser.comp())
-      print("dest: ", parser.dest())
-      print("jump: ", parser.jump())
-
     if parser.command_type() == CommandType.L_COMMAND:
       pass
 
@@ -160,8 +154,8 @@ if "__main__" == __name__:
   # Both are closed automatically when the code finishes running.
   # If the output file does not exist, it is created automatically in the
   # correct path, using the correct filename.
-  if not len(sys.argv) == 2 and not (len(sys.argv) == 3 and sys.argv[2] == "-d"):
-    sys.exit("Invalid usage, please use: Assembler <input path>")
+  if not len(sys.argv) == 2:
+    sys.exit("Invalid usage, please use: python3 Main.py <input path>")
 
   argument_path = os.path.abspath(sys.argv[1])
 
@@ -183,4 +177,4 @@ if "__main__" == __name__:
     
     with open(input_path, 'r') as input_file, \
           open(output_path, 'w') as output_file:
-      assemble_file(input_file, output_file, debug = (len(sys.argv) == 3))
+      assemble_file(input_file, output_file)

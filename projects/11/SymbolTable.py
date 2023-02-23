@@ -11,7 +11,8 @@ class Symbol:
   """
 
   def __init__(self, name: str, type: str, kind: str, index: int) -> None:
-    """Creates a new symbol.
+    """
+    Creates a new symbol.
 
     Args:
       name (str): the name of the symbol.
@@ -27,9 +28,7 @@ class Symbol:
     self.index = index
 
   def __str__(self) -> None:
-    return f'''name: {self.name} | type: {self.type} | \
-kind: {self.kind} | index: {self.index}'''
-
+    return f'name: {self.name} | type: {self.type} | kind: {self.kind} | index: {self.index}'
 
   def get_name(self) -> str: return self.name
   def get_type(self) -> str: return self.type
@@ -51,12 +50,14 @@ class SymbolTable:
     
     self.class_symbols: dict[Symbol] = {}
     self.routine_symbols: dict[Symbol] = {}
+
     self.indices = {
-        "STATIC": 0,
-        "FIELD": 0,
-        "ARG": 0,
-        "VAR": 0
+      "STATIC": 0,
+      "FIELD": 0,
+      "ARG": 0,
+      "VAR": 0
     }
+
 
   def __str__(self) -> None:
     result = ""
@@ -77,11 +78,13 @@ class SymbolTable:
     """
 
     self.routine_symbols = {}
+
     self.indices["ARG"] = 0
     self.indices["VAR"] = 0
 
   def define(self, name: str, type: str, kind: str) -> None:
-    """Defines a new identifier of a given name, type and kind and assigns 
+    """
+    Defines a new identifier of a given name, type and kind and assigns 
     it a running index. "STATIC" and "FIELD" identifiers have a class scope, 
     while "ARG" and "VAR" identifiers have a subroutine scope.
 
@@ -97,7 +100,7 @@ class SymbolTable:
     elif kind == "ARG" or kind == "VAR":
       self.routine_symbols[name] = Symbol(name, type, kind, self.indices[kind])
     else:
-      raise ValueError("Invalid kind: " + kind)
+      raise ValueError("Invalid variable kind: " + kind)
 
     self.indices[kind] += 1
 

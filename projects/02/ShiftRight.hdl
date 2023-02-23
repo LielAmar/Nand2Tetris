@@ -3,6 +3,11 @@
 // Common Attribution-NonCommercial-ShareAlike 3.0 Unported License 
 // https://creativecommons.org/licenses/by-nc-sa/3.0/
 
+/**
+ * Shifts a 16-bit value right by 1 bit.
+ * The left-most bit (MSB) remains unchanged. 
+ */
+
 CHIP ShiftRight{
 	  IN in[16];
     OUT out[16];

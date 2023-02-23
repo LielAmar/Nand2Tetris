@@ -27,8 +27,10 @@ class Parser:
     """
 
     self.lines = input_file.read().splitlines()
+
     self.current_line_number = -1
     self.current_command = None
+
 
   def has_more_commands(self) -> bool:
     """
@@ -79,7 +81,6 @@ class Parser:
       return "C_POP"
     elif LABEL_COMMAND in self.current_command:
       return "C_LABEL"
-    # Checking if-goto before goto
     elif IF_COMMAND in self.current_command:
       return "C_IF"
     elif GOTO_COMMAND in self.current_command:
@@ -90,6 +91,9 @@ class Parser:
       return "C_RETURN"
     elif CALL_COMMAND in self.current_command:
       return "C_CALL"
+  
+    return None
+
 
   def arg1(self) -> str:
     """
@@ -104,6 +108,8 @@ class Parser:
       return self.current_command
     elif self.command_type != "C_RETURN":
       return self.current_command.split(" ")[1]
+    
+    return None
 
   def arg2(self) -> int:
     """
@@ -113,11 +119,10 @@ class Parser:
         "C_FUNCTION" or "C_CALL".
     """
 
-    # if self.command_type() == CommandType.C_PUSH \
-        # or self.command_type() == CommandType.C_POP \
-        # or self.command_type() == CommandType.C_FUNCTION \
-        # or self.command_type() == CommandType.C_CALL:
-    return int(self.current_command.split()[2])
+    if self.command_type() in ["C_PUSH", "C_POP", "C_FUNCTION", "C_CALL"]:
+      return int(self.current_command.split()[2])
+    
+    return None
       
 
   def is_command(self, line: str) -> bool:
@@ -130,6 +135,8 @@ class Parser:
       Returns:
         bool: True if the line is a command, False otherwise.
     """
+
+    line = line.replace(' ', '')
 
     if not line or line.startswith("//") or line == "\n":
       return False

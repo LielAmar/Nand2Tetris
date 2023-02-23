@@ -13,19 +13,19 @@ from Constants import *
 class CompilationEngine:
   """
   Gets input from a JackTokenizer and emits its parsed structure into an
-  output stream in an XML format.
+  output stream in an VM format.
   """
 
   def __init__(self, tokenizer: JackTokenizer, writer: VMWriter) -> None:
     """
     Creates a new compilation engine with the given input and output. The
     next routine called must be compileClass()
-    :param input_stream: The input stream.
-    :param output_stream: The output stream.
+    :param tokenizer: The tokenizer to use for the compilation process.
+    :param writer: The writer object to use to write output.
     """
 
+    self.symbol_table: SymbolTable = SymbolTable()
     self.tokenizer: JackTokenizer = tokenizer
-    self.symbol_table = SymbolTable()
     self.writer: VMWriter = writer
 
     self.class_name = ""
@@ -92,7 +92,7 @@ class CompilationEngine:
     """
 
     # Saving the variable's kind (static or field) and advancing
-    kind = self.tokenizer.keyword()
+    kind = "STATIC" if self.tokenizer.keyword() == "static" else "FIELD"
     self.tokenizer.advance()
 
     # Saving the variable's type and advancing
@@ -109,7 +109,7 @@ class CompilationEngine:
     while self.tokenizer.symbol() != ";":
       # Saving the current variable to the symbol table
       if self.tokenizer.token_type() == "IDENTIFIER":
-        self.symbol_table.define(self.tokenizer.identifier(), type, VARIABLE_KINDS[kind])
+        self.symbol_table.define(self.tokenizer.identifier(), type, kind)
       
       # Advance to the next token
       self.tokenizer.advance()
@@ -136,12 +136,9 @@ class CompilationEngine:
 
     # If we are writing a method, we need to add the 'this' argument
     if self.tokenizer.keyword() == "method":
-      self.symbol_table.define("this", self.class_name, VARIABLE_KINDS["argument"])
+      self.symbol_table.define("this", self.class_name, "ARG")
     
     self.__subroutine()
-
-    # print(f"{self.class_name}.{self.subroutine_name} symbol table:")
-    # print(self.symbol_table)
       
   def __subroutine(self):
     """
@@ -207,7 +204,7 @@ class CompilationEngine:
       self.tokenizer.advance()
 
       # Saving the current variable to the symbol table and advancing
-      self.symbol_table.define(self.tokenizer.identifier(), type, VARIABLE_KINDS["argument"])
+      self.symbol_table.define(self.tokenizer.identifier(), type, "ARG")
       self.tokenizer.advance()
 
       # If we hit a comma, we'll advance and continue to the next parameter
@@ -225,34 +222,32 @@ class CompilationEngine:
     self.tokenizer.advance()
 
     # Compiling all variables
-    num_vars = 0
     while self.tokenizer.token_type() == "KEYWORD" and ( \
-          self.tokenizer.keyword() == "var"):
-      num_vars += self.compile_var_dec()
+        self.tokenizer.keyword() == "var"):
+      self.compile_var_dec()
 
     # Writing the function VM declaration to the output file
     # Meaning, "function Class.Subroutine numVars"
-    self.writer.write_function(f"{self.class_name}.{self.subroutine_name}", num_vars)
+    self.writer.write_function(f"{self.class_name}.{self.subroutine_name}", self.symbol_table.var_count("VAR"))
 
     # If we're in a constructor, we need to alloc enough memory for the fields
     # and then save the base address in pointer 0 (this)
     if self.subroutine_type == "constructor":
-      self.writer.write_push("CONST", self.symbol_table.var_count("FIELD"))
+      self.writer.write_push("constant", self.symbol_table.var_count("FIELD"))
       self.writer.write_call("Memory.alloc", 1)
-      self.writer.write_pop("POINTER", 0)
+      self.writer.write_pop("pointer", 0)
 
     # If we're in a method, we need to save the given base address in arg 0
     # in pointer 0 (this)
     if self.subroutine_type == "method":
-      self.writer.write_push("ARG", 0)
-      self.writer.write_pop("POINTER", 0)
+      self.writer.write_push("argument", 0)
+      self.writer.write_pop("pointer", 0)
 
     # Compiling all the statements
     self.compile_statements()
 
     # Skipping the } of the subroutine body
     self.tokenizer.advance()
-
 
   def compile_var_dec(self) -> None:
     """
@@ -275,17 +270,16 @@ class CompilationEngine:
 
     num_vars = 0
 
-    # Saving the variable's kind (var) and writing it
-    kind = self.tokenizer.keyword()
+    # Skipping the variable's kind (var)
     self.tokenizer.advance()
 
-    # Saving the variable's type and writing it
+    # Saving the variable's type and skipping
     type = self.tokenizer.keyword() \
         if self.tokenizer.token_type() == "KEYWORD" \
         else self.tokenizer.identifier()
     self.tokenizer.advance()
 
-    # Writing all the tokens [variable names] until reaching a ;
+    # Skipping all the tokens [variable names] until reaching a ;
     # After hitting a ; we'll write it as well
     # Example input: x;
     # Example input: c, d;
@@ -293,7 +287,7 @@ class CompilationEngine:
     while self.tokenizer.symbol() != ";":
       # Saving the current variable to the symbol table
       if self.tokenizer.token_type() == "IDENTIFIER":
-        self.symbol_table.define(self.tokenizer.identifier(), type, VARIABLE_KINDS[kind])
+        self.symbol_table.define(self.tokenizer.identifier(), type, "VAR")
 
         num_vars += 1
 
@@ -302,8 +296,6 @@ class CompilationEngine:
 
     # Skipping the ; tag
     self.tokenizer.advance()
-
-    return num_vars
 
   def compile_statements(self) -> None:
     """Compiles a sequence of statements, not including the enclosing 
@@ -320,11 +312,11 @@ class CompilationEngine:
     # - do Output.write(x);
     # - return x;
     while self.tokenizer.token_type() == "KEYWORD" and ( \
-          self.tokenizer.keyword() == "let" or \
-          self.tokenizer.keyword() == "if" or \
-          self.tokenizer.keyword() == "while" or \
-          self.tokenizer.keyword() == "do" or \
-          self.tokenizer.keyword() == "return"):
+        self.tokenizer.keyword() == "let" or \
+        self.tokenizer.keyword() == "if" or \
+        self.tokenizer.keyword() == "while" or \
+        self.tokenizer.keyword() == "do" or \
+        self.tokenizer.keyword() == "return"):
 
       if self.tokenizer.keyword() == "let":
         self.compile_let()
@@ -355,7 +347,7 @@ class CompilationEngine:
     # After hitting a ( we'll write skip it and continue to the expression list
     # Example input: do Output.write(x);
     while self.tokenizer.symbol() != "(":
-      function_name += self.tokenizer.value()
+      function_name += self.tokenizer.string_val()
       self.tokenizer.advance()
 
     # Skipping the ( of the expression list
@@ -387,7 +379,7 @@ class CompilationEngine:
       num_args += 1
 
       # Pushing the current object's address to the stack
-      self.writer.write_push("POINTER", 0)
+      self.writer.write_push("pointer", 0)
 
       function_name = f"{self.class_name}.{function_name}"
 
@@ -405,7 +397,7 @@ class CompilationEngine:
 
     # Since we're calling a function using do, meaning we don't do anything
     # with the return value, we need to pop the returned value from the stack
-    self.writer.write_pop("TEMP", 0)
+    self.writer.write_pop("temp", 0)
   
   def compile_let(self) -> None:
     """
@@ -466,10 +458,10 @@ class CompilationEngine:
     # segment, push the value from the temp segment to the stack, and pop
     # the value to the that segment
     if is_array:
-      self.writer.write_pop("TEMP", 0)
-      self.writer.write_pop("POINTER", 1)
-      self.writer.write_push("TEMP", 0)
-      self.writer.write_pop("THAT", 0)
+      self.writer.write_pop("temp", 0)
+      self.writer.write_pop("pointer", 1)
+      self.writer.write_push("temp", 0)
+      self.writer.write_pop("that", 0)
     else:
       self.writer.write_pop(KIND_SEGMENTS[object_kind], object_index)
 
@@ -493,7 +485,7 @@ class CompilationEngine:
         self.tokenizer.symbol() != ";":
       self.compile_expression()
     else:
-      self.writer.write_push("CONST", 0)
+      self.writer.write_push("constant", 0)
 
     # Calling write_return to return the value
     self.writer.write_return()
@@ -672,17 +664,17 @@ class CompilationEngine:
 
     # If we have an integer constant, we'll push it
     elif self.tokenizer.token_type() == "INT_CONST":
-      self.writer.write_push("CONST", self.tokenizer.int_val())
+      self.writer.write_push("constant", self.tokenizer.int_val())
 
       self.tokenizer.advance()
 
     # If we have a string constant, we'll push it
     elif self.tokenizer.token_type() == "STRING_CONST":
-      self.writer.write_push("CONST", len(self.tokenizer.string_val()))
+      self.writer.write_push("constant", len(self.tokenizer.string_val()))
       self.writer.write_call("String.new", 1)
 
       for char in self.tokenizer.string_val():
-        self.writer.write_push("CONST", ord(char))
+        self.writer.write_push("constant", ord(char))
         self.writer.write_call("String.appendChar", 2)
 
       self.tokenizer.advance()
@@ -691,10 +683,10 @@ class CompilationEngine:
     # If we have a this keyword, we'll push the pointer 0 value
     elif self.tokenizer.token_type() == "KEYWORD":
       if self.tokenizer.keyword() == "this":
-        self.writer.write_push("POINTER", 0)
+        self.writer.write_push("pointer", 0)
 
       elif self.tokenizer.keyword() in ["true", "false", "null"]:
-        self.writer.write_push("CONST", 0)
+        self.writer.write_push("constant", 0)
 
         if self.tokenizer.keyword() == "true":
           self.writer.write_arithmetic("NOT")
@@ -744,10 +736,10 @@ class CompilationEngine:
       self.writer.write_arithmetic("ADD")
 
       # Re-position the THAT pointer to the array element
-      self.writer.write_pop("POINTER", 1)
+      self.writer.write_pop("pointer", 1)
 
       # Push the value of the array element to the stack
-      self.writer.write_push("THAT", 0)
+      self.writer.write_push("that", 0)
 
 
     # If we have a function call
@@ -799,7 +791,7 @@ class CompilationEngine:
       # If we don't have a class name, add the current class name
       # and push "this" to the stack
       if "." not in call_name:
-        self.writer.write_push("THIS", 0)
+        self.writer.write_push("this", 0)
 
         call_name = self.class_name + "." + call_name
 
@@ -818,6 +810,7 @@ class CompilationEngine:
       self.writer.write_push(KIND_SEGMENTS[variable_kind], variable_index)
 
       self.tokenizer.advance()
+
 
   def compile_expression_list(self) -> int:
     """

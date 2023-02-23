@@ -127,8 +127,6 @@ class Bird {
       let velocity = jumpVelocity;
         
       do erase(); // Erases the bird
-      // do tick(); // Updates the bird's position
-      // do render(); // Renders the bird
     }
     
     return;

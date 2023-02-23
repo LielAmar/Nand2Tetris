@@ -1,7 +1,6 @@
-// This file is part of nand2tetris, as taught in The Hebrew University,
-// and was written by Aviv Yaish, and is published under the Creative 
-// Common Attribution-NonCommercial-ShareAlike 3.0 Unported License 
-// https://creativecommons.org/licenses/by-nc-sa/3.0/
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
 // File name: projects/02/ALU.hdl
 
 /**
@@ -44,7 +43,7 @@ CHIP ALU {
 
     PARTS:
     // Handling x
-    Mux16(a=x, b=false, sel=zx, out=xAfterZero);                   // zx == 1 => use Mux to get {0,...,0}. Otherwise, keep the same
+    Mux16(a=x, b=false, sel=zx, out=xAfterZero);                 // zx == 1 => use Mux to get {0,...,0}. Otherwise, keep the same
 
     Not16(in=xAfterZero, out=notXAfterZero);                     // Calculate the opposite of the result of previous stage
     Mux16(a=xAfterZero, b=notXAfterZero, sel=nx, out=xAfterAll); // nx == 1 => use Mux to get the opposite. Otherwise, keep the same

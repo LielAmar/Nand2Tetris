@@ -21,7 +21,7 @@
   <ol align="left">
     <li>Clone this repository using <code>git clone &lt;url&gt;</code></li>
     <li>Open the cloned project in your IDE</li>
-    <li>Use <code>python Main.py &lt;target_vm_file/folder&gt;</code> to translate your VM code into Assembly code</li>
+    <li>Use the Tools folder to compile the game's code and run it on the VMEmulator program</li>
   </ol>
 </div>
 

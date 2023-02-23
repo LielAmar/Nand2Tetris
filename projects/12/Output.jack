@@ -226,7 +226,6 @@ class Output {
             let newCol = 0;
         }
 
-        // TODO: make sure we should return to first line if reached the end
         if(newRow = 23) {
             let newRow = 0;
         }
@@ -250,7 +249,6 @@ class Output {
             let newCol = 63;
         }
 
-        // TODO: make sure we should return to first line if reached the end
         if(newRow = -1) {
             let newRow = 0;
             let newCol = 0;

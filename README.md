@@ -20,40 +20,40 @@
   <h2 align="left" style="border-bottom: 1px solid gray">Exercises</h2>
 
   <ul align="left">
-    <li><a href="./projects/01"><b>Exercise 1 - Boolean Logic »</b></a></li>
+    <li><a href="./Exercise 01"><b>Exercise 1 - Boolean Logic »</b></a></li>
     <ul><li style="list-style: none;">⤷ Implementation of basic Logic Gates</li></ul>
     <br>
-    <li><a href="./projects/02"><b>Exercise 2 - Boolean Arithmetic »</b></a></li>
+    <li><a href="./Exercise 02"><b>Exercise 2 - Boolean Arithmetic »</b></a></li>
     <ul><li style="list-style: none;">⤷ Implementation of Arithmetic Chips</li></ul>
     <br>
-    <li><a href="./projects/03"><b>Exercise 3 - Sequential Logic »</b></a></li>
+    <li><a href="./Exercise 03"><b>Exercise 3 - Sequential Logic »</b></a></li>
     <ul><li style="list-style: none;">⤷ Implementation of Sequential Chips</li></ul>
     <br>
-    <li><a href="./projects/04"><b>Exercise 4 - Machine Language »</b></a></li>
+    <li><a href="./Exercise 04"><b>Exercise 4 - Machine Language »</b></a></li>
     <ul><li style="list-style: none;">⤷ Familiarization with the Nand2Tetris Machine Language</li></ul>
     <br>
-    <li><a href="./projects/05"><b>Exercise 5 - Computer Architecture »</b></a></li>
+    <li><a href="./Exercise 05"><b>Exercise 5 - Computer Architecture »</b></a></li>
     <ul><li style="list-style: none;">⤷ Implementation of Computer Architecture Chips</li></ul>
     <br>
-    <li><a href="./projects/06"><b>Exercise 6 - Assembler »</b></a></li>
+    <li><a href="./Exercise 06"><b>Exercise 6 - Assembler »</b></a></li>
     <ul><li style="list-style: none;">⤷ Implementation of an Assembler, translating to Machine Language</li></ul>
     <br>
-    <li><a href="./projects/07"><b>Exercise 7 - Virtual Machine Translator (Part 1) »</b></a></li>
+    <li><a href="./Exercise 07"><b>Exercise 7 - Virtual Machine Translator (Part 1) »</b></a></li>
     <ul><li style="list-style: none;">⤷ Implementation of a VM translator for Arithmetic operations</li></ul>
     <br>
-    <li><a href="./projects/08"><b>Exercise 8 - Virtual Machine Translator (Part 2) »</b></a></li>
+    <li><a href="./Exercise 08"><b>Exercise 8 - Virtual Machine Translator (Part 2) »</b></a></li>
     <ul><li style="list-style: none;">⤷ Implementation of a VM translator for Functions and Program-Flow</li></ul>
     <br>
-    <li><a href="./projects/09"><b>Exercise 9 - High Level Programing »</b></a></li>
+    <li><a href="./Exercise 09"><b>Exercise 9 - High Level Programing »</b></a></li>
     <ul><li style="list-style: none;">⤷ Development of a game with the Jack language</li></ul>
     <br>
-    <li><a href="./projects/10"><b>Exercise 10 - Compilation (Part 1) »</b></a></li>
+    <li><a href="./Exercise 10"><b>Exercise 10 - Compilation (Part 1) »</b></a></li>
     <ul><li style="list-style: none;">⤷ Implementation of a Jack Compiler (XML Structured)</li></ul>
     <br>
-    <li><a href="./projects/11"><b>Exercise 11 - Compilation (Part 2) »</b></a></li>
+    <li><a href="./Exercise 11"><b>Exercise 11 - Compilation (Part 2) »</b></a></li>
     <ul><li style="list-style: none;">⤷ Implementation of a Jack Compiler</li></ul>
     <br>
-    <li><a href="./projects/12"><b>Exercise 12 - Operating System »</b></a></li>
+    <li><a href="./Exercise 12"><b>Exercise 12 - Operating System »</b></a></li>
     <ul><li style="list-style: none;">⤷ Implementation of a working, basic, Operating System</li></ul>
   </ul>
 </div>
@@ -64,9 +64,9 @@
   <h2 align="left" style="border-bottom: 1px solid gray">Media</h2>
 
   <div align="left">
-    <a href="./projects/09"><img src="./projects/09/media/1.png" alt="flappy-bird-game" width="300px" /></a>
+    <a href="./projects/09"><img src="./Exercise 09/media/1.png" alt="flappy-bird-game" width="300px" /></a>
     <br>
-    <a href="./projects/12"><img src="./projects/12/media/1.png" alt="os-pong-game" width="300px" /></a>
+    <a href="./projects/12"><img src="./Exercise 12/media/1.png" alt="os-pong-game" width="300px" /></a>
   </div>
 </div>
 
